@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import { connectDB } from "./db/connect.js";
-import { app, server } from "./socket/socket.js";
+import { connectDB } from "./utils/connect.js";
+import { app, server } from "./services/socket.js";
 
-import { Route } from "./router/index.js";
+import { Route } from "./routers/index.js";
 
 dotenv.config();
 
