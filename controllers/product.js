@@ -6,11 +6,13 @@ const ProductController = {
         try {
             const product = await ProductModel.find();
             res.status(200).json({
+                'http-status-code': 200,
                 message: "Hiển thị thành công",
                 data: product
-            })
+            });
         } catch (error) {
             res.status(400).json({
+                'http-status-code': 400,
                 message: error.message
             })
         }
@@ -19,16 +21,19 @@ const ProductController = {
         try {
             const product = await ProductModel.findById(req.params.id);
             res.status(200).json({
+                'http-status-code': 200,
                 message: "Hiển thị thành công",
                 data: product
             });
             if (!product) {
                 return res.status(404).json({
+                    'http-status-code': 404,
                     message: "Not Found",
                 })
             }
         } catch (error) {
             res.status(400).json({
+                'http-status-code': 400,
                 message: error.message
             })
         }
@@ -40,17 +45,20 @@ const ProductController = {
             if (error) {
                 const errors = error.details.map((err) => err.message);
                 return res.status(400).json({
+                    'http-status-code': 400,
                     message: errors,
                 })
             }
 
             const product = await ProductModel.create(productData);
             res.status(200).json({
+                'http-status-code': 200,
                 message: "Thêm sản phẩm thành công",
                 data: product,
             });
         } catch (error) {
             res.status(400).json({
+                'http-status-code': 400,
                 message: error.message
             })
         }
@@ -63,6 +71,7 @@ const ProductController = {
             if (error) {
                 const errors = error.details.map((err) => err.message);
                 return res.status(400).json({
+                    'http-status-code': 400,
                     message: errors,
                 })
             }
@@ -72,11 +81,13 @@ const ProductController = {
                 { new: true }
             )
             res.status(200).json({
+                'http-status-code': 200,
                 message: "Cập nhật sản phẩm thành công",
                 data: updateProduct,
             });
         } catch (error) {
             res.status(400).json({
+                'http-status-code': 400,
                 message: error.message
             })
         }
@@ -86,14 +97,17 @@ const ProductController = {
             const product = await ProductModel.findByIdAndDelete(req.params.id);
             if (!product) {
                 return res.status(404).json({
+                    'http-status-code': 404,
                     message: "Not Found",
                 })
             }
             res.status(200).json({
+                'http-status-code': 200,
                 message: "Xóa thành công",
             });
         } catch (error) {
             res.status(400).json({
+                'http-status-code': 400,
                 message: error.message
             })
         }
