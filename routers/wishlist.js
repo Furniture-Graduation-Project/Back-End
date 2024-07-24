@@ -4,12 +4,12 @@ import {
   deleteWishlist,
   editWishlist,
   getAllWishlist,
-  getDetailwishlist,
-} from "../controllers/wishlist";
+  getDetailWishlist,
+} from "../controllers/wishlist.js";
 const routerWishlist = new Router();
 
 routerWishlist.get("/", getAllWishlist);
-routerWishlist.get("/:id", getDetailwishlist);
+routerWishlist.get("/:id", getDetailWishlist);
 routerWishlist.post("/", createWishlist);
 routerWishlist.put("/:id", editWishlist);
 routerWishlist.delete("/", deleteWishlist);
