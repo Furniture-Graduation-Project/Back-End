@@ -1,5 +1,7 @@
+import routerEmployee from "./employee.js";
+import routerReview from "./review.js";
+
 export function Route(app) {
-  app.use("/api", () => {
-    console.log("Server running");
-  });
+  app.use("/api", routerEmployee);
+  app.use("/api", routerReview);
 }
