@@ -8,10 +8,10 @@ import {
 } from "../controllers/wishlist";
 const routerWishlist = new Router();
 
-routerWishlist.get("/wishlist", getAllWishlist);
-routerWishlist.get("/wishlist/:id", getDetailwishlist);
-routerWishlist.post("/wishlist", createWishlist);
-routerWishlist.put("/wishlist/:id", editWishlist);
-routerWishlist.delete("/wishlist", deleteWishlist);
+routerWishlist.get("/", getAllWishlist);
+routerWishlist.get("/:id", getDetailwishlist);
+routerWishlist.post("/", createWishlist);
+routerWishlist.put("/:id", editWishlist);
+routerWishlist.delete("/", deleteWishlist);
 
 export default routerWishlist;

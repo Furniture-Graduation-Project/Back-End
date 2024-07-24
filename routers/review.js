@@ -8,9 +8,9 @@ import {
 } from "../controllers/review.js";
 
 const routerReview = new Router();
-routerReview.get("/review", getAllReview);
-routerReview.get("/review/:id", getDetailReview);
-routerReview.post("/review", createReview);
-routerReview.put("/review/:id", editReview);
-routerReview.get("/review/:id", deleteReview);
+routerReview.get("/", getAllReview);
+routerReview.get("/:id", getDetailReview);
+routerReview.post("/", createReview);
+routerReview.put("/:id", editReview);
+routerReview.get("/:id", deleteReview);
 export default routerReview;

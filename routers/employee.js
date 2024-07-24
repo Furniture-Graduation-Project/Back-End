@@ -9,10 +9,10 @@ import {
 
 const routerEmployee = new Router();
 
-routerEmployee.get("/employee", getAllEmployee);
-routerEmployee.get("/employee/:id", getDetailEmployee);
-routerEmployee.post("/employee", createEmployee);
-routerEmployee.put("/employee/:id", editEmployee);
-routerEmployee.delete("/employee/:id", deleteEmployee);
+routerEmployee.get("/", getAllEmployee);
+routerEmployee.get("/:id", getDetailEmployee);
+routerEmployee.post("/", createEmployee);
+routerEmployee.put("/:id", editEmployee);
+routerEmployee.delete("/:id", deleteEmployee);
 
 export default routerEmployee;
