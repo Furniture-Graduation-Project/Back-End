@@ -5,14 +5,12 @@ const ProductController = {
     async getAllProductModel(req , res) {
         try {
             const product = await ProductModel.find();
-            res.status(200).json({
-                'http-status-code': 200,
+            res.status(StatusCodes.OK).json({
                 message: "Hiển thị thành công",
                 data: product
             });
         } catch (error) {
-            res.status(400).json({
-                'http-status-code': 400,
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             })
         }
@@ -20,20 +18,17 @@ const ProductController = {
     async detailProductModel(req, res) {
         try {
             const product = await ProductModel.findById(req.params.id);
-            res.status(200).json({
-                'http-status-code': 200,
+            res.status(StatusCodes.OK).json({
                 message: "Hiển thị thành công",
                 data: product
             });
             if (!product) {
-                return res.status(404).json({
-                    'http-status-code': 404,
+                return res.status(getStatusCode('Internal Server Error')).json({
                     message: "Not Found",
                 })
             }
         } catch (error) {
-            res.status(400).json({
-                'http-status-code': 400,
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             })
         }
@@ -44,21 +39,18 @@ const ProductController = {
             const { error } = createValidate.validate(req.body);
             if (error) {
                 const errors = error.details.map((err) => err.message);
-                return res.status(400).json({
-                    'http-status-code': 400,
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                     message: errors,
                 })
             }
 
             const product = await ProductModel.create(productData);
-            res.status(200).json({
-                'http-status-code': 200,
+            res.status(StatusCodes.OK).json({
                 message: "Thêm sản phẩm thành công",
                 data: product,
             });
         } catch (error) {
-            res.status(400).json({
-                'http-status-code': 400,
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             })
         }
@@ -70,8 +62,7 @@ const ProductController = {
             const { error } = updateValidate.validate(req.body);
             if (error) {
                 const errors = error.details.map((err) => err.message);
-                return res.status(400).json({
-                    'http-status-code': 400,
+                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                     message: errors,
                 })
             }
@@ -80,14 +71,12 @@ const ProductController = {
                 productData,
                 { new: true }
             )
-            res.status(200).json({
-                'http-status-code': 200,
+            res.status(StatusCodes.OK).json({
                 message: "Cập nhật sản phẩm thành công",
                 data: updateProduct,
             });
         } catch (error) {
-            res.status(400).json({
-                'http-status-code': 400,
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             })
         }
@@ -96,18 +85,15 @@ const ProductController = {
         try {
             const product = await ProductModel.findByIdAndDelete(req.params.id);
             if (!product) {
-                return res.status(404).json({
-                    'http-status-code': 404,
+                return res.status(getStatusCode('Internal Server Error')).json({
                     message: "Not Found",
                 })
             }
-            res.status(200).json({
-                'http-status-code': 200,
+            res.status(StatusCodes.OK).json({
                 message: "Xóa thành công",
             });
         } catch (error) {
-            res.status(400).json({
-                'http-status-code': 400,
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             })
         }
