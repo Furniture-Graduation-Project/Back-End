@@ -10,12 +10,10 @@ const promotionSchema = new mongoose.Schema(
     productID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
-      required: false,
     },
     categoryID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: false,
     },
   },
   {

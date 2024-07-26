@@ -6,20 +6,14 @@ import {
   deleteVoucher,
   getVoucherById,
 } from "../controllers/voucherController.js";
-import { validateVoucher } from "../validations/voucherValidation.js";
-import authMiddleware from "../middleware/authMiddleware.js";
 
-const router = express.Router();
+const routerVoucher = express.Router();
 
-router
-  .route("/")
-  .post(authMiddleware, validateVoucher, createVoucher)
-  .get(authMiddleware, getVouchers);
+routerVoucher.post("/", createVoucher);
+routerVoucher.get("/", getVouchers);
 
-router
-  .route("/:id")
-  .get(authMiddleware, getVoucherById)
-  .put(authMiddleware, validateVoucher, updateVoucher)
-  .delete(authMiddleware, deleteVoucher);
+routerVoucher.get("/:id", getVoucherById);
+routerVoucher.put("/:id", updateVoucher);
+routerVoucher.delete("/:id", deleteVoucher);
 
-export default router;
+export default routerVoucher;

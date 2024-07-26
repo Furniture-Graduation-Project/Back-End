@@ -6,20 +6,14 @@ import {
   deletePromotion,
   getPromotionById,
 } from "../controllers/promotionController.js";
-import { validatePromotion } from "../validations/promotionValidation.js";
-import authMiddleware from "../middleware/authMiddleware.js";
 
-const router = express.Router();
+const routerPromotion = express.Router();
 
-router
-  .route("/")
-  .post(authMiddleware, validatePromotion, createPromotion)
-  .get(authMiddleware, getPromotions);
+routerPromotion.post("/", createPromotion);
+routerPromotion.get("/", getPromotions);
 
-router
-  .route("/:id")
-  .get(authMiddleware, getPromotionById)
-  .put(authMiddleware, validatePromotion, updatePromotion)
-  .delete(authMiddleware, deletePromotion);
+routerPromotion.get("/:id", getPromotionById);
+routerPromotion.put("/:id",  updatePromotion);
+routerPromotion.delete("/:id", deletePromotion);
 
-export default router;
+export default routerPromotion;

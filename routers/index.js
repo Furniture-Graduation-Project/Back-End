@@ -5,6 +5,8 @@ import CategoryRoute from "./category.js";
 import orderRouter from "./order.js";
 import routerWishlist from "./wishlist.js";
 import routerComment from "./comment.js";
+import routerPromotion from "./promotion.js";
+import routerVoucher from "./voucher.js";
 
 export function Route(app) {
   app.use("/api", () => {
@@ -17,4 +19,6 @@ export function Route(app) {
   app.use("/review", routerReview);
   app.use("/wishlist", routerWishlist);
   app.use("/comment", routerComment);
+  app.use("/promotion", routerPromotion);
+  app.use("/voucher", routerVoucher);
 }
