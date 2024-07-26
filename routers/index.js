@@ -5,6 +5,7 @@ import CategoryRoute from "./category.js";
 import orderRouter from "./order.js";
 import routerWishlist from "./wishlist.js";
 import routerComment from "./comment.js";
+import routerCart from "./cart.js";
 
 export function Route(app) {
   app.use("/api", () => {
@@ -17,4 +18,5 @@ export function Route(app) {
   app.use("/review", routerReview);
   app.use("/wishlist", routerWishlist);
   app.use("/comment", routerComment);
+  app.use("/cart", routerCart);
 }

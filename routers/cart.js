@@ -3,19 +3,23 @@ import { cartValidation } from "../validations/cartValidation.js";
 import { validate } from "../validations/validate.js";
 import * as cartController from "../controllers/cartController.js";
 
-const router = express.Router();
+const routerCart = express.Router();
 
-router.get("/:UserID", cartController.getCart);
-router.post("/item", validate(cartValidation), cartController.addItemToCart);
-router.put(
+routerCart.get("/:UserID", cartController.getCart);
+routerCart.post(
+  "/item",
+  validate(cartValidation),
+  cartController.addItemToCart
+);
+routerCart.put(
   "/item/:UserID",
   validate(cartValidation),
   cartController.updateCartItem
 );
-router.delete(
+routerCart.delete(
   "/item/:UserID/:ProductID/:ProductOption",
   cartController.removeItemFromCart
 );
-router.delete("/:UserID", cartController.deleteCart);
+routerCart.delete("/:UserID", cartController.deleteCart);
 
-export default router;
+export default routerCart;
