@@ -1,25 +1,7 @@
 import mongoose from "mongoose";
-
-const orderItemSchema = new mongoose.Schema({
-  productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
-  },
-  productOptionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ProductOption",
-    required: true,
-  },
-  unitPrice: {
-    type: Number,
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-  },
-});
+import { paymentSchema } from "./payment.js";
+import { shipmentSchema } from "./shipment.js";
+import { orderItemSchema } from "./orderItem.js";
 
 const orderSchema = new mongoose.Schema({
   userId: {
@@ -44,24 +26,21 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   items: [orderItemSchema],
-  payment: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Payment",
-  },
-  shipments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Shipment",
-    },
-  ],
+  payment: paymentSchema,
+  shipments: shipmentSchema,
   status: {
     type: String,
-    enum: ["pending", "confirmed", "shipped", "delivered"],
+    enum: [
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned",
+      "refunded",
+    ],
     default: "pending",
-  },
-  deliveryPerson: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Employee",
   },
 });
 

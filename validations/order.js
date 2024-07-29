@@ -1,4 +1,7 @@
 import Joi from "joi";
+import { orderItemSchema } from "./orderItem.js";
+import { paymentSchema } from "./payment.js";
+import { shipmentSchema } from "./shipment.js";
 
 const OrderValidation = {
   requiredSchema: Joi.object({
@@ -9,22 +12,18 @@ const OrderValidation = {
       .pattern(/^[0-9]{10,15}$/),
     orderAddress: Joi.string().required(),
     totalPrice: Joi.number().required(),
-    items: Joi.array()
-      .items(
-        Joi.object({
-          productId: Joi.string().required(),
-          productOptionId: Joi.string().required(),
-          unitPrice: Joi.number().required(),
-          quantity: Joi.number().required(),
-        })
-      )
-      .required(),
-    payment: Joi.string(),
-    shipments: Joi.array().items(Joi.string()),
-    status: Joi.string()
-      .valid("pending", "confirmed", "shipped", "delivered")
-      .default("pending"),
-    deliveryPerson: Joi.string(),
+    payment: paymentSchema.required(),
+    items: Joi.array().min(1).items(orderItemSchema).required(),
+    status: Joi.string().valid(
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned",
+      "refunded"
+    ),
   }),
   optionalSchema: Joi.object({
     userId: Joi.string().optional(),
@@ -32,22 +31,21 @@ const OrderValidation = {
     orderPhone: Joi.string().optional(),
     orderAddress: Joi.string().optional(),
     totalPrice: Joi.number().optional(),
-    items: Joi.array()
-      .items(
-        Joi.object({
-          productId: Joi.string().optional(),
-          productOptionId: Joi.string().optional(),
-          unitPrice: Joi.number().optional(),
-          quantity: Joi.number().optional(),
-        })
+    items: Joi.array().min(1).items(orderItemSchema).optional(),
+    payment: paymentSchema.optional(),
+    shipments: shipmentSchema.optional(),
+    status: Joi.string()
+      .valid(
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "returned",
+        "refunded"
       )
       .optional(),
-    payment: Joi.string().optional(),
-    shipments: Joi.array().items(Joi.string()).optional(),
-    status: Joi.string()
-      .valid("pending", "confirmed", "shipped", "delivered")
-      .optional(),
-    deliveryPerson: Joi.string().optional(),
   }),
 };
 
