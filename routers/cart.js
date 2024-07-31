@@ -1,25 +1,18 @@
 import express from "express";
-import { cartValidation } from "../validations/cartValidation.js";
-import { validate } from "../validations/validate.js";
-import * as cartController from "../controllers/cartController.js";
+import {
+  addItemToCart,
+  deleteCart,
+  getCart,
+  removeItemFromCart,
+  updateCartItem,
+} from "../controllers/cart.js";
 
-const routerCart = express.Router();
+const router = express.Router();
 
-routerCart.get("/:UserID", cartController.getCart);
-routerCart.post(
-  "/item",
-  validate(cartValidation),
-  cartController.addItemToCart
-);
-routerCart.put(
-  "/item/:UserID",
-  validate(cartValidation),
-  cartController.updateCartItem
-);
-routerCart.delete(
-  "/item/:UserID/:ProductID/:ProductOption",
-  cartController.removeItemFromCart
-);
-routerCart.delete("/:UserID", cartController.deleteCart);
+router.get("/:UserID", getCart);
+router.post("/item", addItemToCart);
+router.put("/item/:UserID", updateCartItem);
+router.delete("/item/:UserID/:ProductID/:ProductOption", removeItemFromCart);
+router.delete("/:UserID", deleteCart);
 
-export default routerCart;
+export default router;

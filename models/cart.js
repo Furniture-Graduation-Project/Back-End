@@ -8,11 +8,13 @@ const cartItemSchema = new mongoose.Schema({
   DateAdded: { type: Date, default: Date.now },
 });
 
-const cartSchema = new mongoose.Schema({
-  UserID: { type: String, required: true },
-  items: [cartItemSchema],
-  DateAdded: { type: Date, default: Date.now },
-});
+const cartSchema = new mongoose.Schema(
+  {
+    UserID: { type: String, required: true },
+    items: [cartItemSchema],
+  },
+  { timestamps: true, versionKey: true }
+);
 
 const Cart = mongoose.model("Cart", cartSchema);
 

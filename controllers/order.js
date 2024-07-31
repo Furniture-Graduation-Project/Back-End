@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import OrderModel from "../models/order.js";
 import orderValidation from "../validations/order.js";
-
 const OrderController = {
   getAll: async (req, res) => {
     try {
@@ -84,9 +83,6 @@ const OrderController = {
       totalPrice,
       items,
       payment,
-      shipments,
-      status,
-      deliveryPerson,
     } = req.body;
 
     try {
@@ -99,9 +95,6 @@ const OrderController = {
           totalPrice,
           items,
           payment,
-          shipments,
-          status,
-          deliveryPerson,
         },
         { abortEarly: false }
       );
@@ -110,9 +103,11 @@ const OrderController = {
           message: error.details.map((detail) => detail.message),
         });
       }
-
       const data = await OrderModel.create(value);
-      return res.status(StatusCodes.CREATED).json(data);
+      return res.status(StatusCodes.CREATED).json({
+        data: data,
+        message: "Đơn hàng đã đặt thành công!",
+      });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -129,7 +124,7 @@ const OrderController = {
       totalPrice,
       items,
       payment,
-      shipments,
+      shipment,
       status,
       deliveryPerson,
     } = req.body;
@@ -143,7 +138,7 @@ const OrderController = {
         ...(totalPrice && { totalPrice }),
         ...(items && { items }),
         ...(payment && { payment }),
-        ...(shipments && { shipments }),
+        ...(shipment && { shipment }),
         ...(status && { status }),
         ...(deliveryPerson && { deliveryPerson }),
       };
@@ -187,7 +182,10 @@ const OrderController = {
         });
       }
       const data = await OrderModel.findByIdAndDelete(id);
-      return res.status(StatusCodes.OK).json(data);
+      return res.status(StatusCodes.OK).json({
+        data: data,
+        message: "Xóa đơn hàng thành công!",
+      });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
