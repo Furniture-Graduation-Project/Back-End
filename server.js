@@ -7,7 +7,7 @@ import passport from "passport";
 import "./controllers/passport.js";
 import { app, server } from "./services/socket.js";
 
-import { connectDB } from "./config/connect.js";
+import { connectDB } from "./utils/connect.js";
 import { Route } from "./routers/index.js";
 
 dotenv.config();
