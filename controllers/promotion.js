@@ -1,4 +1,4 @@
-import Promotion from "../models/promotionModel.js";
+import Promotion from "../models/promotion.js";
 import { StatusCodes } from "http-status-codes";
 
 export const createPromotion = async (req, res) => {
@@ -24,9 +24,13 @@ export const createPromotion = async (req, res) => {
     });
 
     await promotion.save();
-    res.status(StatusCodes.CREATED).json({ message: "Tạo promotion thành công", promotion });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: "Tạo promotion thành công", promotion });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: "Tạo promotion thất bại", error: error.message });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Tạo promotion thất bại", error: error.message });
   }
 };
 
@@ -35,7 +39,12 @@ export const getPromotions = async (req, res) => {
     const promotions = await Promotion.find().populate("productID categoryID");
     res.status(StatusCodes.OK).json(promotions);
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Lấy danh sách promotion thất bại", error: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({
+        message: "Lấy danh sách promotion thất bại",
+        error: error.message,
+      });
   }
 };
 
@@ -43,13 +52,19 @@ export const getPromotionById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const promotion = await Promotion.findById(id).populate("productID categoryID");
+    const promotion = await Promotion.findById(id).populate(
+      "productID categoryID"
+    );
     if (!promotion) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy promotion" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Không tìm thấy promotion" });
     }
     res.status(StatusCodes.OK).json(promotion);
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Lấy promotion thất bại", error: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Lấy promotion thất bại", error: error.message });
   }
 };
 
@@ -66,23 +81,33 @@ export const updatePromotion = async (req, res) => {
   } = req.body;
 
   try {
-    const promotion = await Promotion.findByIdAndUpdate(id, {
-      description,
-      type,
-      value,
-      startDate,
-      endDate,
-      productID,
-      categoryID,
-    }, { new: true });
+    const promotion = await Promotion.findByIdAndUpdate(
+      id,
+      {
+        description,
+        type,
+        value,
+        startDate,
+        endDate,
+        productID,
+        categoryID,
+      },
+      { new: true }
+    );
 
     if (!promotion) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy promotion" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Không tìm thấy promotion" });
     }
 
-    res.status(StatusCodes.OK).json({ message: "Cập nhật promotion thành công", promotion });
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Cập nhật promotion thành công", promotion });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: "Cập nhật promotion thất bại", error: error.message });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Cập nhật promotion thất bại", error: error.message });
   }
 };
 
@@ -92,11 +117,15 @@ export const deletePromotion = async (req, res) => {
   try {
     const promotion = await Promotion.findByIdAndDelete(id);
     if (!promotion) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy promotion" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Không tìm thấy promotion" });
     }
 
     res.status(StatusCodes.OK).json({ message: "Xóa promotion thành công" });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Xóa promotion thất bại", error: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Xóa promotion thất bại", error: error.message });
   }
 };
