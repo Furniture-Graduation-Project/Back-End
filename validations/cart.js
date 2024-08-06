@@ -1,37 +1,51 @@
 import Joi from "joi";
 
-export const cartValidation = Joi.object({
+// Schema cho việc tạo mới giỏ hàng
+const createValidate = Joi.object({
   UserID: Joi.string().required().messages({
-    "string.base": `"UserID" should be a type of 'text'`,
-    "string.empty": `"UserID" cannot be an empty field`,
-    "any.required": `"UserID" is a required field`,
+    "any.required": "UserID is required",
+    "string.empty": "UserID cannot be empty",
   }),
-  items: Joi.array().items(
-    Joi.object({
-      ProductID: Joi.string().required().messages({
-        "string.base": `"ProductID" should be a type of 'text'`,
-        "string.empty": `"ProductID" cannot be an empty field`,
-        "any.required": `"ProductID" is a required field`,
-      }),
-      ProductOption: Joi.string().required().messages({
-        "string.base": `"ProductOption" should be a type of 'text'`,
-        "string.empty": `"ProductOption" cannot be an empty field`,
-        "any.required": `"ProductOption" is a required field`,
-      }),
-      Quantity: Joi.number().integer().min(1).required().messages({
-        "number.base": `"Quantity" should be a type of 'number'`,
-        "number.integer": `"Quantity" must be an integer`,
-        "number.min": `"Quantity" must be greater than or equal to 1`,
-        "any.required": `"Quantity" is a required field`,
-      }),
-      Price: Joi.number().min(0).required().messages({
-        "number.base": `"Price" should be a type of 'number'`,
-        "number.min": `"Price" must be greater than or equal to 0`,
-        "any.required": `"Price" is a required field`,
-      }),
-      DateAdded: Joi.date().default(Date.now).messages({
-        "date.base": `"DateAdded" should be a type of 'date'`,
-      }),
-    })
-  ),
+  ProductID: Joi.string().required().messages({
+    "any.required": "ProductID is required",
+    "string.empty": "ProductID cannot be empty",
+  }),
+  Quantity: Joi.number().min(1).required().messages({
+    "any.required": "Quantity is required",
+    "number.base": "Quantity must be a number",
+    "number.min": "Quantity must be at least 1",
+  }),
+  Price: Joi.number().required().messages({
+    "any.required": "Price is required",
+    "number.base": "Price must be a number",
+  }),
+  DateAdded: Joi.date().optional().messages({
+    "date.base": "DateAdded must be a valid date",
+  }),
+}).options({
+  abortEarly: false,
 });
+
+// Schema cho việc cập nhật giỏ hàng
+const updateValidate = Joi.object({
+  UserID: Joi.string().optional().messages({
+    "string.base": "UserID must be a string",
+  }),
+  ProductID: Joi.string().optional().messages({
+    "string.base": "ProductID must be a string",
+  }),
+  Quantity: Joi.number().min(1).optional().messages({
+    "number.base": "Quantity must be a number",
+    "number.min": "Quantity must be at least 1",
+  }),
+  Price: Joi.number().optional().messages({
+    "number.base": "Price must be a number",
+  }),
+  DateAdded: Joi.date().optional().messages({
+    "date.base": "DateAdded must be a valid date",
+  }),
+}).options({
+  abortEarly: false,
+});
+
+export { createValidate, updateValidate };
