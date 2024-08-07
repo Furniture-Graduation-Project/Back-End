@@ -6,6 +6,9 @@ import orderRouter from "./order.js";
 import routerWishlist from "./wishlist.js";
 import routerComment from "./comment.js";
 import routerCart from "./cart.js";
+import routerPromotion from "./promotion.js";
+import routerVoucher from "./voucher.js";
+import authRoutes from "./passport.js";
 
 export function Route(app) {
   app.use("/api", () => {
@@ -19,4 +22,7 @@ export function Route(app) {
   app.use("/wishlist", routerWishlist);
   app.use("/comment", routerComment);
   app.use("/cart", routerCart);
+  app.use("/promotion", routerPromotion);
+  app.use("/voucher", routerVoucher);
+  app.use("/", authRoutes);
 }
