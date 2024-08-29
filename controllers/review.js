@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Review from "../models/review.js";
-import { crudValidate } from "../validations/review.js"; // Giả sử bạn có tệp validation cho review
+import { crudValidate } from "../validations/review.js";
 
 export const getAllReview = async (req, res) => {
   try {

@@ -5,7 +5,6 @@ import cors from 'cors';
 
 import { connectDB } from './utils/connect.js';
 import { app, server } from './services/socket.js';
-
 import { Route } from './routers/index.js';
 
 dotenv.config();
