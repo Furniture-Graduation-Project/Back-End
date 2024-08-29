@@ -6,6 +6,7 @@ import {
   getVouchers,
   updateVoucher,
 } from '../controllers/voucher.js';
+
 const routerVoucher = express.Router();
 
 routerVoucher.post('/', createVoucher);

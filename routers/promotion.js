@@ -5,13 +5,15 @@ import {
   getPromotionById,
   getPromotions,
   updatePromotion,
-} from '../controllers/promotion.js';
+} from "../controllers/promotion.js";
+
 const routerPromotion = express.Router();
 
-routerPromotion.post('/', createPromotion);
-routerPromotion.get('/', getPromotions);
-routerPromotion.get('/:id', getPromotionById);
-routerPromotion.put('/:id', updatePromotion);
-routerPromotion.delete('/:id', deletePromotion);
+routerPromotion.post("/", createPromotion);
+routerPromotion.get("/", getPromotions);
+
+routerPromotion.get("/:id", getPromotionById);
+routerPromotion.put("/:id", updatePromotion);
+routerPromotion.delete("/:id", deletePromotion);
 
 export default routerPromotion;
