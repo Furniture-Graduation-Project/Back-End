@@ -17,7 +17,7 @@ export const createVoucher = async (req, res) => {
   } = req.body;
 
   try {
-    const voucher = new Voucher({
+    const voucher = new VoucherModel({
       code,
       description,
       type,
@@ -34,11 +34,11 @@ export const createVoucher = async (req, res) => {
     await voucher.save();
     res
       .status(StatusCodes.CREATED)
-      .json({ message: "Tạo voucher thành công", voucher });
+      .json({ message: 'Tạo voucher thành công', voucher });
   } catch (error) {
     res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Tạo voucher thất bại", error: error.message });
+      .json({ message: 'Tạo voucher thất bại', error: error.message });
   }
 };
 
@@ -48,11 +48,11 @@ export const getVouchers = async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
-    const vouchers = await Voucher.find()
+    const vouchers = await VoucherModel.find()
       .skip(skip)
       .limit(limit)
-      .populate("orders"); // Populate orders
-    const total = await Voucher.countDocuments();
+      .populate('orders'); // Populate orders
+    const total = await VoucherModel.countDocuments();
     res.status(StatusCodes.OK).json({
       vouchers,
       page,
@@ -60,12 +60,10 @@ export const getVouchers = async (req, res) => {
       totalVouchers: total,
     });
   } catch (error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({
-        message: "Lấy danh sách voucher thất bại",
-        error: error.message,
-      });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: 'Lấy danh sách voucher thất bại',
+      error: error.message,
+    });
   }
 };
 
@@ -73,17 +71,17 @@ export const getVoucherById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const voucher = await Voucher.findById(id).populate("orders"); // Populate orders
+    const voucher = await VoucherModel.findById(id).populate('orders'); // Populate orders
     if (!voucher) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Không tìm thấy voucher" });
+        .json({ message: 'Không tìm thấy voucher' });
     }
     res.status(StatusCodes.OK).json(voucher);
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Lấy voucher thất bại", error: error.message });
+      .json({ message: 'Lấy voucher thất bại', error: error.message });
   }
 };
 
@@ -104,7 +102,7 @@ export const updateVoucher = async (req, res) => {
   } = req.body;
 
   try {
-    const voucher = await Voucher.findByIdAndUpdate(
+    const voucher = await VoucherModel.findByIdAndUpdate(
       id,
       {
         code,
@@ -119,22 +117,22 @@ export const updateVoucher = async (req, res) => {
         categories,
         orders, // Cập nhật orders
       },
-      { new: true }
+      { new: true },
     );
 
     if (!voucher) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Không tìm thấy voucher" });
+        .json({ message: 'Không tìm thấy voucher' });
     }
 
     res
       .status(StatusCodes.OK)
-      .json({ message: "Cập nhật voucher thành công", voucher });
+      .json({ message: 'Cập nhật voucher thành công', voucher });
   } catch (error) {
     res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "Cập nhật voucher thất bại", error: error.message });
+      .json({ message: 'Cập nhật voucher thất bại', error: error.message });
   }
 };
 
@@ -142,17 +140,17 @@ export const deleteVoucher = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const voucher = await Voucher.findByIdAndDelete(id);
+    const voucher = await VoucherModel.findByIdAndDelete(id);
     if (!voucher) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Không tìm thấy voucher" });
+        .json({ message: 'Không tìm thấy voucher' });
     }
 
-    res.status(StatusCodes.OK).json({ message: "Xóa voucher thành công" });
+    res.status(StatusCodes.OK).json({ message: 'Xóa voucher thành công' });
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Xóa voucher thất bại", error: error.message });
+      .json({ message: 'Xóa voucher thất bại', error: error.message });
   }
 };

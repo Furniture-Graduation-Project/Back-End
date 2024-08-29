@@ -1,19 +1,18 @@
-import express from "express";
+import express from 'express';
 import {
   createVoucher,
-  getVouchers,
-  updateVoucher,
   deleteVoucher,
   getVoucherById,
-} from "../controllers/voucher.js";
+  getVouchers,
+  updateVoucher,
+} from '../controllers/voucher.js';
 
 const routerVoucher = express.Router();
 
-routerVoucher.post("/", createVoucher);
-routerVoucher.get("/", getVouchers);
-
-routerVoucher.get("/:id", getVoucherById);
-routerVoucher.put("/:id", updateVoucher);
-routerVoucher.delete("/:id", deleteVoucher);
+routerVoucher.post('/', createVoucher);
+routerVoucher.get('/', getVouchers);
+routerVoucher.get('/:id', getVoucherById);
+routerVoucher.put('/:id', updateVoucher);
+routerVoucher.delete('/:id', deleteVoucher);
 
 export default routerVoucher;
