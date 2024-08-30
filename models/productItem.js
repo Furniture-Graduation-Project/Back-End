@@ -1,34 +1,25 @@
 import mongoose from 'mongoose';
 
+const variantSchema = new mongoose.Schema({
+  variant: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  value: {
+    type: String,
+    required: true,
+  },
+});
+
 const productItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
     required: true,
   },
-  size: {
-    type: String,
-    default: '',
-    trim: true,
-  },
-  color: {
-    type: String,
-    enum: [
-      'Red',
-      'Blue',
-      'Green',
-      'Black',
-      'White',
-      'Yellow',
-      'Beige',
-      'Cream',
-      'Brown',
-      'Gray',
-      'Navy',
-      'Olive',
-      'Taupe',
-      'Teal',
-    ],
+  variants: {
+    type: [variantSchema],
     required: true,
   },
   stock: {
@@ -39,11 +30,12 @@ const productItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  images: {
+  image: {
     type: String,
-    required: true,
+    default: '',
   },
 });
 
 const ProductItemModel = mongoose.model('ProductItem', productItemSchema);
+
 export default ProductItemModel;
