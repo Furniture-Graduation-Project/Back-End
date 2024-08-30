@@ -10,12 +10,14 @@ import routerPromotion from './promotion.js';
 import routerVoucher from './voucher.js';
 import authRoutes from './passport.js';
 import routeMessage from './message.js';
+import productItemRouter from './productItem.js';
 
 export function Route(app) {
   app.use('/api', () => {
     console.log('Server running');
   });
   app.use('/product', productRouter);
+  app.use('/product-item', productItemRouter);
   app.use('/category', CategoryRoute);
   app.use('/order', orderRouter);
   app.use('/employee', routerEmployee);
