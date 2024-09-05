@@ -1,12 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import Review from '../models/review.js';
+import ReviewModel from '../models/review.js';
 import { reviewSchema } from '../validations/review.js';
 
 export const getAllReview = async (req, res) => {
   try {
-    const reviews = await Review.find();
+    const reviews = await ReviewModel.find();
     return res.status(StatusCodes.OK).json({
-      message: 'Get All Review Done',
+      message: 'Get All ReviewModel Done',
       data: reviews,
     });
   } catch (error) {
@@ -18,14 +18,14 @@ export const getAllReview = async (req, res) => {
 
 export const getDetailReview = async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id);
+    const review = await ReviewModel.findById(req.params.id);
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Review not found',
+        message: 'ReviewModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Get Detail Review Done',
+      message: 'Get Detail ReviewModel Done',
       data: review,
     });
   } catch (error) {
@@ -47,9 +47,9 @@ export const createReview = async (req, res) => {
       });
     }
 
-    const review = await Review.create(req.body);
+    const review = await ReviewModel.create(req.body);
     return res.status(StatusCodes.CREATED).json({
-      message: 'Create Review Done',
+      message: 'Create ReviewModel Done',
       data: review,
     });
   } catch (error) {
@@ -70,16 +70,16 @@ export const editReview = async (req, res) => {
         message: errors,
       });
     }
-    const review = await Review.findByIdAndUpdate(req.params.id, req.body, {
+    const review = await ReviewModel.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Review not found',
+        message: 'ReviewModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Update Review Done',
+      message: 'Update ReviewModel Done',
       data: review,
     });
   } catch (error) {
@@ -91,14 +91,14 @@ export const editReview = async (req, res) => {
 
 export const deleteReview = async (req, res) => {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const review = await ReviewModel.findByIdAndDelete(req.params.id);
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Review not found',
+        message: 'ReviewModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Delete Review Done',
+      message: 'Delete ReviewModel Done',
       data: review,
     });
   } catch (error) {

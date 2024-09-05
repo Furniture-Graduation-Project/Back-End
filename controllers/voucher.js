@@ -1,5 +1,5 @@
-import Voucher from "../models/voucher.js";
-import { StatusCodes } from "http-status-codes";
+import VoucherModel from '../models/voucher.js';
+import { StatusCodes } from 'http-status-codes';
 
 export const createVoucher = async (req, res) => {
   const {
