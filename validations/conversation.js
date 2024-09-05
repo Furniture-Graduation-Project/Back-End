@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import messageValidate from './message.js';
+import { messageSchema } from './message.js';
 
-const createConversationValidate = Joi.object({
+export const createConversationSchema = Joi.object({
   userId: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required()
@@ -9,7 +9,7 @@ const createConversationValidate = Joi.object({
       'string.pattern.base': 'ID người dùng không hợp lệ.',
       'any.required': 'ID người dùng là bắt buộc.',
     }),
-  messages: Joi.array().items(messageValidate).optional().messages({
+  messages: Joi.array().items(messageSchema).optional().messages({
     'array.base': 'Danh sách tin nhắn không hợp lệ.',
   }),
   star: Joi.boolean().default(false).messages({
@@ -40,8 +40,8 @@ const createConversationValidate = Joi.object({
     }),
 });
 
-const updateConversationValidate = Joi.object({
-  messages: Joi.array().items(messageValidate).optional().messages({
+export const updateConversationSchema = Joi.object({
+  messages: Joi.array().items(messageSchema).optional().messages({
     'array.base': 'Danh sách tin nhắn không hợp lệ.',
   }),
   star: Joi.boolean().optional().messages({
@@ -68,5 +68,3 @@ const updateConversationValidate = Joi.object({
     'string.base': 'Danh mục phải là một chuỗi ký tự.',
   }),
 });
-
-export { createConversationValidate, updateConversationValidate };

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import Employee from "../models/employee.js";
-import { crudValidate } from "../validations/employee.js";
+import { employeeSchema } from "../validations/employee.js";
 
 export const getAllEmployee = async (req, res) => {
   try {
@@ -38,7 +38,7 @@ export const getDetailEmployee = async (req, res) => {
 
 export const createEmployee = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = employeeSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -71,7 +71,7 @@ export const createEmployee = async (req, res) => {
 
 export const editEmployee = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = employeeSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {

@@ -1,12 +1,12 @@
-import { StatusCodes } from "http-status-codes";
-import Comment from "../models/comment.js";
-import { crudValidate } from "../validations/comment.js";
+import { StatusCodes } from 'http-status-codes';
+import Comment from '../models/comment.js';
+import { commentSchema } from '../validations/comment.js';
 
 export const getAllComment = async (req, res) => {
   try {
     const comments = await Comment.find();
     return res.status(StatusCodes.OK).json({
-      message: "Get All Comments Done",
+      message: 'Get All Comments Done',
       data: comments,
     });
   } catch (error) {
@@ -21,11 +21,11 @@ export const getDetailComment = async (req, res) => {
     const comment = await Comment.findById(req.params.id);
     if (!comment) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Comment not found",
+        message: 'Comment not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Get Detail Comment Done",
+      message: 'Get Detail Comment Done',
       data: comment,
     });
   } catch (error) {
@@ -37,7 +37,7 @@ export const getDetailComment = async (req, res) => {
 
 export const createComment = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = commentSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -48,7 +48,7 @@ export const createComment = async (req, res) => {
     }
     const comment = await Comment.create(req.body);
     return res.status(StatusCodes.CREATED).json({
-      message: "Create Comment Done",
+      message: 'Create Comment Done',
       data: comment,
     });
   } catch (error) {
@@ -60,7 +60,7 @@ export const createComment = async (req, res) => {
 
 export const editComment = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = commentSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -74,11 +74,11 @@ export const editComment = async (req, res) => {
     });
     if (!comment) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Comment not found",
+        message: 'Comment not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Update Comment Done",
+      message: 'Update Comment Done',
       data: comment,
     });
   } catch (error) {
@@ -93,11 +93,11 @@ export const deleteComment = async (req, res) => {
     const comment = await Comment.findByIdAndDelete(req.params.id);
     if (!comment) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Comment not found",
+        message: 'Comment not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Delete Comment Done",
+      message: 'Delete Comment Done',
       data: comment,
     });
   } catch (error) {

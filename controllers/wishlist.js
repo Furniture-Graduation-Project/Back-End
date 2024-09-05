@@ -1,12 +1,12 @@
-import { StatusCodes } from "http-status-codes";
-import Wishlist from "../models/wishlist.js";
-import { crudValidate } from "../validations/wishlist.js";
+import { StatusCodes } from 'http-status-codes';
+import Wishlist from '../models/wishlist.js';
+import { wishlistSchema } from '../validations/wishlist.js';
 
 export const getAllWishlist = async (req, res) => {
   try {
     const wishlists = await Wishlist.find();
     return res.status(StatusCodes.OK).json({
-      message: "Get All Wishlist Done",
+      message: 'Get All Wishlist Done',
       data: wishlists,
     });
   } catch (error) {
@@ -21,11 +21,11 @@ export const getDetailWishlist = async (req, res) => {
     const wishlist = await Wishlist.findById(req.params.id);
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Wishlist not found",
+        message: 'Wishlist not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Get Detail Wishlist Done",
+      message: 'Get Detail Wishlist Done',
       data: wishlist,
     });
   } catch (error) {
@@ -37,7 +37,7 @@ export const getDetailWishlist = async (req, res) => {
 
 export const createWishlist = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = wishlistSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -48,7 +48,7 @@ export const createWishlist = async (req, res) => {
     }
     const wishlist = await Wishlist.create(req.body);
     return res.status(StatusCodes.CREATED).json({
-      message: "Create Wishlist Done",
+      message: 'Create Wishlist Done',
       data: wishlist,
     });
   } catch (error) {
@@ -60,7 +60,7 @@ export const createWishlist = async (req, res) => {
 
 export const editWishlist = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = wishlistSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -74,11 +74,11 @@ export const editWishlist = async (req, res) => {
     });
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Wishlist not found",
+        message: 'Wishlist not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Update Wishlist Done",
+      message: 'Update Wishlist Done',
       data: wishlist,
     });
   } catch (error) {
@@ -93,11 +93,11 @@ export const deleteWishlist = async (req, res) => {
     const wishlist = await Wishlist.findByIdAndDelete(req.params.id);
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Wishlist not found",
+        message: 'Wishlist not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Delete Wishlist Done",
+      message: 'Delete Wishlist Done',
       data: wishlist,
     });
   } catch (error) {

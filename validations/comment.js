@@ -1,27 +1,25 @@
-import Joi from "joi";
+import Joi from 'joi';
 
-const crudValidate = Joi.object({
+export const commentSchema = Joi.object({
   productId: Joi.string().required().messages({
-    "string.base": "Product ID should be a type of text",
-    "string.empty": "Product ID cannot be empty",
-    "any.required": "Product ID is required",
+    'string.base': 'Mã sản phẩm phải là chuỗi ký tự',
+    'string.empty': 'Mã sản phẩm không được để trống',
+    'any.required': 'Mã sản phẩm là bắt buộc',
   }),
   userId: Joi.string().required().messages({
-    "string.base": "User ID should be a type of text",
-    "string.empty": "User ID cannot be empty",
-    "any.required": "User ID is required",
+    'string.base': 'Mã người dùng phải là chuỗi ký tự',
+    'string.empty': 'Mã người dùng không được để trống',
+    'any.required': 'Mã người dùng là bắt buộc',
   }),
   rating: Joi.number().min(0).max(5).messages({
-    "number.base": "Rating should be a type of number",
-    "number.min": "Rating cannot be less than 0",
-    "number.max": "Rating cannot be more than 5",
+    'number.base': 'Đánh giá phải là một số',
+    'number.min': 'Đánh giá không được nhỏ hơn 0',
+    'number.max': 'Đánh giá không được lớn hơn 5',
   }),
   reviewText: Joi.string().optional().messages({
-    "string.base": "Review text should be a type of text",
+    'string.base': 'Nội dung đánh giá phải là chuỗi ký tự',
   }),
   reviewDate: Joi.date().optional().messages({
-    "date.base": "Review date should be a valid date",
+    'date.base': 'Ngày đánh giá phải là ngày hợp lệ',
   }),
 });
-
-export { crudValidate };
