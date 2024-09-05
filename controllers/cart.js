@@ -4,7 +4,7 @@ import { createCartSchema, updateCartSchema } from '../validations/cart.js';
 
 const CartController = {
 
-  async getAllCarts(req, res) {
+  async getAll(req, res) {
     try {
       const carts = await CartModel.find();
       res.status(StatusCodes.OK).json({
@@ -18,7 +18,7 @@ const CartController = {
     }
   },
 
-  async detailCart(req, res) {
+  async detail(req, res) {
     try {
       const cart = await CartModel.findById(req.params.id);
       if (!cart) {
@@ -37,7 +37,7 @@ const CartController = {
     }
   },
 
-  async createCart(req, res) {
+  async create(req, res) {
     try {
       const { error } = createCartSchema.validate(req.body);
       if (error) {
@@ -62,7 +62,7 @@ const CartController = {
     }
   },
 
-  async updateCart(req, res) {
+  async update(req, res) {
     try {
       const { error } = updateCartSchema.validate(req.body);
       if (error) {
@@ -96,7 +96,7 @@ const CartController = {
     }
   },
 
-  async deleteCart(req, res) {
+  async delete(req, res) {
     try {
       const cart = await CartModel.findByIdAndDelete(req.params.id);
       if (!cart) {

@@ -1,18 +1,12 @@
 import { Router } from "express";
-import {
-    create,
-    get,
-    remove,
-    removeLocation,
-    update,
-} from "../controllers/location.js";
+import LocationController from "../controllers/location";
 
 const router = Router();
 
-router.post("/", create);
-router.get("/:id", get);
-router.delete("/", remove);
-router.delete("/:id", removeLocation);
-router.put("/", update);
+router.post("/", LocationController.create);
+router.get("/:id", LocationController.get);
+router.delete("/", LocationController.delete);
+router.delete("/:id", LocationController.removeLocation);
+router.put("/", LocationController.update);
 
 export default router;

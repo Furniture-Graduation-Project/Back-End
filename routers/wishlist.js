@@ -1,17 +1,11 @@
-import { Router } from "express";
-import {
-  createWishlist,
-  deleteWishlist,
-  editWishlist,
-  getAllWishlist,
-  getDetailWishlist,
-} from "../controllers/wishlist.js";
+import { Router } from 'express';
+import WishlistController from '../controllers/wishlist.js';
 const routerWishlist = new Router();
 
-routerWishlist.get("/", getAllWishlist);
-routerWishlist.get("/:id", getDetailWishlist);
-routerWishlist.post("/", createWishlist);
-routerWishlist.put("/:id", editWishlist);
-routerWishlist.delete("/", deleteWishlist);
+routerWishlist.get('/', WishlistController.getAll);
+routerWishlist.get('/:id', WishlistController.getDetail);
+routerWishlist.post('/', WishlistController.create);
+routerWishlist.put('/:id', WishlistController.edit);
+routerWishlist.delete('/', WishlistController.delete);
 
 export default routerWishlist;
