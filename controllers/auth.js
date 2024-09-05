@@ -1,9 +1,9 @@
-import User from "../models/user.js";
-import { StatusCodes } from "http-status-codes";
-import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { signupSchema, signinSchema } from "../validations/auth.js";
-import dotenv from "dotenv";
+import User from '../models/user.js';
+import { StatusCodes } from 'http-status-codes';
+import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { signupSchema, signinSchema } from '../validations/auth.js';
+import dotenv from 'dotenv';
 dotenv.config();
 
 export const signup = async (req, res) => {
@@ -16,7 +16,7 @@ export const signup = async (req, res) => {
     const isExist = await User.findOne({ email: req.body.email });
     if (isExist) {
       return res.status(StatusCodes.BAD_GATEWAY).json({
-        message: "Email đã tồn tại !",
+        message: 'Email đã tồn tại !',
       });
     }
     const hashPass = await bcryptjs.hash(req.body.password, 10);
@@ -37,13 +37,13 @@ export const signin = async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(StatusCodes.BAD_GATEWAY).json({
-        message: "Email không tồn tại !",
+        message: 'Email không tồn tại !',
       });
     }
     const isMatch = await bcryptjs.compare(req.body.password, user.password);
     if (!isMatch) {
       return res.status(StatusCodes.BAD_GATEWAY).json({
-        message: "Sai mật khẩu !",
+        message: 'Sai mật khẩu !',
       });
     }
     // const token = jwt.sign({ _id: req.body._id }, process.env.SECRET_KEY, {
@@ -72,7 +72,7 @@ export const update = async (req, res) => {
     if (!data) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không tồn tại !" });
+        .json({ message: 'Người dùng không tồn tại !' });
     }
     return res.status(StatusCodes.OK).json({ data });
   } catch (error) {

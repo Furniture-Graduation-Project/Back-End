@@ -1,7 +1,9 @@
+import { StatusCodes } from 'http-status-codes';
 import CartModel from '../models/cart.js';
 import { createCartSchema, updateCartSchema } from '../validations/cart.js';
 
 const CartController = {
+
   async getAllCarts(req, res) {
     try {
       const carts = await CartModel.find();

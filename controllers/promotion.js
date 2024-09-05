@@ -1,5 +1,5 @@
-import Promotion from "../models/promotion.js";
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from 'http-status-codes';
+import PromotionModel from '../models/promotion.js';
 
 export const createPromotion = async (req, res) => {
   const {

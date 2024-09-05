@@ -1,12 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import Wishlist from '../models/wishlist.js';
+import WishlistModel from '../models/wishlist.js';
 import { wishlistSchema } from '../validations/wishlist.js';
 
 export const getAllWishlist = async (req, res) => {
   try {
-    const wishlists = await Wishlist.find();
+    const wishlists = await WishlistModel.find();
     return res.status(StatusCodes.OK).json({
-      message: 'Get All Wishlist Done',
+      message: 'Get All WishlistModel Done',
       data: wishlists,
     });
   } catch (error) {
@@ -18,14 +18,14 @@ export const getAllWishlist = async (req, res) => {
 
 export const getDetailWishlist = async (req, res) => {
   try {
-    const wishlist = await Wishlist.findById(req.params.id);
+    const wishlist = await WishlistModel.findById(req.params.id);
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Wishlist not found',
+        message: 'WishlistModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Get Detail Wishlist Done',
+      message: 'Get Detail WishlistModel Done',
       data: wishlist,
     });
   } catch (error) {
@@ -46,9 +46,9 @@ export const createWishlist = async (req, res) => {
         message: errors,
       });
     }
-    const wishlist = await Wishlist.create(req.body);
+    const wishlist = await WishlistModel.create(req.body);
     return res.status(StatusCodes.CREATED).json({
-      message: 'Create Wishlist Done',
+      message: 'Create WishlistModel Done',
       data: wishlist,
     });
   } catch (error) {
@@ -69,16 +69,20 @@ export const editWishlist = async (req, res) => {
         message: errors,
       });
     }
-    const wishlist = await Wishlist.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const wishlist = await WishlistModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      },
+    );
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Wishlist not found',
+        message: 'WishlistModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Update Wishlist Done',
+      message: 'Update WishlistModel Done',
       data: wishlist,
     });
   } catch (error) {
@@ -90,14 +94,14 @@ export const editWishlist = async (req, res) => {
 
 export const deleteWishlist = async (req, res) => {
   try {
-    const wishlist = await Wishlist.findByIdAndDelete(req.params.id);
+    const wishlist = await WishlistModel.findByIdAndDelete(req.params.id);
     if (!wishlist) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Wishlist not found',
+        message: 'WishlistModel not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: 'Delete Wishlist Done',
+      message: 'Delete WishlistModel Done',
       data: wishlist,
     });
   } catch (error) {
