@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const messageValidate = Joi.object({
+export const messageSchema = Joi.object({
   content: Joi.string().required().messages({
     'string.base': 'Nội dung tin nhắn phải là một chuỗi.',
     'string.empty': 'Nội dung tin nhắn không được để trống.',
@@ -46,5 +46,3 @@ const messageValidate = Joi.object({
     'date.base': 'Thời gian gửi tin nhắn phải là một ngày hợp lệ.',
   }),
 });
-
-export default messageValidate;

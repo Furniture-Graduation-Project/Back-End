@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import ProductItemModel from '../models/productItem.js';
-import productItemSchema from '../validations/productItem.js';
+import { productItemSchema } from '../validations/productItem.js';
 
 const ProductItemController = {
   create: async (req, res) => {

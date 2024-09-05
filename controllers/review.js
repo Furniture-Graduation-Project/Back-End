@@ -1,12 +1,12 @@
-import { StatusCodes } from "http-status-codes";
-import Review from "../models/review.js";
-import { crudValidate } from "../validations/review.js";
+import { StatusCodes } from 'http-status-codes';
+import Review from '../models/review.js';
+import { reviewSchema } from '../validations/review.js';
 
 export const getAllReview = async (req, res) => {
   try {
     const reviews = await Review.find();
     return res.status(StatusCodes.OK).json({
-      message: "Get All Review Done",
+      message: 'Get All Review Done',
       data: reviews,
     });
   } catch (error) {
@@ -21,11 +21,11 @@ export const getDetailReview = async (req, res) => {
     const review = await Review.findById(req.params.id);
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
+        message: 'Review not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Get Detail Review Done",
+      message: 'Get Detail Review Done',
       data: review,
     });
   } catch (error) {
@@ -37,7 +37,7 @@ export const getDetailReview = async (req, res) => {
 
 export const createReview = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = reviewSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -49,7 +49,7 @@ export const createReview = async (req, res) => {
 
     const review = await Review.create(req.body);
     return res.status(StatusCodes.CREATED).json({
-      message: "Create Review Done",
+      message: 'Create Review Done',
       data: review,
     });
   } catch (error) {
@@ -61,7 +61,7 @@ export const createReview = async (req, res) => {
 
 export const editReview = async (req, res) => {
   try {
-    const { error } = crudValidate.validate(req.body, {
+    const { error } = reviewSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -75,11 +75,11 @@ export const editReview = async (req, res) => {
     });
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
+        message: 'Review not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Update Review Done",
+      message: 'Update Review Done',
       data: review,
     });
   } catch (error) {
@@ -94,11 +94,11 @@ export const deleteReview = async (req, res) => {
     const review = await Review.findByIdAndDelete(req.params.id);
     if (!review) {
       return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
+        message: 'Review not found',
       });
     }
     return res.status(StatusCodes.OK).json({
-      message: "Delete Review Done",
+      message: 'Delete Review Done',
       data: review,
     });
   } catch (error) {

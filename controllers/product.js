@@ -1,6 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
 import ProductModel from '../models/product.js';
-import { createValidate, updateValidate } from '../validations/product.js';
+import {
+  createProductSchema,
+  updateProductSchema,
+} from '../validations/product.js';
 
 const ProductController = {
   async getAllProductModel(req, res) {
@@ -37,7 +40,7 @@ const ProductController = {
   async createProductModel(req, res) {
     try {
       const productData = { ...req.body };
-      const { error } = createValidate.validate(req.body);
+      const { error } = createProductSchema.validate(req.body);
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -60,7 +63,7 @@ const ProductController = {
     try {
       const productId = req.params.id;
       const productData = req.body;
-      const { error } = updateValidate.validate(req.body);
+      const { error } = updateProductSchema.validate(req.body);
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

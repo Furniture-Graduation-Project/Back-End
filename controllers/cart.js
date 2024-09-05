@@ -1,12 +1,12 @@
-import CartModel from "../models/cart.js";
-import { createValidate, updateValidate } from "../validations/cart.js";
+import CartModel from '../models/cart.js';
+import { createCartSchema, updateCartSchema } from '../validations/cart.js';
 
 const CartController = {
   async getAllCarts(req, res) {
     try {
       const carts = await CartModel.find();
       res.status(StatusCodes.OK).json({
-        message: "Hiển thị thành công",
+        message: 'Hiển thị thành công',
         data: carts,
       });
     } catch (error) {
@@ -21,11 +21,11 @@ const CartController = {
       const cart = await CartModel.findById(req.params.id);
       if (!cart) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Không tìm thấy giỏ hàng",
+          message: 'Không tìm thấy giỏ hàng',
         });
       }
       res.status(StatusCodes.OK).json({
-        message: "Hiển thị thành công",
+        message: 'Hiển thị thành công',
         data: cart,
       });
     } catch (error) {
@@ -37,7 +37,7 @@ const CartController = {
 
   async createCart(req, res) {
     try {
-      const { error } = createValidate.validate(req.body);
+      const { error } = createCartSchema.validate(req.body);
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -50,7 +50,7 @@ const CartController = {
 
       const cart = await CartModel.create(cartData);
       res.status(StatusCodes.CREATED).json({
-        message: "Thêm giỏ hàng thành công",
+        message: 'Thêm giỏ hàng thành công',
         data: cart,
       });
     } catch (error) {
@@ -62,7 +62,7 @@ const CartController = {
 
   async updateCart(req, res) {
     try {
-      const { error } = updateValidate.validate(req.body);
+      const { error } = updateCartSchema.validate(req.body);
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -80,11 +80,11 @@ const CartController = {
       });
       if (!cart) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Không tìm thấy giỏ hàng",
+          message: 'Không tìm thấy giỏ hàng',
         });
       }
       res.status(StatusCodes.OK).json({
-        message: "Cập nhật giỏ hàng thành công",
+        message: 'Cập nhật giỏ hàng thành công',
         data: cart,
       });
     } catch (error) {
@@ -99,11 +99,11 @@ const CartController = {
       const cart = await CartModel.findByIdAndDelete(req.params.id);
       if (!cart) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Không tìm thấy giỏ hàng",
+          message: 'Không tìm thấy giỏ hàng',
         });
       }
       res.status(StatusCodes.OK).json({
-        message: "Xóa giỏ hàng thành công",
+        message: 'Xóa giỏ hàng thành công',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

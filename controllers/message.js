@@ -2,10 +2,10 @@ import { StatusCodes } from 'http-status-codes';
 
 import ConversationModel from '../models/message.js';
 import { io } from '../services/socket.js';
-import messageValidate from '../validations/message.js';
+import { messageSchema } from '../validations/message.js';
 import {
-  createConversationValidate,
-  updateConversationValidate,
+  createConversationSchema,
+  updateConversationSchema,
 } from '../validations/conversation.js';
 
 export const MessageController = {
@@ -127,7 +127,7 @@ export const MessageController = {
   createConversation: async (req, res) => {
     try {
       const { userId, label, category, status } = req.body;
-      const { value, error } = createConversationValidate.validate(
+      const { value, error } = createConversationSchema.validate(
         {
           userId,
           label,
@@ -167,7 +167,7 @@ export const MessageController = {
     try {
       const { id } = req.params;
       const { label, category, status, star } = req.body;
-      const { value, error } = updateConversationValidate.validate(
+      const { value, error } = updateConversationSchema.validate(
         {
           label,
           category,
@@ -206,7 +206,7 @@ export const MessageController = {
     try {
       const { id } = req.params;
       const { sender, content, status } = req.body;
-      const { value, error } = messageValidate.validate(
+      const { value, error } = messageSchema.validate(
         {
           sender,
           content,
