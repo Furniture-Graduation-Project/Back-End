@@ -19,8 +19,14 @@ const CategoryController = {
     }
   },
   async detailCategoryModel(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy danh mục' });
+    }
     try {
-      const category = await CategoryModel.findById(req.params.id);
+      const category = await CategoryModel.findById(id);
       res.status(StatusCodes.OK).json({
         message: 'Hiển thị thành công',
         data: category,
@@ -39,29 +45,29 @@ const CategoryController = {
   },
   async createCategoryModel(req, res) {
     try {
-      // Validate dữ liệu từ request body
-      const categoryData = { ...req.body };
-      await createCategorySchema.validateAsync(categoryData, {
+      const { value, error } = createCategorySchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
-
-      // Tạo category mới trong database
-      const category = await CategoryModel.create(categoryData);
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Lỗi: ' + errors.join(', '),
+        });
+      }
+      const category = await CategoryModel.create(value);
       res.status(StatusCodes.OK).json({
         'http-status-code': 200,
         message: 'Thêm thành công',
         data: category,
       });
     } catch (error) {
-      // Kiểm tra lỗi validate của Joi
       if (error.isJoi) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           message: errors,
         });
       }
-
-      // Xử lý các lỗi khác
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: error.message,
       });
@@ -70,8 +76,15 @@ const CategoryController = {
   async updateCategoryModel(req, res) {
     try {
       const categoryId = req.params.id;
-      const categoryData = req.body;
-      const { error } = updateCategorySchema.validate(req.body);
+      if (!categoryId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy danh mục' });
+      }
+      const { value, error } = updateCategorySchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -81,7 +94,7 @@ const CategoryController = {
       }
       const updateCategory = await CategoryModel.findByIdAndUpdate(
         categoryId,
-        categoryData,
+        value,
         { new: true },
       );
       res.status(StatusCodes.OK).json({
@@ -94,10 +107,10 @@ const CategoryController = {
       });
     }
   },
-
   async deleteCategory(req, res) {
+    const id = req.params.id;
     try {
-      const category = await CategoryModel.findByIdAndDelete(req.params.id);
+      const category = await CategoryModel.findByIdAndDelete(id);
       if (!category) {
         return res.status(getStatusCode('Internal Server Error')).json({
           message: 'Not Found',

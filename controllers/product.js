@@ -20,8 +20,14 @@ const ProductController = {
     }
   },
   async detailProductModel(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy sản phẩm' });
+    }
     try {
-      const product = await ProductModel.findById(req.params.id);
+      const product = await ProductModel.findById(id);
       res.status(StatusCodes.OK).json({
         message: 'Hiển thị thành công',
         data: product,
@@ -39,8 +45,10 @@ const ProductController = {
   },
   async createProductModel(req, res) {
     try {
-      const productData = { ...req.body };
-      const { error } = createProductSchema.validate(req.body);
+      const { value, error } = createProductSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -48,7 +56,7 @@ const ProductController = {
         });
       }
 
-      const product = await ProductModel.create(productData);
+      const product = await ProductModel.create(value);
       res.status(StatusCodes.OK).json({
         message: 'Thêm sản phẩm thành công',
         data: product,
@@ -62,8 +70,15 @@ const ProductController = {
   async updateProductModel(req, res) {
     try {
       const productId = req.params.id;
-      const productData = req.body;
-      const { error } = updateProductSchema.validate(req.body);
+      if (!productId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy sản phẩm' });
+      }
+      const { value, error } = updateProductSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -72,7 +87,7 @@ const ProductController = {
       }
       const updateProduct = await ProductModel.findByIdAndUpdate(
         productId,
-        productData,
+        value,
         { new: true },
       );
       res.status(StatusCodes.OK).json({
@@ -86,11 +101,17 @@ const ProductController = {
     }
   },
   async deleteProduct(req, res) {
+    const productId = req.params.id;
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy sản phẩm' });
+    }
     try {
-      const product = await ProductModel.findByIdAndDelete(req.params.id);
+      const product = await ProductModel.findByIdAndDelete(productId);
       if (!product) {
-        return res.status(getStatusCode('Internal Server Error')).json({
-          message: 'Not Found',
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Không tìm thấy sản phẩm',
         });
       }
       res.status(StatusCodes.OK).json({

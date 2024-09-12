@@ -19,8 +19,14 @@ const EmployeeController = {
   },
 
   getDetail: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy nhân viên' });
+    }
     try {
-      const employee = await Employee.findById(req.params.id);
+      const employee = await Employee.findById(id);
       if (!employee) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Nhân viên không tìm thấy',
@@ -39,8 +45,9 @@ const EmployeeController = {
 
   create: async (req, res) => {
     try {
-      const { error } = employeeSchema.validate(req.body, {
+      const { value, error } = employeeSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -48,11 +55,10 @@ const EmployeeController = {
           message: errors,
         });
       }
-      const { password, ...otherDetails } = req.body;
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       const employee = await Employee.create({
-        ...otherDetails,
+        ...value,
         password: hashedPassword,
       });
       return res.status(StatusCodes.CREATED).json({
@@ -67,9 +73,16 @@ const EmployeeController = {
   },
 
   update: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy nhân viên' });
+    }
     try {
-      const { error } = employeeSchema.validate(req.body, {
+      const { value, error } = employeeSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -77,13 +90,9 @@ const EmployeeController = {
           message: errors,
         });
       }
-      const employee = await Employee.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-        },
-      );
+      const employee = await Employee.findByIdAndUpdate(id, value, {
+        new: true,
+      });
       if (!employee) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Nhân viên không tìm thấy',
@@ -101,8 +110,14 @@ const EmployeeController = {
   },
 
   delete: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy nhân viên' });
+    }
     try {
-      const employee = await Employee.findByIdAndDelete(req.params.id);
+      const employee = await Employee.findByIdAndDelete(id);
       if (!employee) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Nhân viên không tìm thấy',

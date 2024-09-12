@@ -1,27 +1,20 @@
 import { StatusCodes } from 'http-status-codes';
 import PromotionModel from '../models/promotion.js';
+import { promotionSchema } from '../validations/promotion.js';
 
 const PromotionController = {
   create: async (req, res) => {
-    const {
-      description,
-      type,
-      value,
-      startDate,
-      endDate,
-      productID,
-      categoryID,
-    } = req.body;
-
+    const { value, error } = promotionSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (error) {
+      const message = error.details.map((e) => e.message);
+      return res.status(StatusCodes.BAD_REQUEST).json({ message });
+    }
     try {
       const promotion = new PromotionModel({
-        description,
-        type,
         value,
-        startDate,
-        endDate,
-        productID,
-        categoryID,
       });
 
       await promotion.save();
@@ -51,7 +44,11 @@ const PromotionController = {
 
   getById: async (req, res) => {
     const { id } = req.params;
-
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy promotion' });
+    }
     try {
       const promotion = await PromotionModel.findById(id).populate(
         'productID categoryID',
@@ -71,30 +68,24 @@ const PromotionController = {
 
   update: async (req, res) => {
     const { id } = req.params;
-    const {
-      description,
-      type,
-      value,
-      startDate,
-      endDate,
-      productID,
-      categoryID,
-    } = req.body;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy promotion' });
+    }
+    const { value, error } = promotionSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (error) {
+      const message = error.details.map((e) => e.message);
+      return res.status(StatusCodes.BAD_REQUEST).json({ message });
+    }
 
     try {
-      const promotion = await PromotionModel.findByIdAndUpdate(
-        id,
-        {
-          description,
-          type,
-          value,
-          startDate,
-          endDate,
-          productID,
-          categoryID,
-        },
-        { new: true },
-      );
+      const promotion = await PromotionModel.findByIdAndUpdate(id, value, {
+        new: true,
+      });
 
       if (!promotion) {
         return res
@@ -114,7 +105,11 @@ const PromotionController = {
 
   delete: async (req, res) => {
     const { id } = req.params;
-
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy promotion' });
+    }
     try {
       const promotion = await PromotionModel.findByIdAndDelete(id);
       if (!promotion) {

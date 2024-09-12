@@ -18,6 +18,12 @@ const ReviewController = {
   },
 
   getById: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
     try {
       const review = await ReviewModel.findById(req.params.id);
       if (!review) {
@@ -38,8 +44,9 @@ const ReviewController = {
 
   create: async (req, res) => {
     try {
-      const { error } = reviewSchema.validate(req.body, {
+      const { value, error } = reviewSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -48,7 +55,7 @@ const ReviewController = {
         });
       }
 
-      const review = await ReviewModel.create(req.body);
+      const review = await ReviewModel.create(value);
       return res.status(StatusCodes.CREATED).json({
         message: 'Tạo đánh giá thành công',
         data: review,
@@ -61,9 +68,16 @@ const ReviewController = {
   },
 
   update: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
     try {
-      const { error } = reviewSchema.validate(req.body, {
+      const { value, error } = reviewSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -71,13 +85,9 @@ const ReviewController = {
           message: 'Lỗi: ' + errors.join(', '),
         });
       }
-      const review = await ReviewModel.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-        },
-      );
+      const review = await ReviewModel.findByIdAndUpdate(id, value, {
+        new: true,
+      });
       if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Không tìm thấy đánh giá',
@@ -95,8 +105,14 @@ const ReviewController = {
   },
 
   delete: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
     try {
-      const review = await ReviewModel.findByIdAndDelete(req.params.id);
+      const review = await ReviewModel.findByIdAndDelete(id);
       if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Không tìm thấy đánh giá',

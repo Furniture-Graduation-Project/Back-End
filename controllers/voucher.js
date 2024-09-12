@@ -1,35 +1,20 @@
 import VoucherModel from '../models/voucher.js';
 import { StatusCodes } from 'http-status-codes';
+import { voucherSchema } from '../validations/voucher.js';
 
 const VoucherController = {
   create: async (req, res) => {
-    const {
-      code,
-      description,
-      type,
-      value,
-      startDate,
-      endDate,
-      usageLimit,
-      status,
-      products,
-      categories,
-      orders,
-    } = req.body;
-
+    const { value, error } = voucherSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (error) {
+      const message = error.details.map((e) => e.message);
+      return res.status(StatusCodes.BAD_REQUEST).json({ message });
+    }
     try {
       const voucher = new VoucherModel({
-        code,
-        description,
-        type,
         value,
-        startDate,
-        endDate,
-        usageLimit,
-        status,
-        products,
-        categories,
-        orders, // Thêm orders vào khi tạo voucher
       });
 
       await voucher.save();
@@ -52,7 +37,7 @@ const VoucherController = {
       const vouchers = await VoucherModel.find()
         .skip(skip)
         .limit(limit)
-        .populate('orders'); // Populate orders
+        .populate('orders');
       const total = await VoucherModel.countDocuments();
       res.status(StatusCodes.OK).json({
         vouchers,
@@ -70,9 +55,13 @@ const VoucherController = {
 
   getById: async (req, res) => {
     const { id } = req.params;
-
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy voucher' });
+    }
     try {
-      const voucher = await VoucherModel.findById(id).populate('orders'); // Populate orders
+      const voucher = await VoucherModel.findById(id).populate('orders');
       if (!voucher) {
         return res
           .status(StatusCodes.NOT_FOUND)
@@ -88,38 +77,23 @@ const VoucherController = {
 
   update: async (req, res) => {
     const { id } = req.params;
-    const {
-      code,
-      description,
-      type,
-      value,
-      startDate,
-      endDate,
-      usageLimit,
-      status,
-      products,
-      categories,
-      orders,
-    } = req.body;
-
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy voucher' });
+    }
+    const { value, error } = voucherSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+    if (error) {
+      const message = error.details.map((e) => e.message);
+      return res.status(StatusCodes.BAD_REQUEST).json({ message });
+    }
     try {
-      const voucher = await VoucherModel.findByIdAndUpdate(
-        id,
-        {
-          code,
-          description,
-          type,
-          value,
-          startDate,
-          endDate,
-          usageLimit,
-          status,
-          products,
-          categories,
-          orders, // Cập nhật orders
-        },
-        { new: true },
-      );
+      const voucher = await VoucherModel.findByIdAndUpdate(id, value, {
+        new: true,
+      });
 
       if (!voucher) {
         return res
@@ -139,7 +113,11 @@ const VoucherController = {
 
   delete: async (req, res) => {
     const { id } = req.params;
-
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy voucher' });
+    }
     try {
       const voucher = await VoucherModel.findByIdAndDelete(id);
       if (!voucher) {
