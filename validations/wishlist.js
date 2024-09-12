@@ -5,8 +5,7 @@ export const wishlistSchema = Joi.object({
     'any.required': 'Mã khách hàng là bắt buộc',
     'string.empty': 'Mã khách hàng không được để trống',
   }),
-  productID: Joi.string().required().messages({
-    'any.required': 'Mã sản phẩm là bắt buộc',
-    'string.empty': 'Mã sản phẩm không được để trống',
+  products: Joi.array().messages({
+    'array.base': 'Sản phẩm phải là mảng',
   }),
 });

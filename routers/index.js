@@ -8,7 +8,7 @@ import routerComment from './comment.js';
 import routerCart from './cart.js';
 import routerPromotion from './promotion.js';
 import routerVoucher from './voucher.js';
-import authRoutes from './passport.js';
+import authRoutes from './user.js';
 import routeMessage from './message.js';
 import productItemRouter from './productItem.js';
 

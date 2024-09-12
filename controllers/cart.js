@@ -3,7 +3,6 @@ import CartModel from '../models/cart.js';
 import { createCartSchema, updateCartSchema } from '../validations/cart.js';
 
 const CartController = {
-
   async getAll(req, res) {
     try {
       const carts = await CartModel.find();
@@ -19,8 +18,14 @@ const CartController = {
   },
 
   async detail(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy giỏ hàng' });
+    }
     try {
-      const cart = await CartModel.findById(req.params.id);
+      const cart = await CartModel.findById(id);
       if (!cart) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Không tìm thấy giỏ hàng',
@@ -39,18 +44,19 @@ const CartController = {
 
   async create(req, res) {
     try {
-      const { error } = createCartSchema.validate(req.body);
+      const { value, error } = createCartSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
+      value.price = value.quantity * value.price;
 
-      const cartData = req.body;
-      cartData.Price = cartData.Quantity * cartData.Price;
-
-      const cart = await CartModel.create(cartData);
+      const cart = await CartModel.create(value);
       res.status(StatusCodes.CREATED).json({
         message: 'Thêm giỏ hàng thành công',
         data: cart,
@@ -63,21 +69,28 @@ const CartController = {
   },
 
   async update(req, res) {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy giỏ hàng' });
+    }
     try {
-      const { error } = updateCartSchema.validate(req.body);
+      const { value, error } = updateCartSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
-
-      const cartData = req.body;
-      if (cartData.Quantity && cartData.Price) {
-        cartData.Price = cartData.Quantity * cartData.Price;
+      if (value.quantity && value.price) {
+        value.price = value.quantity * value.price;
       }
 
-      const cart = await CartModel.findByIdAndUpdate(req.params.id, cartData, {
+      const cart = await CartModel.findByIdAndUpdate(id, value, {
         new: true,
       });
       if (!cart) {
@@ -97,8 +110,14 @@ const CartController = {
   },
 
   async delete(req, res) {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Không tìm thấy giỏ hàng',
+      });
+    }
     try {
-      const cart = await CartModel.findByIdAndDelete(req.params.id);
+      const cart = await CartModel.findByIdAndDelete(id);
       if (!cart) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Không tìm thấy giỏ hàng',

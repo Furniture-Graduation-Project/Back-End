@@ -15,24 +15,8 @@ const LocationController = {
       userId,
     } = req.body;
 
-    const { error } = locationSchema.validate(req.body);
-
-    if (error) {
-      const message = error.details.map((e) => e.message);
-      return res.status(StatusCodes.BAD_REQUEST).json({ message });
-    }
-
-    try {
-      let location = await Location.findOne({ userId });
-
-      if (!location) {
-        location = new Location({
-          userId,
-          locations: [],
-        });
-      }
-
-      location.locations.push({
+    const { value, error } = locationSchema.validate(
+      {
         street,
         city,
         state,
@@ -40,6 +24,34 @@ const LocationController = {
         country,
         recipientName,
         phoneNumber,
+        userId,
+      },
+      { abortEarly: false, stripUnknown: true },
+    );
+
+    if (error) {
+      const message = error.details.map((e) => e.message);
+      return res.status(StatusCodes.BAD_REQUEST).json({ message });
+    }
+
+    try {
+      let location = await Location.findOne(value.userId);
+
+      if (!location) {
+        location = new Location({
+          userId: value.userId,
+          locations: [],
+        });
+      }
+
+      location.locations.push({
+        street: value.street,
+        city: value.city,
+        state: value.state,
+        postalCode: value.postalCode,
+        country: value.country,
+        recipientName: value.recipientName,
+        phoneNumber: value.phoneNumber,
       });
 
       await location.save();
@@ -53,9 +65,10 @@ const LocationController = {
   },
 
   get: async (req, res) => {
+    const { userId } = req.params;
     try {
       const locations = await Location.find({
-        userId: req.params.userId,
+        userId,
       }).populate({
         path: 'userId',
         select: 'email name',
@@ -89,15 +102,28 @@ const LocationController = {
     } = req.body;
 
     try {
-      const { error } = locationSchema.validate(req.body);
+      const { value, error } = locationSchema.validate(
+        {
+          userId,
+          locationId,
+          street,
+          city,
+          state,
+          postalCode,
+          country,
+          recipientName,
+          phoneNumber,
+        },
+        { abortEarly: false, stripUnknown: true },
+      );
       if (error) {
         const message = error.details.map((e) => e.message);
         return res.status(StatusCodes.BAD_REQUEST).json({ message });
       }
 
       let location = await Location.findOne({
-        userId,
-        'locations._id': locationId,
+        userId: value.userId,
+        'locations._id': value.locationId,
       });
 
       if (!location) {
@@ -106,16 +132,16 @@ const LocationController = {
           .json({ message: 'Địa chỉ không tồn tại !' });
       }
 
-      const address = location.locations.id(locationId);
+      const address = location.locations.id(value.locationId);
 
       if (address) {
-        address.street = street;
-        address.city = city;
-        address.state = state;
-        address.postalCode = postalCode;
-        address.country = country;
-        address.recipientName = recipientName;
-        address.phoneNumber = phoneNumber;
+        address.street = value.street;
+        address.city = value.city;
+        address.state = value.state;
+        address.postalCode = value.postalCode;
+        address.country = value.country;
+        address.recipientName = value.recipientName;
+        address.phoneNumber = value.phoneNumber;
 
         await location.save();
 
@@ -134,6 +160,12 @@ const LocationController = {
 
   delete: async (req, res) => {
     const { userId, locationId } = req.body;
+
+    if (!userId || !locationId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy địa địa chỉ' });
+    }
 
     try {
       let location = await Location.findOne({

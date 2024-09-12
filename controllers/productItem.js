@@ -6,9 +6,8 @@ const ProductItemController = {
   create: async (req, res) => {
     try {
       const { productId, variants, stock, price, image } = req.body;
-      console.log(req.body);
 
-      const { error } = productItemSchema.validate(
+      const { value, error } = productItemSchema.validate(
         {
           productId,
           variants,
@@ -16,8 +15,9 @@ const ProductItemController = {
           price,
           image,
         },
-        { abortEarly: false },
+        { abortEarly: false, stripUnknown: true },
       );
+
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -26,11 +26,7 @@ const ProductItemController = {
       }
 
       const newProductItem = new ProductItemModel({
-        productId,
-        variants,
-        stock,
-        price,
-        image,
+        value,
       });
       await newProductItem.save();
 
@@ -56,12 +52,17 @@ const ProductItemController = {
   getById: async (req, res) => {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy đánh giá' });
+      }
       const productItem = await ProductItemModel.findById(id);
 
       if (!productItem) {
         return res
           .status(StatusCodes.NOT_FOUND)
-          .json({ message: 'Không tìm thấy sản phẩm' });
+          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 
       return res.status(StatusCodes.OK).json(productItem);
@@ -74,6 +75,11 @@ const ProductItemController = {
   getByProductId: async (req, res) => {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
+      }
       const productItem = await ProductItemModel.find({
         productId: id,
       });
@@ -98,7 +104,10 @@ const ProductItemController = {
   update: async (req, res) => {
     try {
       const { id } = req.params;
-      const { error } = productItemSchema.validate(req.body);
+      const { value, error } = productItemSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -108,7 +117,7 @@ const ProductItemController = {
 
       const updatedProductItem = await ProductItemModel.findByIdAndUpdate(
         id,
-        req.body,
+        value,
         {
           new: true,
           runValidators: true,
@@ -118,7 +127,7 @@ const ProductItemController = {
       if (!updatedProductItem) {
         return res
           .status(StatusCodes.NOT_FOUND)
-          .json({ message: 'Không tìm thấy sản phẩm' });
+          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 
       return res.status(StatusCodes.OK).json(updatedProductItem);
@@ -133,15 +142,23 @@ const ProductItemController = {
     try {
       const { id } = req.params;
 
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
+      }
+
       const deletedProductItem = await ProductItemModel.findByIdAndDelete(id);
 
       if (!deletedProductItem) {
         return res
           .status(StatusCodes.NOT_FOUND)
-          .json({ message: 'Không tìm thấy sản phẩm' });
+          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 
-      return res.status(StatusCodes.OK).json({ message: 'Sản phẩm đã bị xóa' });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: 'Sản phẩm biến thể đã bị xóa' });
     } catch (err) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)

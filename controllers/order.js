@@ -22,6 +22,12 @@ const OrderController = {
   },
   getByIdOrder: async (req, res) => {
     const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đơn hàng' });
+    }
     try {
       console.log(id);
       const order = await OrderModel.findById(id).populate({
@@ -96,7 +102,7 @@ const OrderController = {
           items,
           payment,
         },
-        { abortEarly: false },
+        { abortEarly: false, stripUnknown: true },
       );
       if (error) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -116,6 +122,11 @@ const OrderController = {
   },
   update: async (req, res) => {
     const { id } = req.params;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đơn hàng' });
+    }
     const {
       userId,
       orderName,
@@ -144,6 +155,7 @@ const OrderController = {
       };
       const { error, value } = updateOrderSchema.validate(updateData, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -171,6 +183,11 @@ const OrderController = {
   },
   delete: async (req, res) => {
     const { id } = req.params;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Không tìm thấy đơn hàng',
+      });
+    }
     try {
       const order = await OrderModel.findById(id);
       if (!order) {

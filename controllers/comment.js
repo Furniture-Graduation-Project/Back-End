@@ -18,8 +18,14 @@ const CommentController = {
   },
 
   getDetail: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy bình luận' });
+    }
     try {
-      const comment = await Comment.findById(req.params.id);
+      const comment = await Comment.findById(id);
       if (!comment) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Bình luận không tìm thấy',
@@ -38,8 +44,9 @@ const CommentController = {
 
   create: async (req, res) => {
     try {
-      const { error } = commentSchema.validate(req.body, {
+      const { value, error } = commentSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -47,7 +54,7 @@ const CommentController = {
           message: 'Lỗi: ' + errors.join(', '),
         });
       }
-      const comment = await Comment.create(req.body);
+      const comment = await Comment.create(value);
       return res.status(StatusCodes.CREATED).json({
         message: 'Tạo bình luận thành công',
         data: comment,
@@ -60,9 +67,17 @@ const CommentController = {
   },
 
   edit: async (req, res) => {
+    const id = req.params.id;
+
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy bình luận' });
+    }
     try {
-      const { error } = commentSchema.validate(req.body, {
+      const { value, error } = commentSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -70,7 +85,7 @@ const CommentController = {
           message: 'Lỗi: ' + errors.join(', '),
         });
       }
-      const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, {
+      const comment = await Comment.findByIdAndUpdate(id, value, {
         new: true,
       });
       if (!comment) {
@@ -90,8 +105,15 @@ const CommentController = {
   },
 
   delete: async (req, res) => {
+    const id = req.params.id;
+
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy bình luận' });
+    }
     try {
-      const comment = await Comment.findByIdAndDelete(req.params.id);
+      const comment = await Comment.findByIdAndDelete(id);
       if (!comment) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Bình luận không tìm thấy',

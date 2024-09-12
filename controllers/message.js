@@ -31,6 +31,12 @@ export const MessageController = {
     try {
       const { id } = req.params;
 
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
+
       const conversation = await ConversationModel.findById(id).populate({
         path: 'userId',
       });
@@ -51,6 +57,13 @@ export const MessageController = {
   getByUser: async (req, res) => {
     try {
       const { id } = req.params;
+
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
+
       let conversation = await ConversationModel.findOne({
         userId: id,
       }).populate({
@@ -72,6 +85,12 @@ export const MessageController = {
   getByCategory: async (req, res) => {
     try {
       const { category } = req.params;
+
+      if (!category) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
       const messages = await ConversationModel.find({ category }).populate({
         path: 'userId',
       });
@@ -87,6 +106,12 @@ export const MessageController = {
   getByStatus: async (req, res) => {
     try {
       const { status } = req.params;
+
+      if (!status) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
       const messages = await ConversationModel.find({ status }).populate({
         path: 'userId',
       });
@@ -101,6 +126,12 @@ export const MessageController = {
 
   getByStar: async (req, res) => {
     try {
+      const { star } = req.params;
+      if (!star) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
       const messages = await ConversationModel.find({ star: true });
       res.status(StatusCodes.OK).json(messages);
     } catch (err) {
@@ -113,6 +144,12 @@ export const MessageController = {
   getByLabel: async (req, res) => {
     try {
       const { label } = req.params;
+
+      if (!label) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
       const messages = await ConversationModel.find({ label }).populate({
         path: 'userId',
       });
@@ -134,7 +171,7 @@ export const MessageController = {
           category,
           status,
         },
-        { abortEarly: false },
+        { abortEarly: false, stripUnknown: true },
       );
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
@@ -174,7 +211,7 @@ export const MessageController = {
           status,
           star,
         },
-        { abortEarly: false },
+        { abortEarly: false, stripUnknown: true },
       );
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
@@ -182,9 +219,9 @@ export const MessageController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: errorMessages });
       }
-      const updatedConversation = await ConversationModel.findOneAndUpdate(
-        { _id: id },
-        { $set: value },
+      const updatedConversation = await ConversationModel.findByIdAndUpdate(
+        id,
+        value,
         { new: true, runValidators: true },
       );
 
@@ -212,7 +249,7 @@ export const MessageController = {
           content,
           status,
         },
-        { abortEarly: false },
+        { abortEarly: false, stripUnknown: true },
       );
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
@@ -248,6 +285,12 @@ export const MessageController = {
   delete: async (req, res) => {
     try {
       const { id } = req.params;
+
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Không tìm thấy cuộc trò chuyên' });
+      }
       const conversation = await ConversationModel.findByIdAndDelete(id);
       if (!conversation) {
         return res

@@ -7,7 +7,7 @@ const WishlistController = {
     try {
       const wishlists = await WishlistModel.find();
       return res.status(StatusCodes.OK).json({
-        message: 'Get All Wishlist Done',
+        message: 'Lấy danh sách yêu thích thành công',
         data: wishlists,
       });
     } catch (error) {
@@ -18,15 +18,21 @@ const WishlistController = {
   },
 
   getDetail: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy danh sách yêu thích' });
+    }
     try {
-      const wishlist = await WishlistModel.findById(req.params.id);
+      const wishlist = await WishlistModel.findById(id);
       if (!wishlist) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Wishlist not found',
+          message: 'Không tìm thấy danh sách yêu thích',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Get Detail Wishlist Done',
+        message: 'Lấy chi tiết danh sách yêu thích thành công',
         data: wishlist,
       });
     } catch (error) {
@@ -38,8 +44,9 @@ const WishlistController = {
 
   create: async (req, res) => {
     try {
-      const { error } = wishlistSchema.validate(req.body, {
+      const { value, error } = wishlistSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -47,9 +54,9 @@ const WishlistController = {
           message: errors,
         });
       }
-      const wishlist = await WishlistModel.create(req.body);
+      const wishlist = await WishlistModel.create(value);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Create Wishlist Done',
+        message: 'Tạo danh sách yêu thích thành công',
         data: wishlist,
       });
     } catch (error) {
@@ -60,9 +67,16 @@ const WishlistController = {
   },
 
   edit: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Không tìm thấy danh sách yêu thích',
+      });
+    }
     try {
       const { error } = wishlistSchema.validate(req.body, {
         abortEarly: false,
+        stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
@@ -70,18 +84,16 @@ const WishlistController = {
           message: errors,
         });
       }
-      const wishlist = await WishlistModel.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true },
-      );
+      const wishlist = await WishlistModel.findByIdAndUpdate(id, value, {
+        new: true,
+      });
       if (!wishlist) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Wishlist not found',
+          message: 'Không tìm thấy danh sách yêu thích',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Update Wishlist Done',
+        message: 'Cập nhật danh sách yêu thích thành công',
         data: wishlist,
       });
     } catch (error) {
@@ -92,15 +104,21 @@ const WishlistController = {
   },
 
   delete: async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Không tìm thấy danh sách yêu thích',
+      });
+    }
     try {
       const wishlist = await WishlistModel.findByIdAndDelete(req.params.id);
       if (!wishlist) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Wishlist not found',
+          message: 'Không tìm thấy danh sách yêu thích',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Delete Wishlist Done',
+        message: 'Xóa danh sách yêu thích thành công',
         data: wishlist,
       });
     } catch (error) {
