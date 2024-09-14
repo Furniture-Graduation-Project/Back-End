@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+
 import routerEmployee from './employee.js';
 import routerReview from './review.js';
 import productRouter from './product.js';
@@ -12,10 +16,12 @@ import authRoutes from './user.js';
 import routeMessage from './message.js';
 import productItemRouter from './productItem.js';
 
+const swaggerDocument = JSON.parse(
+  fs.readFileSync(path.resolve('swagger.json'), 'utf8'),
+);
+
 export function Route(app) {
-  app.use('/api', () => {
-    console.log('Server running');
-  });
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   app.use('/product', productRouter);
   app.use('/product-item', productItemRouter);
   app.use('/category', CategoryRoute);
