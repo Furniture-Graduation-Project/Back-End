@@ -3,6 +3,7 @@ import ReviewModel from '../models/review.js';
 import { reviewSchema } from '../validations/review.js';
 
 const ReviewController = {
+  // Lấy tất cả đánh giá
   getAll: async (req, res) => {
     try {
       const reviews = await ReviewModel.find();
@@ -11,21 +12,22 @@ const ReviewController = {
         data: reviews,
       });
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Lỗi: ' + error.message,
       });
     }
   },
 
+  // Lấy đánh giá theo ID
   getById: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: 'Không tìm thấy đánh giá' });
     }
     try {
-      const review = await ReviewModel.findById(req.params.id);
+      const review = await ReviewModel.findById(id);
       if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
           message: 'Không tìm thấy đánh giá',
@@ -36,12 +38,13 @@ const ReviewController = {
         data: review,
       });
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Lỗi: ' + error.message,
       });
     }
   },
 
+  // Tạo mới đánh giá
   create: async (req, res) => {
     try {
       const { value, error } = reviewSchema.validate(req.body, {
@@ -55,6 +58,7 @@ const ReviewController = {
         });
       }
 
+      // Tạo đánh giá mới
       const review = await ReviewModel.create(value);
       return res.status(StatusCodes.CREATED).json({
         message: 'Tạo đánh giá thành công',
@@ -67,8 +71,9 @@ const ReviewController = {
     }
   },
 
+  // Cập nhật đánh giá theo ID
   update: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -104,8 +109,9 @@ const ReviewController = {
     }
   },
 
+  // Xóa đánh giá theo ID
   delete: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -121,6 +127,32 @@ const ReviewController = {
       return res.status(StatusCodes.OK).json({
         message: 'Xóa đánh giá thành công',
         data: review,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lỗi: ' + error.message,
+      });
+    }
+  },
+
+  // Lấy tất cả đánh giá theo sản phẩm
+  getReviewsByProductId: async (req, res) => {
+    const { productId } = req.params;
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy sản phẩm' });
+    }
+    try {
+      const reviews = await ReviewModel.find({ productId });
+      if (reviews.length === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Không có đánh giá cho sản phẩm này.',
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: 'Lấy đánh giá cho sản phẩm thành công',
+        data: reviews,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

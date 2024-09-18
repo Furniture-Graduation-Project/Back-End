@@ -1,130 +1,94 @@
-import CategoryModel from '../models/category.js';
-import {
-  createCategorySchema,
-  updateCategorySchema,
-} from '../validations/category.js';
-import { StatusCodes } from 'http-status-codes';
-const CategoryController = {
-  async getAllCategoryModel(req, res) {
-    try {
-      const category = await CategoryModel.find();
-      res.status(StatusCodes.OK).json({
-        message: 'Hiển thị thành công',
-        data: category,
-      });
-    } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: error.message,
-      });
-    }
-  },
-  async detailCategoryModel(req, res) {
-    const { id } = req.params;
-    if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy danh mục' });
-    }
-    try {
-      const category = await CategoryModel.findById(id);
-      res.status(StatusCodes.OK).json({
-        message: 'Hiển thị thành công',
-        data: category,
-      });
-      if (!category) {
-        return res.status(getStatusCode('Internal Server Error')).json({
-          message: 'Not Found',
-        });
-      }
-    } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        'http-status-code': 400,
-        message: error.message,
-      });
-    }
-  },
-  async createCategoryModel(req, res) {
-    try {
-      const { value, error } = createCategorySchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
-      if (error) {
-        const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Lỗi: ' + errors.join(', '),
-        });
-      }
-      const category = await CategoryModel.create(value);
-      res.status(StatusCodes.OK).json({
-        'http-status-code': 200,
-        message: 'Thêm thành công',
-        data: category,
-      });
-    } catch (error) {
-      if (error.isJoi) {
-        const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          message: errors,
-        });
-      }
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: error.message,
-      });
-    }
-  },
-  async updateCategoryModel(req, res) {
-    try {
-      const categoryId = req.params.id;
-      if (!categoryId) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'Không tìm thấy danh mục' });
-      }
-      const { value, error } = updateCategorySchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
-      if (error) {
-        const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          'http-status-code': 400,
-          message: errors,
-        });
-      }
-      const updateCategory = await CategoryModel.findByIdAndUpdate(
-        categoryId,
-        value,
-        { new: true },
-      );
-      res.status(StatusCodes.OK).json({
-        message: 'Cập nhật thành công',
-        data: updateCategory,
-      });
-    } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: error.message,
-      });
-    }
-  },
-  async deleteCategory(req, res) {
-    const id = req.params.id;
-    try {
-      const category = await CategoryModel.findByIdAndDelete(id);
-      if (!category) {
-        return res.status(getStatusCode('Internal Server Error')).json({
-          message: 'Not Found',
-        });
-      }
-      res.status(StatusCodes.OK).json({
-        message: 'Xóa thành công',
-      });
-    } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: error.message,
-      });
-    }
-  },
+import { StatusCodes } from "http-status-codes";
+import Category from "../models/category";
+import Product from "../models/product";
+
+export const create = async (req, res) => {
+  try {
+    // Tìm số lượng danh mục đã tồn tại
+    const categoryCount = await Category.countDocuments();
+
+    // Nếu chưa có danh mục nào, tạo danh mục đầu tiên với role = 1
+    const role = categoryCount === 0 ? 1 : 0;
+
+    const category = await Category.create({
+      categoryId: new mongoose.Types.ObjectId(),
+      categoryName: req.body.categoryName,
+      role: role,
+      description: req.body.description,
+    });
+
+    return res.status(StatusCodes.CREATED).json(category);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
 };
 
-export default CategoryController;
+export const getAll = async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    if (categories.length === 0) {
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Không có danh mục nào!" });
+    }
+    return res.status(StatusCodes.OK).json(categories);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
+};
+
+export const getCategoryById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const products = await Product.find({ categoryId: id });
+    const category = await Category.findById(id);
+    if (!category) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Không tìm thấy danh mục!" });
+    }
+    return res.status(StatusCodes.OK).json({
+      category,
+      products,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
+};
+
+export const deleteCategoryById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Tìm danh mục với role = 1 để cập nhật cho các sản phẩm
+    const defaultCategory = await Category.findOne({ role: 1 });
+
+    if (!defaultCategory) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Không tìm thấy danh mục mặc định!" });
+    }
+
+    // Cập nhật danh mục sản phẩm trước khi xóa danh mục
+    await Product.updateMany(
+      { categoryId: id },
+      { categoryId: defaultCategory.categoryId }
+    );
+
+    const category = await Category.findByIdAndDelete(id);
+    return res.status(StatusCodes.OK).json(category);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
+};
+
+export const updateCategoryById = async (req, res) => {
+  try {
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    return res.status(StatusCodes.OK).json(category);
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+  }
+};
