@@ -1,19 +1,12 @@
-import express from "express";
-import {
-  createPromotion,
-  getPromotions,
-  updatePromotion,
-  deletePromotion,
-  getPromotionById,
-} from "../controllers/promotion.js";
+import express from 'express';
+import PromotionController from '../controllers/promotion.js';
 
 const routerPromotion = express.Router();
 
-routerPromotion.post("/", createPromotion);
-routerPromotion.get("/", getPromotions);
-
-routerPromotion.get("/:id", getPromotionById);
-routerPromotion.put("/:id", updatePromotion);
-routerPromotion.delete("/:id", deletePromotion);
+routerPromotion.get('/', PromotionController.getAll);
+routerPromotion.get('/:id', PromotionController.getById);
+routerPromotion.post('/', PromotionController.create);
+routerPromotion.put('/:id', PromotionController.update);
+routerPromotion.delete('/:id', PromotionController.delete);
 
 export default routerPromotion;

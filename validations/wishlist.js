@@ -1,14 +1,11 @@
-import Joi from "joi";
+import Joi from 'joi';
 
-const crudValidate = Joi.object({
+export const wishlistSchema = Joi.object({
   customerID: Joi.string().required().messages({
-    "any.required": "Customer ID không được để trống",
-    "string.empty": "Customer ID không được để trống",
+    'any.required': 'Mã khách hàng là bắt buộc',
+    'string.empty': 'Mã khách hàng không được để trống',
   }),
-  productID: Joi.string().required().messages({
-    "any.required": "Product ID không được để trống",
-    "string.empty": "Product ID không được để trống",
+  products: Joi.array().messages({
+    'array.base': 'Sản phẩm phải là mảng',
   }),
 });
-
-export { crudValidate };

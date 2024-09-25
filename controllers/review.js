@@ -1,109 +1,133 @@
-import { StatusCodes } from "http-status-codes";
-import Review from "../models/review.js";
-import { crudValidate } from "../validations/review.js"; // Giả sử bạn có tệp validation cho review
+import { StatusCodes } from 'http-status-codes';
+import ReviewModel from '../models/review.js';
+import { reviewSchema } from '../validations/review.js';
 
-export const getAllReview = async (req, res) => {
-  try {
-    const reviews = await Review.find();
-    return res.status(StatusCodes.OK).json({
-      message: "Get All Review Done",
-      data: reviews,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
-    });
-  }
-};
-
-export const getDetailReview = async (req, res) => {
-  try {
-    const review = await Review.findById(req.params.id);
-    if (!review) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
+const ReviewController = {
+  getAll: async (req, res) => {
+    try {
+      const reviews = await ReviewModel.find();
+      return res.status(StatusCodes.OK).json({
+        message: 'Lấy tất cả đánh giá thành công',
+        data: reviews,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Lỗi: ' + error.message,
       });
     }
-    return res.status(StatusCodes.OK).json({
-      message: "Get Detail Review Done",
-      data: review,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
-    });
-  }
-};
+  },
 
-export const createReview = async (req, res) => {
-  try {
-    const { error } = crudValidate.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      const errors = error.details.map((err) => err.message);
-      return res.status(400).json({
-        message: errors,
+  getById: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
+    try {
+      const review = await ReviewModel.findById(req.params.id);
+      if (!review) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Không tìm thấy đánh giá',
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: 'Lấy chi tiết đánh giá thành công',
+        data: review,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Lỗi: ' + error.message,
       });
     }
+  },
 
-    const review = await Review.create(req.body);
-    return res.status(StatusCodes.CREATED).json({
-      message: "Create Review Done",
-      data: review,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-    });
-  }
-};
+  create: async (req, res) => {
+    try {
+      const { value, error } = reviewSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Lỗi: ' + errors.join(', '),
+        });
+      }
 
-export const editReview = async (req, res) => {
-  try {
-    const { error } = crudValidate.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      const errors = error.details.map((err) => err.message);
-      return res.status(400).json({
-        message: errors,
+      const review = await ReviewModel.create(value);
+      return res.status(StatusCodes.CREATED).json({
+        message: 'Tạo đánh giá thành công',
+        data: review,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lỗi: ' + error.message,
       });
     }
-    const review = await Review.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!review) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
+  },
+
+  update: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
+    try {
+      const { value, error } = reviewSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Lỗi: ' + errors.join(', '),
+        });
+      }
+      const review = await ReviewModel.findByIdAndUpdate(id, value, {
+        new: true,
+      });
+      if (!review) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Không tìm thấy đánh giá',
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: 'Cập nhật đánh giá thành công',
+        data: review,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lỗi: ' + error.message,
       });
     }
-    return res.status(StatusCodes.OK).json({
-      message: "Update Review Done",
-      data: review,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-    });
-  }
+  },
+
+  delete: async (req, res) => {
+    const id = req.params.id;
+    if (!id) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'Không tìm thấy đánh giá' });
+    }
+    try {
+      const review = await ReviewModel.findByIdAndDelete(id);
+      if (!review) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: 'Không tìm thấy đánh giá',
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: 'Xóa đánh giá thành công',
+        data: review,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lỗi: ' + error.message,
+      });
+    }
+  },
 };
 
-export const deleteReview = async (req, res) => {
-  try {
-    const review = await Review.findByIdAndDelete(req.params.id);
-    if (!review) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Review not found",
-      });
-    }
-    return res.status(StatusCodes.OK).json({
-      message: "Delete Review Done",
-      data: review,
-    });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-    });
-  }
-};
+export default ReviewController;

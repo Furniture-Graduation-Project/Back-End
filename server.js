@@ -4,6 +4,7 @@ import express from "express";
 import "./controllers/passport.js";
 import { app, server } from "./services/socket.js";
 
+
 import { connectDB } from "./utils/connect.js";
 import { Route } from "./routers/index.js";
 
@@ -11,7 +12,7 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

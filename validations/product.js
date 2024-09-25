@@ -1,68 +1,65 @@
 import Joi from 'joi';
 
-// Schema cho việc tạo mới sản phẩm
-const createValidate = Joi.object({
-    name: Joi.string().required().messages({
-        'any.required': 'Name is required',
-        'string.empty': 'Name cannot be empty'
-    }),
-    description: Joi.string().optional().allow('').messages({
-        'string.base': 'Description must be a string'
-    }),
-    price: Joi.number().min(0).optional().messages({
-        'number.base': 'Price must be a number',
-        'number.min': 'Price must be at least 0'
-    }),
-    quantity: Joi.number().min(0).optional().messages({
-        'number.base': 'Quantity must be a number',
-        'number.min': 'Quantity must be at least 0'
-    }),
-    category: Joi.string().optional().allow('').messages({
-        'string.base': 'Category must be a string'
-    }),
-    images: Joi.string().required().messages({
-        'any.required': 'Images are required',
-        'string.empty': 'Images cannot be empty'
-    }),
-    createdAt: Joi.number().min(0).optional().messages({
-        'number.base': 'CreatedAt must be a number',
-        'number.min': 'CreatedAt must be at least 0'
-    }),
+export const createProductSchema = Joi.object({
+  name: Joi.string().required().messages({
+    'any.required': 'Tên không được để trống',
+    'string.empty': 'Tên không được để trống',
+  }),
+  description: Joi.string().optional().allow('').messages({
+    'string.base': 'Mô tả phải là chuỗi ký tự',
+  }),
+  price: Joi.number().min(0).optional().messages({
+    'number.base': 'Giá phải là số',
+    'number.min': 'Giá phải lớn hơn hoặc bằng 0',
+  }),
+  quantity: Joi.number().min(0).optional().messages({
+    'number.base': 'Số lượng phải là số',
+    'number.min': 'Số lượng phải lớn hơn hoặc bằng 0',
+  }),
+  category: Joi.string().optional().allow('').messages({
+    'string.base': 'Danh mục phải là chuỗi ký tự',
+  }),
+  images: Joi.array().min(1).required().messages({
+    'any.required': 'Hình ảnh không được để trống',
+    'string.empty': 'Hình ảnh không được để trống',
+  }),
+  createdAt: Joi.number().min(0).optional().messages({
+    'number.base': 'Thời gian tạo phải là số',
+    'number.min': 'Thời gian tạo phải lớn hơn hoặc bằng 0',
+  }),
 }).options({
-    abortEarly: false
-});
-// Schema cho việc cập nhật sản phẩm
-const updateValidate = Joi.object({
-    name: Joi.string().required().messages({
-        'any.required': 'Name is required',
-        'string.empty': 'Name cannot be empty'
-    }),
-    description: Joi.string().optional().allow('').messages({
-        'string.base': 'Description must be a string'
-    }),
-    price: Joi.number().min(0).required().messages({
-        'any.required': 'Price is required',
-        'number.base': 'Price must be a number',
-        'number.min': 'Price must be at least 0'
-    }),
-    quantity: Joi.number().required().messages({
-        'any.required': 'Quantity is required',
-        'number.base': 'Quantity must be a number'
-    }),
-    category: Joi.string().required().messages({
-        'any.required': 'Category is required',
-        'string.empty': 'Category cannot be empty'
-    }),
-    images: Joi.string().required().messages({
-        'any.required': 'Images are required',
-        'string.empty': 'Images cannot be empty'
-    }),
-    createdAt: Joi.number().messages({
-        'any.required': 'CreatedAt is required',
-        'number.base': 'CreatedAt must be a number'
-    }),
-}).options({
-    abortEarly: false
+  abortEarly: false,
 });
 
-export { createValidate, updateValidate };
+export const updateProductSchema = Joi.object({
+  name: Joi.string().required().messages({
+    'any.required': 'Tên không được để trống',
+    'string.empty': 'Tên không được để trống',
+  }),
+  description: Joi.string().optional().allow('').messages({
+    'string.base': 'Mô tả phải là chuỗi ký tự',
+  }),
+  price: Joi.number().min(0).required().messages({
+    'any.required': 'Giá không được để trống',
+    'number.base': 'Giá phải là số',
+    'number.min': 'Giá phải lớn hơn hoặc bằng 0',
+  }),
+  quantity: Joi.number().required().messages({
+    'any.required': 'Số lượng không được để trống',
+    'number.base': 'Số lượng phải là số',
+  }),
+  category: Joi.string().required().messages({
+    'any.required': 'Danh mục không được để trống',
+    'string.empty': 'Danh mục không được để trống',
+  }),
+  images: Joi.array().min(1).required().messages({
+    'any.required': 'Hình ảnh không được để trống',
+    'string.empty': 'Hình ảnh không được để trống',
+  }),
+  createdAt: Joi.number().messages({
+    'any.required': 'Thời gian tạo không được để trống',
+    'number.base': 'Thời gian tạo phải là số',
+  }),
+}).options({
+  abortEarly: false,
+});
