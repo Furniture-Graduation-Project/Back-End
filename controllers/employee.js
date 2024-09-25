@@ -41,10 +41,17 @@ export const createEmployee = async (req, res) => {
     const { error } = crudValidate.validate(req.body, {
       abortEarly: false,
     });
+
     if (error) {
       const errors = error.details.map((err) => err.message);
       return res.status(400).json({
         message: errors,
+      });
+    }
+    const isExist = await Employee.findOne({ email: req.body.email });
+    if (isExist) {
+      return res.status(StatusCodes.BAD_GATEWAY).json({
+        message: "Email đã tồn tại !",
       });
     }
     const { password, ...otherDetails } = req.body;

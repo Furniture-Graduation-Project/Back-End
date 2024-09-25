@@ -4,6 +4,7 @@ import User from "../models/user.js";
 import { locationSchema } from "../validations/location.js";
 
 export const create = async (req, res) => {
+  const userId = req.params.userId;
   const {
     street,
     city,
@@ -12,7 +13,6 @@ export const create = async (req, res) => {
     country,
     recipientName,
     phoneNumber,
-    userId,
   } = req.body;
 
   const { error } = locationSchema.validate(req.body);
@@ -53,7 +53,7 @@ export const create = async (req, res) => {
 
 export const get = async (req, res) => {
   try {
-    const locations = await Location.find(req.params.userId).populate({
+    const locations = await Location.find({}).populate({
       path: "userId",
       select: "email name",
     });
@@ -71,10 +71,31 @@ export const get = async (req, res) => {
   }
 };
 
+export const getByUserId = async (req, res) => {
+  try {
+    const locations = await Location.findOne({
+      userId: req.params.userId,
+    }).populate({
+      path: "userId",
+      select: "email name",
+    });
+    if (locations.length === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Người dùng không có địa chỉ nào !" });
+    }
+
+    return res.status(StatusCodes.OK).json(locations);
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
+  }
+};
+
 export const update = async (req, res) => {
   const {
     userId,
-    locationId,
     street,
     city,
     state,
@@ -83,16 +104,22 @@ export const update = async (req, res) => {
     recipientName,
     phoneNumber,
   } = req.body;
+
+  const locationId = req.params.id;
+
   try {
     const { error } = locationSchema.validate(req.body);
     if (error) {
       const message = error.details.map((e) => e.message);
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
+
     let location = await Location.findOne({
       userId,
       "locations._id": locationId,
     });
+
+    console.log(userId, locationId);
 
     if (!location) {
       return res
@@ -127,7 +154,8 @@ export const update = async (req, res) => {
 };
 
 export const remove = async (req, res) => {
-  const { userId, locationId } = req.body;
+  const { userId } = req.body;
+  const locationId = req.params.id;
 
   try {
     let location = await Location.findOne({
@@ -159,7 +187,7 @@ export const remove = async (req, res) => {
 
 export const removeLocation = async (req, res) => {
   try {
-    const location = await Location.findByIdAndDelete(req.params.id);
+    const location = await Location.findByIdAndDelete(req.params.locationsId);
     if (!location) {
       return res
         .status(StatusCodes.NOT_FOUND)
