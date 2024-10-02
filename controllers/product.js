@@ -1,17 +1,23 @@
-import { StatusCodes } from 'http-status-codes';
-import ProductModel from '../models/product.js';
+import { StatusCodes } from "http-status-codes";
+import ProductModel from "../models/product.js";
 import {
   createProductSchema,
   updateProductSchema,
-} from '../validations/product.js';
+} from "../validations/product.js";
 
 const ProductController = {
   async getAllProductModel(req, res) {
     try {
-      const product = await ProductModel.find();
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = parseInt(req.query.skip, 10) || 0;
+      const products = await ProductModel.find().limit(limit).skip(skip);
+      const totalProducts = await ProductModel.countDocuments();
       res.status(StatusCodes.OK).json({
-        message: 'Hiển thị thành công',
-        data: product,
+        message: "Hiển thị thành công",
+        data: products,
+        total: totalProducts,
+        limit,
+        skip,
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -19,30 +25,32 @@ const ProductController = {
       });
     }
   },
+
   async detailProductModel(req, res) {
     const { id } = req.params;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy sản phẩm' });
+        .json({ message: "Không tìm thấy sản phẩm" });
     }
     try {
       const product = await ProductModel.findById(id);
-      res.status(StatusCodes.OK).json({
-        message: 'Hiển thị thành công',
-        data: product,
-      });
       if (!product) {
-        return res.status(getStatusCode('Internal Server Error')).json({
-          message: 'Not Found',
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Sản phẩm không tồn tại",
         });
       }
+      res.status(StatusCodes.OK).json({
+        message: "Hiển thị thành công",
+        data: product,
+      });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: error.message,
       });
     }
   },
+
   async createProductModel(req, res) {
     try {
       const { value, error } = createProductSchema.validate(req.body, {
@@ -51,14 +59,14 @@ const ProductController = {
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
 
       const product = await ProductModel.create(value);
       res.status(StatusCodes.OK).json({
-        message: 'Thêm sản phẩm thành công',
+        message: "Thêm sản phẩm thành công",
         data: product,
       });
     } catch (error) {
@@ -67,31 +75,40 @@ const ProductController = {
       });
     }
   },
+
   async updateProductModel(req, res) {
+    const productId = req.params.id;
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Không tìm thấy sản phẩm" });
+    }
     try {
-      const productId = req.params.id;
-      if (!productId) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'Không tìm thấy sản phẩm' });
-      }
       const { value, error } = updateProductSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
+
       const updateProduct = await ProductModel.findByIdAndUpdate(
         productId,
         value,
-        { new: true },
+        { new: true }
       );
+
+      if (!updateProduct) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Sản phẩm không tồn tại",
+        });
+      }
+
       res.status(StatusCodes.OK).json({
-        message: 'Cập nhật sản phẩm thành công',
+        message: "Cập nhật sản phẩm thành công",
         data: updateProduct,
       });
     } catch (error) {
@@ -100,22 +117,23 @@ const ProductController = {
       });
     }
   },
+
   async deleteProduct(req, res) {
     const productId = req.params.id;
     if (!productId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy sản phẩm' });
+        .json({ message: "Không tìm thấy sản phẩm" });
     }
     try {
       const product = await ProductModel.findByIdAndDelete(productId);
       if (!product) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Không tìm thấy sản phẩm',
+          message: "Sản phẩm không tồn tại",
         });
       }
       res.status(StatusCodes.OK).json({
-        message: 'Xóa thành công',
+        message: "Xóa sản phẩm thành công",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
