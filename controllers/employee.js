@@ -7,11 +7,39 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const EmployeeController = {
+  getLimited: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10);
+      const skip = (page - 1) * limit;
+      const employees = await Employee.find().skip(skip).limit(limit);
+      if (!employees || employees.length === 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Không có nhân viên tồn tại." });
+      }
+
+      const totalEmployees = await Employee.countDocuments();
+      const totalPages = limit ? Math.ceil(totalEmployees / limit) : 1;
+
+      res.status(StatusCodes.OK).json({
+        employees,
+        page,
+        totalPages,
+        totalEmployees,
+        message: "Lấy danh sách nhân viên thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin nhân viên.",
+        error: error.message,
+      });
+    }
+  },
+
   getAll: async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = parseInt(req.query.skip) || 0;
-      const employees = await Employee.find().limit(limit).skip(skip);
+      const employees = await Employee.find();
       return res.status(StatusCodes.OK).json({
         message: "Lấy tất cả nhân viên thành công",
         data: employees,
@@ -66,6 +94,7 @@ const EmployeeController = {
         ...value,
         password: hashedPassword,
       });
+
       return res.status(StatusCodes.CREATED).json({
         message: "Tạo nhân viên thành công",
         data: employee,
