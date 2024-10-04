@@ -26,6 +26,37 @@ export const MessageController = {
         .json({ error: 'Có lỗi xảy ra khi lấy thông tin cuộc trò chuyện.' });
     }
   },
+  getLimited: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10);
+      const skip = (page - 1) * limit;
+      const conversation = await ConversationModel.find()
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'userId',
+        });
+      if (!conversation || conversation.length === 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Không có cuộc trò chuyên tồn tại.' });
+      }
+      const totalConversation = await ConversationModel.countDocuments();
+      const totalPages = limit ? Math.ceil(totalConversation / limit) : 1;
+      res.status(StatusCodes.OK).json({
+        conversation,
+        page,
+        totalPages,
+        totalConversation,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
+    } catch (error) {
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Có lỗi xảy ra khi lấy thông tin cuộc trò chuyên.' });
+    }
+  },
 
   getById: async (req, res) => {
     try {
