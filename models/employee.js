@@ -8,19 +8,26 @@ const EmployeeSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
     },
-    fullname: {
+    avatar: {
+      type: String,
+      default: "",
+    },
+    fullName: {
       type: String,
     },
-    phonenumber: {
-      type: Number,
-      default: 0,
+    phoneNumber: {
+      type: String,
+      default: "",
     },
     address: {
       type: String,
+      default: "",
     },
     role: {
       type: String,
+      default: "employee",
     },
   },
   { timestamps: true, versionKey: false }

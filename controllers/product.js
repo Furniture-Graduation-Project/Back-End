@@ -1,111 +1,146 @@
 import { StatusCodes } from "http-status-codes";
-import mongoose from "mongoose";
-import Product from "../models/product";
+import ProductModel from "../models/product.js";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/product.js";
 
-export const create = async (req, res) => {
-  try {
-    const productData = {
-      name: req.body.name,
-      productId: new mongoose.Types.ObjectId(),
-      categoryID: req.body.categoryID,
-      images: req.body.images || [],
-      price: req.body.price,
-      quantity: req.body.quantity || 0,
-      title: req.body.title || "",
-      description: req.body.description || "",
-      brand: req.body.brand || "",
-      colors: req.body.colors || [],
-      sizes: req.body.sizes || [],
-      discount: req.body.discount || 0,
-    };
-
-    const product = await Product.create(productData);
-    return res.status(StatusCodes.CREATED).json(product);
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-  }
-};
-
-export const getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find().populate("categoryID", "name");
-    if (products.length === 0) {
-      return res.status(StatusCodes.OK).json({ data: [] });
+const ProductController = {
+  async getAllProductModel(req, res) {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = parseInt(req.query.skip, 10) || 0;
+      const products = await ProductModel.find().limit(limit).skip(skip);
+      const totalProducts = await ProductModel.countDocuments();
+      res.status(StatusCodes.OK).json({
+        message: "Hiển thị thành công",
+        data: products,
+        total: totalProducts,
+        limit,
+        skip,
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
     }
-    return res.status(StatusCodes.OK).json({ data: products });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: error.message });
-  }
-};
+  },
 
-export const getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id).populate(
-      "categoryID",
-      "name"
-    );
-    if (!product) {
+  async detailProductModel(req, res) {
+    const { id } = req.params;
+    if (!id) {
       return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Không tìm thấy sản phẩm nào!" });
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Không tìm thấy sản phẩm" });
     }
-    return res.status(StatusCodes.OK).json(product);
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
-  }
-};
-
-export const deleteProductById = async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    return res.status(StatusCodes.OK).json(product);
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
-  }
-};
-
-export const updateProductById = async (req, res) => {
-  try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    return res.status(StatusCodes.OK).json(product);
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
-  }
-};
-
-export const related = async (req, res) => {
-  try {
-    const products = await Product.find({
-      categoryID: req.params.categoryID,
-      _id: { $ne: req.params.productId },
-    }).populate("categoryID", "name");
-    return res.status(StatusCodes.OK).json(products);
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
-  }
-};
-
-export const getProductsByCategory = async (req, res) => {
-  try {
-    const { categoryID } = req.params;
-    const products = await Product.find({ categoryID }).populate(
-      "categoryID",
-      "name"
-    );
-
-    if (products.length === 0) {
-      return res.status(StatusCodes.OK).json({ data: [] });
+    try {
+      const product = await ProductModel.findById(id);
+      if (!product) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Sản phẩm không tồn tại",
+        });
+      }
+      res.status(StatusCodes.OK).json({
+        message: "Hiển thị thành công",
+        data: product,
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
     }
-    return res.status(StatusCodes.OK).json({ data: products });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Internal Server Error" });
-  }
+  },
+
+  async createProductModel(req, res) {
+    try {
+      const { value, error } = createProductSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: errors,
+        });
+      }
+
+      const product = await ProductModel.create(value);
+      res.status(StatusCodes.OK).json({
+        message: "Thêm sản phẩm thành công",
+        data: product,
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+
+  async updateProductModel(req, res) {
+    const productId = req.params.id;
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Không tìm thấy sản phẩm" });
+    }
+    try {
+      const { value, error } = updateProductSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: errors,
+        });
+      }
+
+      const updateProduct = await ProductModel.findByIdAndUpdate(
+        productId,
+        value,
+        { new: true }
+      );
+
+      if (!updateProduct) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Sản phẩm không tồn tại",
+        });
+      }
+
+      res.status(StatusCodes.OK).json({
+        message: "Cập nhật sản phẩm thành công",
+        data: updateProduct,
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+
+  async deleteProduct(req, res) {
+    const productId = req.params.id;
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Không tìm thấy sản phẩm" });
+    }
+    try {
+      const product = await ProductModel.findByIdAndDelete(productId);
+      if (!product) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Sản phẩm không tồn tại",
+        });
+      }
+      res.status(StatusCodes.OK).json({
+        message: "Xóa sản phẩm thành công",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
 };
+
+export default ProductController;
