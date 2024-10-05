@@ -22,7 +22,7 @@ export const createProductSchema = Joi.object({
     "number.base": "Số lượng sản phẩm phải là số",
     "number.min": "Số lượng sản phẩm phải lớn hơn hoặc bằng 0",
   }),
-  categoryID: Joi.string().required().messages({
+  category: Joi.string().required().messages({
     "any.required": "Danh mục sản phẩm là bắt buộc",
     "string.empty": "Danh mục sản phẩm không được để trống",
   }),
@@ -34,9 +34,8 @@ export const createProductSchema = Joi.object({
     "array.base": "Kích thước phải là mảng các chuỗi ký tự",
     "string.base": "Mỗi kích thước phải là chuỗi ký tự",
   }),
-  brand: Joi.string().required().messages({
-    "any.required": "Thương hiệu sản phẩm là bắt buộc",
-    "string.empty": "Thương hiệu sản phẩm không được để trống",
+  SKU: Joi.number().optional().messages({
+    "number.base": "SKU phải là số",
   }),
   images: Joi.array().items(Joi.string()).min(1).required().messages({
     "any.required": "Hình ảnh sản phẩm là bắt buộc",
@@ -69,7 +68,7 @@ export const updateProductSchema = Joi.object({
     "number.base": "Số lượng sản phẩm phải là số",
     "number.min": "Số lượng sản phẩm phải lớn hơn hoặc bằng 0",
   }),
-  categoryID: Joi.string().optional().messages({
+  category: Joi.string().optional().messages({
     "string.base": "Danh mục sản phẩm phải là chuỗi ký tự",
   }),
   colors: Joi.array().items(Joi.string()).optional().messages({
@@ -80,8 +79,8 @@ export const updateProductSchema = Joi.object({
     "array.base": "Kích thước phải là mảng các chuỗi ký tự",
     "string.base": "Mỗi kích thước phải là chuỗi ký tự",
   }),
-  brand: Joi.string().optional().messages({
-    "string.base": "Thương hiệu sản phẩm phải là chuỗi ký tự",
+  SKU: Joi.number().optional().messages({
+    "number.base": "SKU phải là số",
   }),
   images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự",
