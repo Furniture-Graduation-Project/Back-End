@@ -3,11 +3,40 @@ import WishlistModel from "../models/wishlist.js";
 import { wishlistSchema } from "../validations/wishlist.js";
 
 const WishlistController = {
+  getLimited: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+      const wishlists = await WishlistModel.find().skip(skip).limit(limit);
+
+      if (!wishlists || wishlists.length === 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Không có danh sách yêu thích nào tồn tại." });
+      }
+
+      const totalWishlists = await WishlistModel.countDocuments();
+      const totalPages = limit ? Math.ceil(totalWishlists / limit) : 1;
+
+      res.status(StatusCodes.OK).json({
+        wishlists,
+        page,
+        totalPages,
+        totalWishlists,
+        message: "Lấy danh sách yêu thích thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy danh sách yêu thích.",
+        error: error.message,
+      });
+    }
+  },
+
   getAll: async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = parseInt(req.query.skip) || 0;
-      const wishlists = await WishlistModel.find().limit(limit).skip(skip);
+      const wishlists = await WishlistModel.find();
       return res.status(StatusCodes.OK).json({
         message: "Lấy danh sách yêu thích thành công",
         data: wishlists,
