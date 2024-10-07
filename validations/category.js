@@ -17,7 +17,8 @@ export const createCategorySchema = Joi.object({
 });
 
 export const updateCategorySchema = Joi.object({
-  categoryName: Joi.string().optional().messages({
+  categoryName: Joi.string().required().optional().messages({
+    "string.empty": "Tên danh mục không được để trống",
     "string.base": "Tên danh mục phải là một chuỗi",
   }),
   description: Joi.string().optional().allow("").messages({
