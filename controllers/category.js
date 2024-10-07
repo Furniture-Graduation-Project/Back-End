@@ -48,15 +48,19 @@ const CategoryController = {
       }
 
       const { categoryName, description } = req.body;
+
       const existingCategory = await Category.findOne({ categoryName });
       if (existingCategory) {
         return res.status(400).json({ message: "Tên danh mục đã tồn tại." });
       }
 
+      const categoryCount = await Category.countDocuments();
+      const role = categoryCount === 0 ? 1 : 0;
+
       const category = new Category({
         categoryName,
         description,
-        role: req.body.role || 0,
+        role,
       });
 
       await category.save();
