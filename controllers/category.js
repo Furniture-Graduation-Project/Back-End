@@ -1,26 +1,74 @@
 import { StatusCodes } from "http-status-codes";
 import Category from "../models/category.js";
 import Product from "../models/product.js";
-
+import {
+  createCategorySchema,
+  updateCategorySchema,
+} from "../validations/category.js";
 const CategoryController = {
+  getLimited: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+
+      const categories = await Category.find().skip(skip).limit(limit);
+
+      if (!categories || categories.length === 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Không có danh mục nào." });
+      }
+
+      const totalCategories = await Category.countDocuments();
+      const totalPages = limit ? Math.ceil(totalCategories / limit) : 1;
+
+      res.status(StatusCodes.OK).json({
+        categories,
+        page,
+        totalPages,
+        totalCategories,
+        message: "Lấy danh sách danh mục thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin danh mục.",
+        error: error.message,
+      });
+    }
+  },
+
   create: async (req, res) => {
     try {
-      // Tìm số lượng danh mục đã tồn tại
-      const categoryCount = await Category.countDocuments();
+      const { error } = createCategorySchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          errors: error.details.map((err) => err.message),
+        });
+      }
 
-      // Nếu chưa có danh mục nào, tạo danh mục đầu tiên với role = 1
+      const { categoryName, description } = req.body;
+
+      const existingCategory = await Category.findOne({ categoryName });
+      if (existingCategory) {
+        return res.status(400).json({ message: "Tên danh mục đã tồn tại." });
+      }
+
+      const categoryCount = await Category.countDocuments();
       const role = categoryCount === 0 ? 1 : 0;
 
-      const category = await Category.create({
-        categoryId: new mongoose.Types.ObjectId(),
-        categoryName: req.body.categoryName,
-        role: role,
-        description: req.body.description,
+      const category = new Category({
+        categoryName,
+        description,
+        role,
       });
 
+      await category.save();
       return res.status(StatusCodes.CREATED).json(category);
     } catch (error) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
     }
   },
 
@@ -60,8 +108,6 @@ const CategoryController = {
   deleteCategoryById: async (req, res) => {
     try {
       const { id } = req.params;
-
-      // Tìm danh mục với role = 1 để cập nhật cho các sản phẩm
       const defaultCategory = await Category.findOne({ role: 1 });
 
       if (!defaultCategory) {
@@ -70,7 +116,6 @@ const CategoryController = {
           .json({ message: "Không tìm thấy danh mục mặc định!" });
       }
 
-      // Cập nhật danh mục sản phẩm trước khi xóa danh mục
       await Product.updateMany(
         { categoryId: id },
         { categoryId: defaultCategory.categoryId }
@@ -82,7 +127,11 @@ const CategoryController = {
           .status(StatusCodes.NOT_FOUND)
           .json({ message: "Không tìm thấy danh mục để xóa!" });
       }
-      return res.status(StatusCodes.OK).json(deletedCategory);
+
+      return res.status(StatusCodes.OK).json({
+        message: "Xóa danh mục thành công!",
+        deletedCategory,
+      });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
@@ -90,6 +139,13 @@ const CategoryController = {
 
   updateCategoryById: async (req, res) => {
     try {
+      const { error } = updateCategorySchema.validate(req.body);
+      if (error) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          details: error.details.map((err) => err.message),
+        });
+      }
+
       const { id } = req.params;
       const updatedCategory = await Category.findByIdAndUpdate(id, req.body, {
         new: true,
