@@ -8,7 +8,7 @@ import {
 const CategoryController = {
   getLimited: async (req, res) => {
     try {
-      const page = parseInt(req.query.page, 10) || 1;
+      const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
@@ -20,14 +20,13 @@ const CategoryController = {
           .json({ message: "Không có danh mục nào." });
       }
 
-      const totalCategories = await Category.countDocuments();
-      const totalPages = limit ? Math.ceil(totalCategories / limit) : 1;
+      const totalData = await Category.countDocuments();
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
         categories,
-        page,
-        totalPages,
-        totalCategories,
+        totalPage,
+        totalData,
         message: "Lấy danh sách danh mục thành công.",
       });
     } catch (error) {

@@ -9,8 +9,8 @@ dotenv.config();
 const EmployeeController = {
   getLimited: async (req, res) => {
     try {
-      const page = parseInt(req.query.page, 10) || 1;
-      const limit = parseInt(req.query.limit, 10);
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
       const employees = await Employee.find().skip(skip).limit(limit);
       if (!employees || employees.length === 0) {
@@ -19,14 +19,13 @@ const EmployeeController = {
           .json({ message: "Không có nhân viên tồn tại." });
       }
 
-      const totalEmployees = await Employee.countDocuments();
-      const totalPages = limit ? Math.ceil(totalEmployees / limit) : 1;
+      const totalData = await Employee.countDocuments();
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
         employees,
-        page,
-        totalPages,
-        totalEmployees,
+        totalPage,
+        totalData,
         message: "Lấy danh sách nhân viên thành công.",
       });
     } catch (error) {
