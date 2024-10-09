@@ -5,7 +5,7 @@ import { wishlistSchema } from "../validations/wishlist.js";
 const WishlistController = {
   getLimited: async (req, res) => {
     try {
-      const page = parseInt(req.query.page, 10) || 1;
+      const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
       const wishlists = await WishlistModel.find().skip(skip).limit(limit);
@@ -16,14 +16,13 @@ const WishlistController = {
           .json({ message: "Không có danh sách yêu thích nào tồn tại." });
       }
 
-      const totalWishlists = await WishlistModel.countDocuments();
-      const totalPages = limit ? Math.ceil(totalWishlists / limit) : 1;
+      const totalData = await WishlistModel.countDocuments();
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
         wishlists,
-        page,
-        totalPages,
-        totalWishlists,
+        totalPage,
+        totalData,
         message: "Lấy danh sách yêu thích thành công.",
       });
     } catch (error) {
