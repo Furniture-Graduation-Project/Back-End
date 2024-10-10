@@ -24,7 +24,7 @@ const CategoryController = {
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        categories,
+        data: categories,
         totalPage,
         totalData,
         message: "Lấy danh sách danh mục thành công.",
