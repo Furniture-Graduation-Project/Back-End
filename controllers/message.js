@@ -45,7 +45,7 @@ export const MessageController = {
       const totalData = await ConversationModel.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
       res.status(StatusCodes.OK).json({
-        conversation,
+        data: conversation,
         totalPage,
         totalData,
         message: "Cuộc trò chuyên đã được lấy.",

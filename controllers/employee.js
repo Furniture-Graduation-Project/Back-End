@@ -23,7 +23,7 @@ const EmployeeController = {
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        employees,
+        data: employees,
         totalPage,
         totalData,
         message: "Lấy danh sách nhân viên thành công.",

@@ -20,7 +20,7 @@ const WishlistController = {
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        wishlists,
+        data: wishlists,
         totalPage,
         totalData,
         message: "Lấy danh sách yêu thích thành công.",
