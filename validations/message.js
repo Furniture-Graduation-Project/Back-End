@@ -6,14 +6,14 @@ export const messageSchema = Joi.object({
     'string.empty': 'Nội dung tin nhắn không được để trống.',
     'any.required': 'Nội dung tin nhắn là bắt buộc.',
   }),
-  status: Joi.string()
-    .valid('sent', 'received', 'read')
-    .default('sent')
+  type: Joi.string()
+    .valid('text', 'product', 'voucher')
+    .default('text')
     .required()
     .messages({
       'string.base': 'Trạng thái tin nhắn phải là một chuỗi.',
       'any.only':
-        'Trạng thái tin nhắn phải là một trong các giá trị: sent, received, read.',
+        'Trạng thái tin nhắn phải là một trong các giá trị: text, image, product, voucher.',
     }),
 
   sender: Joi.object({
@@ -31,9 +31,6 @@ export const messageSchema = Joi.object({
       'string.base': 'Tên người gửi phải là một chuỗi.',
       'string.empty': 'Tên người gửi không được để trống.',
       'any.required': 'Tên người gửi là bắt buộc.',
-    }),
-    avatar: Joi.string().messages({
-      'string.base': 'Ảnh đại diện người gửi phải là một chuỗi.',
     }),
   })
     .required()

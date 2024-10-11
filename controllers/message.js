@@ -19,7 +19,10 @@ export const MessageController = {
           .status(StatusCodes.NOT_FOUND)
           .json({ message: 'Không có cuộc trò chuyện tồn tại.' });
       }
-      res.status(StatusCodes.OK).json(conversation);
+      res.status(StatusCodes.OK).json({
+        data: conversation,
+        message: 'Lấy tất cả cuộc trò chuyên thành cảnh công.',
+      });
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -77,7 +80,10 @@ export const MessageController = {
           .json({ message: 'Cuộc trò chuyện không tồn tại.' });
       }
 
-      res.status(StatusCodes.OK).json(conversation);
+      res.status(StatusCodes.OK).json({
+        data: conversation,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -105,7 +111,10 @@ export const MessageController = {
           error: 'Không tìm thấy cuộc trò chuyên',
         });
       }
-      res.status(StatusCodes.OK).json(conversation);
+      res.status(StatusCodes.OK).json({
+        data: conversation,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -126,7 +135,10 @@ export const MessageController = {
         path: 'userId',
       });
 
-      res.status(StatusCodes.OK).json(messages);
+      res.status(StatusCodes.OK).json({
+        data: messages,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (err) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -147,7 +159,10 @@ export const MessageController = {
         path: 'userId',
       });
 
-      res.status(StatusCodes.OK).json(messages);
+      res.status(StatusCodes.OK).json({
+        data: messages,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (err) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -164,7 +179,10 @@ export const MessageController = {
           .json({ message: 'Không tìm thấy cuộc trò chuyên' });
       }
       const messages = await ConversationModel.find({ star: true });
-      res.status(StatusCodes.OK).json(messages);
+      res.status(StatusCodes.OK).json({
+        data: messages,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (err) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -185,7 +203,10 @@ export const MessageController = {
         path: 'userId',
       });
 
-      res.status(StatusCodes.OK).json(messages);
+      res.status(StatusCodes.OK).json({
+        data: messages,
+        message: 'Cuộc trò chuyên đã được lấy.',
+      });
     } catch (err) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -273,12 +294,12 @@ export const MessageController = {
   addMessage: async (req, res) => {
     try {
       const { id } = req.params;
-      const { sender, content, status } = req.body;
+      const { sender, content, type } = req.body;
       const { value, error } = messageSchema.validate(
         {
           sender,
           content,
-          status,
+          type,
         },
         { abortEarly: false, stripUnknown: true },
       );
@@ -298,7 +319,7 @@ export const MessageController = {
       const newMessage = {
         sender: value.sender,
         content: value.content,
-        status: value.status,
+        type: value.type,
         timestamp: new Date(),
       };
       conversation.messages.push(newMessage);

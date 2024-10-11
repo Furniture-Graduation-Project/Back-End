@@ -12,10 +12,13 @@ const MessageSchema = new Schema({
       required: true,
     },
     name: { type: String, required: true },
-    avatar: { type: String },
   },
   content: { type: String, required: true },
-  status: { type: String, enum: ['sent', 'received', 'read', ], default: 'sent' },
+  type: {
+    type: String,
+    enum: ['text', 'product', 'voucher'],
+    default: 'text',
+  },
   timestamp: { type: Date, default: Date.now },
 });
 
@@ -33,11 +36,6 @@ const ConversationSchema = new Schema({
     required: true,
     enum: ['service', 'feedback', 'order'],
     default: 'service',
-  },
-  status: {
-    type: String,
-    enum: ['normal', 'spam', 'important', 'deleted'],
-    default: 'normal',
   },
   category: {
     type: String,
