@@ -14,6 +14,7 @@ const MessageSchema = new Schema({
     name: { type: String, required: true },
   },
   content: { type: String, required: true },
+  status: { type: String, enum: ['sent', 'read'], default: 'sent' },
   type: {
     type: String,
     enum: ['text', 'product', 'voucher'],

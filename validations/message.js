@@ -6,6 +6,16 @@ export const messageSchema = Joi.object({
     'string.empty': 'Nội dung tin nhắn không được để trống.',
     'any.required': 'Nội dung tin nhắn là bắt buộc.',
   }),
+  status: Joi.string()
+    .valid('sent', 'read')
+    .default('sent')
+    .required()
+    .messages({
+      'string.base': 'Trạng thái tin nhắn phải là một chuỗi.',
+      'any.only':
+        'Trạng thái tin nhắn phải là một trong các giá trị: sent, read.',
+    }),
+
   type: Joi.string()
     .valid('text', 'product', 'voucher')
     .default('text')
