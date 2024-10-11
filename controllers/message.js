@@ -214,12 +214,11 @@ export const MessageController = {
   },
   createConversation: async (req, res) => {
     try {
-      const { userId, label, category } = req.body;
+      const { userId, label } = req.body;
       const { value, error } = createConversationSchema.validate(
         {
           userId,
           label,
-          category,
         },
         { abortEarly: false, stripUnknown: true },
       );
@@ -253,11 +252,10 @@ export const MessageController = {
   updateConversation: async (req, res) => {
     try {
       const { id } = req.params;
-      const { label, category, star } = req.body;
+      const { label, star } = req.body;
       const { value, error } = updateConversationSchema.validate(
         {
           label,
-          category,
           star,
         },
         { abortEarly: false, stripUnknown: true },
@@ -323,8 +321,10 @@ export const MessageController = {
       };
       conversation.messages.push(newMessage);
       await conversation.save();
-      io.emit(String(conversation._id), newMessage);
-      res.status(StatusCodes.OK).json(newMessage);
+      io.emit(String(conversation._id));
+      res.status(StatusCodes.OK).json({
+        message: 'Tin nhạn đã được thêm.',
+      });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'Có lỗi xảy ra khi thêm tin nhắn vào cuộc trò chuyện.',

@@ -23,13 +23,6 @@ export const createConversationSchema = Joi.object({
         'Nhãn phải là một trong các giá trị: service, feedback, order.',
       'string.base': 'Nhãn phải là một chuỗi ký tự.',
     }),
-  category: Joi.string()
-    .valid('inbox', 'sent', 'draft')
-    .default('draft')
-    .messages({
-      'any.only': 'Danh mục phải là một trong các giá trị: inbox, sent, draft.',
-      'string.base': 'Danh mục phải là một chuỗi ký tự.',
-    }),
 });
 
 export const updateConversationSchema = Joi.object({
@@ -47,8 +40,4 @@ export const updateConversationSchema = Joi.object({
         'Nhãn phải là một trong các giá trị: service, feedback, order.',
       'string.base': 'Nhãn phải là một chuỗi ký tự.',
     }),
-  category: Joi.string().valid('inbox', 'sent', 'draft').optional().messages({
-    'any.only': 'Danh mục phải là một trong các giá trị: inbox, sent, draft.',
-    'string.base': 'Danh mục phải là một chuỗi ký tự.',
-  }),
 });

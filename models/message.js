@@ -37,12 +37,7 @@ const ConversationSchema = new Schema({
     required: true,
     enum: ['service', 'feedback', 'order'],
     default: 'service',
-  },
-  category: {
-    type: String,
-    enum: ['inbox', 'sent', 'draft'],
-    default: 'draft',
-  },
+  }
 });
 
 const ConversationModel = mongoose.model('Conversation', ConversationSchema);
