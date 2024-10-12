@@ -30,7 +30,8 @@ const CartController = {
 
   getAll: async (req, res) => {
     try {
-      const { page, limit } = req.query; // Lấy giá trị từ query
+      const { page, limit } = req.query;
+      z;
       const result = await CartController.getLimited(page, limit);
       res.status(StatusCodes.OK).json(result);
     } catch (error) {
@@ -41,26 +42,37 @@ const CartController = {
     }
   },
 
-  getLimited: async (page, limit) => {
-    const pageNumber = parseInt(page, 10) || 1;
-    const limitNumber = parseInt(limit, 10) || 10;
-    const skip = (pageNumber - 1) * limitNumber;
-
+  getLimited: async (req, res) => {
     try {
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+
       const carts = await CartModel.find()
         .skip(skip)
-        .limit(limitNumber)
+        .limit(limit)
         .populate("cartItems");
-      const total = await CartModel.countDocuments();
-      return {
+
+      if (!carts || carts.length === 0) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Không có giỏ hàng nào." });
+      }
+
+      const totalData = await CartModel.countDocuments();
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
+
+      res.status(StatusCodes.OK).json({
         data: carts,
-        page: pageNumber,
-        totalPages: Math.ceil(total / limitNumber),
-        totalItems: total,
-        message: "Lấy danh sách giỏ hàng thành công",
-      };
+        totalPage,
+        totalData,
+        message: "Lấy danh sách giỏ hàng thành công.",
+      });
     } catch (error) {
-      throw new Error("Lấy danh sách giỏ hàng thất bại: " + error.message);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin giỏ hàng.",
+        error: error.message,
+      });
     }
   },
 
