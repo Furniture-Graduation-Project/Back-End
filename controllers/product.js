@@ -6,7 +6,21 @@ import {
 } from "../validations/product.js";
 
 const ProductController = {
-  async getAllProductModel(req, res) {
+  async getAllProduct(req, res) {
+    try {
+      const products = await ProductModel.find();
+      res.status(StatusCodes.OK).json({
+        message: "Hiển thị tất cả sản phẩm thành công",
+        data: products,
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+
+  async getLimitedProduct(req, res) {
     try {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = parseInt(req.query.skip, 10) || 0;
@@ -26,7 +40,7 @@ const ProductController = {
     }
   },
 
-  async detailProductModel(req, res) {
+  async detailProduct(req, res) {
     const { id } = req.params;
     if (!id) {
       return res
@@ -51,7 +65,7 @@ const ProductController = {
     }
   },
 
-  async createProductModel(req, res) {
+  async createProduct(req, res) {
     try {
       const { value, error } = createProductSchema.validate(req.body, {
         abortEarly: false,
@@ -76,7 +90,7 @@ const ProductController = {
     }
   },
 
-  async updateProductModel(req, res) {
+  async updateProduct(req, res) {
     const productId = req.params.id;
     if (!productId) {
       return res
