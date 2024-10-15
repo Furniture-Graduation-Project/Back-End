@@ -4,6 +4,7 @@ import PromotionController from "../controllers/promotion.js";
 const routerPromotion = express.Router();
 
 routerPromotion.get("/", PromotionController.getAll);
+routerPromotion.get("/limited", PromotionController.getLimited);
 routerPromotion.get("/:id", PromotionController.getById);
 routerPromotion.post("/", PromotionController.create);
 routerPromotion.put("/:id", PromotionController.update);

@@ -6,6 +6,7 @@ const orderRouter = Router();
 orderRouter.get("/", OrderController.getAll);
 orderRouter.get("/order/:id", OrderController.getByIdOrder);
 orderRouter.get("/user/:id", OrderController.getByIdUser);
+orderRouter.get("/limited", OrderController.getLimited);
 orderRouter.post("/", OrderController.add);
 orderRouter.put("/:id", OrderController.update);
 orderRouter.delete("/:id", OrderController.delete);

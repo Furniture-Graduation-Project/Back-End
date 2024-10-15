@@ -30,10 +30,12 @@ const CartController = {
 
   getAll: async (req, res) => {
     try {
-      const { page, limit } = req.query;
-      z;
-      const result = await CartController.getLimited(page, limit);
-      res.status(StatusCodes.OK).json(result);
+      const result = await CartController.find({});
+
+      res.status(StatusCodes.OK).json({
+        data: result,
+        message: "Danh sách giỏ hàng đã được lấy.",
+      });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Lấy danh sách giỏ hàng thất bại",
