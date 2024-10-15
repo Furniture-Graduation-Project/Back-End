@@ -27,7 +27,7 @@ const EmployeeSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "employee",
+      enum: ["admin", "product", "support", "order"],
     },
   },
   { timestamps: true, versionKey: false }
