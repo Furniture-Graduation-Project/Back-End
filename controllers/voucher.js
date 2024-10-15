@@ -13,10 +13,7 @@ const VoucherController = {
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
     try {
-      const voucher = new VoucherModel({
-        value,
-      });
-
+      const voucher = new VoucherModel(value);
       await voucher.save();
       res
         .status(StatusCodes.CREATED)
