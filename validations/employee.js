@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const crudValidate = Joi.object({
+export const employeeSchema = Joi.object({
   email: Joi.string().required().messages({
     "any.required": "Email không được để trống",
     "string.empty": "Email không được để trống",
@@ -24,5 +24,3 @@ const crudValidate = Joi.object({
   }),
   role: Joi.string(),
 });
-
-export { crudValidate };
