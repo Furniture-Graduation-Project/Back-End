@@ -1,13 +1,13 @@
 import express from "express";
 import CartController from "../controllers/cart.js";
 
-const router = express.Router();
+const routerCart = express.Router();
 
-router.get("/", CartController.getAll);
-router.get("/limited", CartController.getLimited);
-router.get("/:id", CartController.detail);
-router.post("/", CartController.create);
-router.put("/:id", CartController.update);
-router.delete("/:id", CartController.delete);
+routerCart.get("/", CartController.getAll);
+routerCart.get("/limited", CartController.getLimited);
+routerCart.get("/:id", CartController.getById);
+routerCart.post("/", CartController.create);
+routerCart.put("/:id", CartController.update);
+routerCart.delete("/:id", CartController.delete);
 
-export default router;
+export default routerCart;
