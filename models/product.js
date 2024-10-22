@@ -34,28 +34,16 @@ const productSchema = new mongoose.Schema({
     ref: "Category",
     required: true,
   },
-  colors: [
-    {
-      type: String,
-    },
-  ],
-  sizes: [
-    {
-      type: String,
-    },
-  ],
-  SKU: {
-    type: Number,
-  },
-  images: [
-    {
-      type: String,
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  productItems: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProductItem",
+    },
+  ],
 });
 
 const ProductModel = mongoose.model("Product", productSchema);
