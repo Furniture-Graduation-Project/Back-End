@@ -13,9 +13,7 @@ const VoucherController = {
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
     try {
-      const voucher = new VoucherModel({
-        value,
-      });
+      const voucher = new VoucherModel(value);
 
       await voucher.save();
       res
@@ -29,7 +27,7 @@ const VoucherController = {
   },
 
   getAll: async (req, res) => {
-    const page = parseInt(req.query.page, 10) || 1;
+    const page = parseInt(req.query.page, 10) + 1 || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
@@ -42,8 +40,8 @@ const VoucherController = {
       res.status(StatusCodes.OK).json({
         vouchers,
         page,
-        totalPages: Math.ceil(total / limit),
-        totalVouchers: total,
+        totalPage: Math.ceil(total / limit),
+        totalData: total,
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
