@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import BlogModel from "../models/blog.js";
-import { blogSchema } from "../validations/blog.js";
+import BlogModel from "../models/blog";
+import { blogSchema } from "../validations/blog";
 
 const BlogController = {
   getAllBlogs: async (req, res) => {
@@ -161,15 +161,15 @@ const BlogController = {
     }
   },
 
-  getBlogsByAuthorId: async (req, res) => {
-    const { authorId } = req.params;
-    if (!authorId) {
+  getBlogsByEmployeeId: async (req, res) => {
+    const { employeeId } = req.params;
+    if (!employeeId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "Không tìm thấy ID tác giả" });
     }
     try {
-      const blogs = await BlogModel.find({ authorId }); // Giả sử trường lưu trữ ID tác giả trong BlogModel là authorId
+      const blogs = await BlogModel.find({ employeeId });
       if (!blogs || blogs.length === 0) {
         return res
           .status(StatusCodes.NOT_FOUND)
