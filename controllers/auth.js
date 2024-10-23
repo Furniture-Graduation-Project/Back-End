@@ -2,7 +2,7 @@ import bcryptjs from "bcryptjs";
 import dotenv from "dotenv";
 import { StatusCodes } from "http-status-codes";
 import User from "../models/user.js";
-import { signinSchema, signupSchema } from "../validations/auth.js";
+import { signinSchema, signupSchema } from "../validations/user.js";
 import {
   generateRefreshToken,
   generateTokenAndSetCookie,
