@@ -27,18 +27,29 @@ const VoucherController = {
   },
 
   getAll: async (req, res) => {
+    try {
+      const vouchers = await VoucherModel.find();
+      res.status(StatusCodes.OK).json({
+        data: vouchers,
+        message: 'Lấy danh sách voucher thành công'
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lấy danh sách voucher thất bại',
+        error: error.message,
+      });
+    }
+  },
+  getLimited: async (req, res) => {
     const page = parseInt(req.query.page, 10) + 1 || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
     try {
-      const vouchers = await VoucherModel.find()
-        .skip(skip)
-        .limit(limit)
-        .populate('orders');
+      const vouchers = await VoucherModel.find().skip(skip).limit(limit);
       const total = await VoucherModel.countDocuments();
       res.status(StatusCodes.OK).json({
-        vouchers,
+        data : vouchers,
         page,
         totalPage: Math.ceil(total / limit),
         totalData: total,
