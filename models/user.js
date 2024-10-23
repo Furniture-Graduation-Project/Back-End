@@ -7,11 +7,6 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     avatar: { type: String, default: "" },
     phone: { type: String },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
     refreshToken: { type: String },
     account: {
       google: {
@@ -25,6 +20,23 @@ const userSchema = new mongoose.Schema(
         refreshToken: { type: String },
       },
     },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    locations: [
+      {
+        street: { type: String },
+        city: { type: String },
+        state: { type: String },
+        postalCode: { type: String },
+        country: { type: String },
+        recipientName: { type: String },
+        phoneNumber: { type: String },
+      },
+    ],
   },
   { versionKey: false, timestamps: true }
 );

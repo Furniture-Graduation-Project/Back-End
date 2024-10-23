@@ -1,14 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
-import ReviewModel from '../models/review.js';
-import { reviewSchema } from '../validations/review.js';
+import Comment from '../models/comment.js';
+import { commentSchema } from '../validations/comment.js';
 
-const ReviewController = {
+const CommentController = {
   getAll: async (req, res) => {
     try {
-      const reviews = await ReviewModel.find();
+      const comments = await Comment.find();
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy tất cả đánh giá thành công',
-        data: reviews,
+        message: 'Lấy tất cả bình luận thành công',
+        data: comments,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -17,23 +17,23 @@ const ReviewController = {
     }
   },
 
-  getById: async (req, res) => {
+  getDetail: async (req, res) => {
     const id = req.params.id;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy đánh giá' });
+        .json({ message: 'Không tìm thấy bình luận' });
     }
     try {
-      const review = await ReviewModel.findById(req.params.id);
-      if (!review) {
+      const comment = await Comment.findById(id);
+      if (!comment) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Không tìm thấy đánh giá',
+          message: 'Bình luận không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy chi tiết đánh giá thành công',
-        data: review,
+        message: 'Lấy chi tiết bình luận thành công',
+        data: comment,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -44,7 +44,7 @@ const ReviewController = {
 
   create: async (req, res) => {
     try {
-      const { value, error } = reviewSchema.validate(req.body, {
+      const { value, error } = commentSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
@@ -54,11 +54,10 @@ const ReviewController = {
           message: 'Lỗi: ' + errors.join(', '),
         });
       }
-
-      const review = await ReviewModel.create(value);
+      const comment = await Comment.create(value);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo đánh giá thành công',
-        data: review,
+        message: 'Tạo bình luận thành công',
+        data: comment,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -67,15 +66,16 @@ const ReviewController = {
     }
   },
 
-  update: async (req, res) => {
+  edit: async (req, res) => {
     const id = req.params.id;
+
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy đánh giá' });
+        .json({ message: 'Không tìm thấy bình luận' });
     }
     try {
-      const { value, error } = reviewSchema.validate(req.body, {
+      const { value, error } = commentSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
@@ -85,17 +85,17 @@ const ReviewController = {
           message: 'Lỗi: ' + errors.join(', '),
         });
       }
-      const review = await ReviewModel.findByIdAndUpdate(id, value, {
+      const comment = await Comment.findByIdAndUpdate(id, value, {
         new: true,
       });
-      if (!review) {
+      if (!comment) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Không tìm thấy đánh giá',
+          message: 'Bình luận không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Cập nhật đánh giá thành công',
-        data: review,
+        message: 'Cập nhật bình luận thành công',
+        data: comment,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -106,21 +106,22 @@ const ReviewController = {
 
   delete: async (req, res) => {
     const id = req.params.id;
+
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy đánh giá' });
+        .json({ message: 'Không tìm thấy bình luận' });
     }
     try {
-      const review = await ReviewModel.findByIdAndDelete(id);
-      if (!review) {
+      const comment = await Comment.findByIdAndDelete(id);
+      if (!comment) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Không tìm thấy đánh giá',
+          message: 'Bình luận không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Xóa đánh giá thành công',
-        data: review,
+        message: 'Xóa bình luận thành công',
+        data: comment,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -130,4 +131,4 @@ const ReviewController = {
   },
 };
 
-export default ReviewController;
+export default CommentController;

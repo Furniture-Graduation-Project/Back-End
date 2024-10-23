@@ -6,21 +6,24 @@ export const employeeSchema = Joi.object({
     "string.empty": "Email không được để trống",
   }),
   password: Joi.string().required().messages({
-    "any.required": "Password không được để trống",
-    "string.empty": "Password không được để trống",
+    "any.required": "Mật khẩu không được để trống",
+    "string.empty": "Mật khẩu không được để trống",
   }),
   fullName: Joi.string().required().messages({
-    "any.required": "FullName không được để trống",
-    "string.empty": "FullName không được để trống",
+    "any.required": "Họ tên không được để trống",
+    "string.empty": "Họ tên không được để trống",
   }),
   phoneNumber: Joi.number().required().messages({
-    "any.required": "PhoneNumber không được để trống",
-    "number.base": "PhoneNumber phải là số",
-    "number.empty": "PhoneNumber không được để trống",
+    "any.required": "Số điện thoại không được để trống",
+    "number.base": "Số điện thoại phải là số",
+    "number.empty": "Số điện thoại không được để trống",
   }),
   address: Joi.string().required().messages({
-    "any.required": "Address không được để trống",
-    "string.empty": "Address không được để trống",
+    "any.required": "Địa chỉ không được để trống",
+    "string.empty": "Địa chỉ không được để trống",
   }),
-  role: Joi.string(),
+  role: Joi.string().required().messages({
+    "any.required": "Vai trò không được để trống",
+    "string.empty": "Vai trò không được để trống",
+  }),
 });

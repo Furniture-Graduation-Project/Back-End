@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const EmployeeSchema = new mongoose.Schema(
   {
-    email: {
+    username: {
       type: String,
       required: true,
     },
@@ -27,7 +27,7 @@ const EmployeeSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "employee",
+      enum: ["admin", "product", "support", "order"],
     },
   },
   { timestamps: true, versionKey: false }
