@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import BlogModel from "../models/blog";
-import { blogSchema } from "../validations/blog";
+import BlogModel from "../models/blog.js";
+import { blogSchema } from "../validations/blog.js";
 
 const BlogController = {
   getAllBlogs: async (req, res) => {
