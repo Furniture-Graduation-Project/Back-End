@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const blogSchema = Joi.object({
-  authorId: Joi.string().required().messages({
+  employeeId: Joi.string().required().messages({
     "any.required": "Tác giả không được để trống",
     "string.empty": "Tác giả không được để trống",
   }),
@@ -19,9 +19,5 @@ export const blogSchema = Joi.object({
   }),
   image: Joi.string().trim().uri().optional().messages({
     "string.uri": "URL hình ảnh không hợp lệ",
-  }),
-  date: Joi.date().iso().required().messages({
-    "any.required": "Ngày viết bài không được để trống",
-    "date.base": "Ngày viết bài phải là một ngày hợp lệ",
   }),
 });
