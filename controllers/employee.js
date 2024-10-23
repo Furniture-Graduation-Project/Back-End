@@ -1,12 +1,44 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import Employee from "../models/employee.js";
-import { employeeSchema, signinSchema } from "../validations/employee.js";
+import { employeeSchema } from "../validations/employee.js";
 import { generateTokenAndSetCookie } from "../utils/token.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 const EmployeeController = {
+  searchByFullName: async (req, res) => {
+    try {
+      const { fullName } = req.query;
+
+      if (!fullName) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Vui lòng cung cấp fullName để tìm kiếm.",
+        });
+      }
+
+      const employees = await Employee.find({
+        fullName: { $regex: fullName, $options: "i" },
+      });
+
+      if (!employees || employees.length === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Không tìm thấy nhân viên nào với fullName này.",
+        });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        message: "Tìm kiếm thành công.",
+        data: employees,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi tìm kiếm nhân viên.",
+        error: error.message,
+      });
+    }
+  },
+
   getLimited: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) + 1 || 1;

@@ -3,6 +3,7 @@ import EmployeeController from "../controllers/employee.js";
 const routerEmployee = new Router();
 
 routerEmployee.get("/", EmployeeController.getAll);
+routerEmployee.get("/search", EmployeeController.searchByFullName);
 routerEmployee.get("/limited", EmployeeController.getLimited);
 routerEmployee.get("/:id", EmployeeController.getDetail);
 routerEmployee.post("/", EmployeeController.create);

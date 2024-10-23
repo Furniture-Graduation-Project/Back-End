@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import Location from "../models/location.js";
+// import Location from "../models/location.js";
 import User from "../models/user.js";
 import { locationSchema } from "../validations/location.js";
 
@@ -22,16 +22,14 @@ export const create = async (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({ message });
   }
   try {
-    let location = await Location.findOne({ userId });
-
-    if (!location) {
-      location = new Location({
-        userId,
-        locations: [],
-      });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Người dùng không tồn tại !" });
     }
 
-    location.locations.push({
+    user.locations.push({
       street,
       city,
       state,
@@ -41,29 +39,11 @@ export const create = async (req, res) => {
       phoneNumber,
     });
 
-    await location.save();
+    await user.save();
 
-    return res.status(StatusCodes.CREATED).json({ location });
-  } catch (error) {
     return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-  }
-};
-
-export const get = async (req, res) => {
-  try {
-    const locations = await Location.find({}).populate({
-      path: "userId",
-      select: "email name",
-    });
-    if (locations.length === 0) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không có địa chỉ nào !" });
-    }
-
-    return res.status(StatusCodes.OK).json({ locations });
+      .status(StatusCodes.CREATED)
+      .json({ message: "Đã thêm địa chỉ thành công !", location: req.body });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -73,19 +53,16 @@ export const get = async (req, res) => {
 
 export const getByUserId = async (req, res) => {
   try {
-    const locations = await Location.findOne({
-      userId: req.params.userId,
-    }).populate({
-      path: "userId",
-      select: "email name",
-    });
-    if (locations.length === 0) {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không có địa chỉ nào !" });
+        .json({ message: "Người dùng không tồn tại !" });
     }
 
-    return res.status(StatusCodes.OK).json(locations);
+    return res.status(StatusCodes.OK).json({ locations: user.locations });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -94,58 +71,31 @@ export const getByUserId = async (req, res) => {
 };
 
 export const update = async (req, res) => {
-  const {
-    userId,
-    street,
-    city,
-    state,
-    postalCode,
-    country,
-    recipientName,
-    phoneNumber,
-  } = req.body;
+  const { userId } = req.body;
 
   const locationId = req.params.id;
 
   try {
-    const { error } = locationSchema.validate(req.body);
-    if (error) {
-      const message = error.details.map((e) => e.message);
-      return res.status(StatusCodes.BAD_REQUEST).json({ message });
-    }
-
-    let location = await Location.findOne({
-      userId,
-      "locations._id": locationId,
+    const user = await User.findOne({
+      _id: userId,
+      locations: { $elemMatch: { _id: locationId } },
     });
 
-    console.log(userId, locationId);
-
-    if (!location) {
+    if (!user) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Địa chỉ không tồn tại !" });
+        .json({ message: "Người dùng không tồn tại !" });
     }
 
-    const address = location.locations.id(locationId);
+    const location = user.locations.id(locationId);
 
-    if (address) {
-      address.street = street;
-      address.country = country;
-      address.city = city;
-      address.state = state;
-      address.postalCode = postalCode;
-      address.recipientName = recipientName;
-      address.phoneNumber = phoneNumber;
-
-      await location.save();
-
-      return res.status(StatusCodes.OK).json({ location });
-    } else {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Địa chỉ không tồn tại !" });
+    for (let key in req.body) {
+      location[key] = req.body[key];
     }
+
+    await user.save();
+
+    return res.status(StatusCodes.OK).json({ location });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -155,44 +105,27 @@ export const update = async (req, res) => {
 
 export const remove = async (req, res) => {
   const { userId } = req.body;
-  const locationId = req.params.id;
+  const locationId = req.params.locationsId;
 
   try {
-    let location = await Location.findOne({
-      userId,
-      "locations._id": locationId,
+    const user = await User.findOne({
+      _id: userId,
+      locations: { $elemMatch: { _id: locationId } },
     });
 
-    if (!location) {
+    console.log(user);
+
+    if (!user) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Địa chỉ không tồn tại !" });
+        .json({ message: "Người dùng không tồn tại !" });
     }
 
-    location.locations = location.locations.filter(
-      (loc) => loc._id.toString() !== locationId
+    user.locations = user.locations.filter(
+      (location) => location._id.toString() !== locationId
     );
 
-    await location.save();
-
-    return res
-      .status(StatusCodes.OK)
-      .json({ location, message: "Đã xóa địa chỉ thành công !" });
-  } catch (error) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-  }
-};
-
-export const removeLocation = async (req, res) => {
-  try {
-    const location = await Location.findByIdAndDelete(req.params.locationsId);
-    if (!location) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Địa chỉ không tồn tại !" });
-    }
+    await user.save();
 
     return res
       .status(StatusCodes.OK)

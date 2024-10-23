@@ -2,7 +2,7 @@ GET http://localhost:8080/users
 ###
 
 GET http://localhost:8080/locations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmYzYzU4ZWQzYzNlNGY2YjYzNjViMjAiLCJpYXQiOjE3MjcyNTM2NDQsImV4cCI6MTcyNzI1MzY3NH0.Is9WaK6EtgQyU037FXyYN55aBO27bcCABF-7vw4NlaA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmYzYzU4ZWQzYzNlNGY2YjYzNjViMjAiLCJpYXQiOjE3Mjc1NDU1MzAsImV4cCI6MTcyNzU0NTU2MH0.Mcu1SbCym7zqQlzi2T9il3kl_uG1Ju3QGlQ1hLjSbEs
 
 ###
 POST http://localhost:5000/signin
@@ -16,7 +16,7 @@ Content-Type: application/json
 ###
 POST http://localhost:5000/refreshtoken
 Content-Type: application/json
-Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmYzYzU4ZWQzYzNlNGY2YjYzNjViMjAiLCJpYXQiOjE3MjcyNTM2MDYsImV4cCI6MTcyNzg1ODQwNn0.T5xySrslY9Cjc6mc-W3t2gRCsvWa-YWZcHLFb8wfw1E
+Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmYzYzU4ZWQzYzNlNGY2YjYzNjViMjAiLCJpYXQiOjE3Mjc1NDU1NzMsImV4cCI6MTcyODE1MDM3M30.zgINLiofEV8cj_W2lLWjdSTYYiYt2apK0XeXgq3JwCQ
 
 ###
 POST http://localhost:5000/logout
