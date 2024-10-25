@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import OrderModel from "../models/order.js";
 import { createOrderSchema, updateOrderSchema } from "../validations/order.js";
+import { io } from "../services/socket.js";
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -123,6 +124,7 @@ const OrderController = {
         });
       }
       const order = await OrderModel.create(value);
+      io.emit("Order", order);
       return res.status(StatusCodes.CREATED).json({
         message: "Tạo đơn hàng thành công",
         data: order,
