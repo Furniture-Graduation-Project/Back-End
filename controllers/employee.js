@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import Employee from "../models/employee.js";
-import { employeeSchema, signinSchema } from "../validations/employee.js";
+import { employeeSchema } from "../validations/employee.js";
 import { generateTokenAndSetCookie } from "../utils/token.js";
 import dotenv from "dotenv";
 dotenv.config();

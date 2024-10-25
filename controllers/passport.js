@@ -10,7 +10,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `http://localhost:${process.env.AUTH_PORT}/google/callback`,
+      callbackURL: `http://localhost:${process.env.PORT}/google/callback`,
       passReqToCallback: true,
     },
     async (request, accessToken, refreshToken, profile, done) => {
@@ -48,7 +48,7 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-      callbackURL: `http://localhost:${process.env.AUTH_PORT}/facebook/callback`,
+      callbackURL: `http://localhost:${process.env.PORT}/facebook/callback`,
       profileFields: ["id", "displayName", "photos", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {

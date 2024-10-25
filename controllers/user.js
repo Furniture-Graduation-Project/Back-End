@@ -1,9 +1,9 @@
-import User from '../models/user.js';
-import { StatusCodes } from 'http-status-codes';
-import bcryptjs from 'bcryptjs';
-import { signupSchema, signinSchema } from '../validations/user.js';
-import dotenv from 'dotenv';
-import generateTokenAndSetCookie from '../utils/generateToken.js';
+import User from "../models/user.js";
+import { StatusCodes } from "http-status-codes";
+import bcrypt from "bcrypt";
+import { signupSchema, signinSchema } from "../validations/user.js";
+import dotenv from "dotenv";
+import generateTokenAndSetCookie from "../utils/generateToken.js";
 dotenv.config();
 
 const UserController = {
@@ -20,10 +20,10 @@ const UserController = {
       const isExist = await User.findOne({ email: value.email });
       if (isExist) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Email đã tồn tại!',
+          message: "Email đã tồn tại!",
         });
       }
-      const hashPass = await bcryptjs.hash(value.password, 10);
+      const hashPass = await bcrypt.hash(value.password, 10);
       const user = await User.create({ ...value, password: hashPass });
       return res.status(StatusCodes.CREATED).json({ user });
     } catch (error) {
@@ -46,13 +46,13 @@ const UserController = {
       const user = await User.findOne({ email: value.email });
       if (!user) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Email không tồn tại!',
+          message: "Email không tồn tại!",
         });
       }
-      const isMatch = await bcryptjs.compare(value.password, user.password);
+      const isMatch = await bcrypt.compare(value.password, user.password);
       if (!isMatch) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Sai mật khẩu!',
+          message: "Sai mật khẩu!",
         });
       }
       generateTokenAndSetCookie(user._id, res);
@@ -70,7 +70,7 @@ const UserController = {
       if (!id) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'Không tìm thấy người dùng' });
+          .json({ message: "Không tìm thấy người dùng" });
       }
       const { value, error } = signinSchema.validate(req.body, {
         abortEarly: false,
@@ -81,7 +81,7 @@ const UserController = {
         return res.status(StatusCodes.BAD_REQUEST).json({ message });
       }
       if (value.password) {
-        const hashPass = await bcryptjs.hash(value.password, 10);
+        const hashPass = await bcrypt.hash(value.password, 10);
         value.password = hashPass;
       }
 
@@ -93,7 +93,7 @@ const UserController = {
       if (!data) {
         return res
           .status(StatusCodes.NOT_FOUND)
-          .json({ message: 'Người dùng không tồn tại!' });
+          .json({ message: "Người dùng không tồn tại!" });
       }
       return res.status(StatusCodes.OK).json({ data });
     } catch (error) {

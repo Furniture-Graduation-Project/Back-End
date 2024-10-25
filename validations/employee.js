@@ -1,9 +1,9 @@
 import Joi from "joi";
 
 export const employeeSchema = Joi.object({
-  username: Joi.string().required().messages({
-    "any.required": "Tên người dùng không được để trống",
-    "string.empty": "Tên người dùng không được để trống",
+  email: Joi.string().required().messages({
+    "any.required": "Email không được để trống",
+    "string.empty": "Email không được để trống",
   }),
   password: Joi.string().required().messages({
     "any.required": "Mật khẩu không được để trống",
@@ -25,16 +25,5 @@ export const employeeSchema = Joi.object({
   role: Joi.string().required().messages({
     "any.required": "Vai trò không được để trống",
     "string.empty": "Vai trò không được để trống",
-  }),
-});
-
-export const signinSchema = Joi.object({
-  username: Joi.string().required().messages({
-    "any.required": "Tên người dùng không được để trống",
-    "string.empty": "Tên người dùng không được để trống",
-  }),
-  password: Joi.string().required().messages({
-    "any.required": "Mật khẩu không được để trống",
-    "string.empty": "Mật khẩu không được để trống",
   }),
 });

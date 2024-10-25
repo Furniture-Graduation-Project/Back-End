@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
 import swaggerUi from "swagger-ui-express";
-
+import authRoutes from "./passport.js";
 import routerCart from "./cart.js";
 import CategoryRoute from "./category.js";
 import routerComment from "./comment.js";
 import routerEmployee from "./employee.js";
+import routerLocation from "./location.js";
 import routeMessage from "./message.js";
 import orderRouter from "./order.js";
 import productRouter from "./product.js";
@@ -26,11 +27,13 @@ export function Route(app) {
   app.use("/category", CategoryRoute);
   app.use("/order", orderRouter);
   app.use("/employee", routerEmployee);
-  app.use("/blog", routerBlog);
   app.use("/wishlist", routerWishlist);
   app.use("/comment", routerComment);
   app.use("/cart", routerCart);
+  app.use("blog", routerBlog);
   app.use("/promotion", routerPromotion);
   app.use("/voucher", routerVoucher);
   app.use("/message", routeMessage);
+  app.use("/locations", routerLocation);
+  app.use("/", authRoutes);
 }
