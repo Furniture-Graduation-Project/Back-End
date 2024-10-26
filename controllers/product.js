@@ -153,4 +153,25 @@ export const ProductController = {
       });
     }
   },
+  getByName: async (req, res) => {
+    try {
+      const { name } = req.query;
+      if (!name) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: "Tên sản phẩm không được bỏ trống." });
+      }
+      const products = await ProductModel.find({ name: { $regex: name, $options: "i" } });
+      if (products.length === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy sản phẩm." });
+      }
+      res.status(StatusCodes.OK).json({
+        data: products,
+        message: "Tìm kiếm sản phẩm thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi tìm kiếm sản phẩm.",
+        error: error.message,
+      });
+    }
+  },
 };
