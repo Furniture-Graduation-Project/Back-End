@@ -13,7 +13,7 @@ const voucherSchema = new mongoose.Schema(
     status: { type: String, enum: ['active', 'inactive'], required: true },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }], // Thêm trường orders
+    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
   },
   {
     timestamps: true,

@@ -30,8 +30,7 @@ const CartController = {
 
   getAll: async (req, res) => {
     try {
-      const result = await CartController.find({});
-
+      const result = await CartModel.find();
       res.status(StatusCodes.OK).json({
         data: result,
         message: "Danh sách giỏ hàng đã được lấy.",
@@ -86,13 +85,16 @@ const CartController = {
         .json({ message: "Không tìm thấy giỏ hàng" });
     }
     try {
-      const cart = await CartModel.findById(id).populate("cartItems");
+      const cart = await CartModel.findOne({UserID : id});   
       if (!cart) {
         return res
           .status(StatusCodes.NOT_FOUND)
           .json({ message: "Không tìm thấy giỏ hàng" });
       }
-      res.status(StatusCodes.OK).json(cart);
+      res.status(StatusCodes.OK).json({
+        data: cart,
+        message: "Lấy thông tin giỏ hàng thành công.",
+      });
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
