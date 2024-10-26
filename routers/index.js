@@ -30,7 +30,7 @@ export function Route(app) {
   app.use("/wishlist", routerWishlist);
   app.use("/comment", routerComment);
   app.use("/cart", routerCart);
-  app.use("blog", routerBlog);
+  app.use("/blog", routerBlog);
   app.use("/promotion", routerPromotion);
   app.use("/voucher", routerVoucher);
   app.use("/message", routeMessage);
