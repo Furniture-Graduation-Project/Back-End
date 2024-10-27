@@ -85,7 +85,14 @@ const CartController = {
         .json({ message: "Không tìm thấy giỏ hàng" });
     }
     try {
-      const cart = await CartModel.findOne({UserID : id});   
+      const cart = await CartModel.findOne({ UserID: id }).populate({
+        path: "carts.productID",
+        model: "Product",
+      }).populate({
+        path: "carts.productItemID",
+        model: "ProductItem",
+      });
+      
       if (!cart) {
         return res
           .status(StatusCodes.NOT_FOUND)
