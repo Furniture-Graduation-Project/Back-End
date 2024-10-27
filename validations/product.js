@@ -5,9 +5,9 @@ export const createProductSchema = Joi.object({
     "any.required": "Tên sản phẩm là bắt buộc",
     "string.empty": "Tên sản phẩm không được để trống",
   }),
-  title: Joi.string().required().messages({
-    "any.required": "Tiêu đề sản phẩm là bắt buộc",
-    "string.empty": "Tiêu đề sản phẩm không được để trống",
+  category: Joi.string().required().messages({
+    "any.required": "Danh mục sản phẩm là bắt buộc",
+    "string.empty": "Danh mục sản phẩm không được để trống",
   }),
   description: Joi.string().optional().allow("").messages({
     "string.base": "Mô tả phải là chuỗi ký tự",
@@ -17,35 +17,24 @@ export const createProductSchema = Joi.object({
     "number.base": "Giá sản phẩm phải là số",
     "number.min": "Giá sản phẩm phải lớn hơn hoặc bằng 0",
   }),
-  quantity: Joi.number().min(0).required().messages({
-    "any.required": "Số lượng sản phẩm là bắt buộc",
-    "number.base": "Số lượng sản phẩm phải là số",
-    "number.min": "Số lượng sản phẩm phải lớn hơn hoặc bằng 0",
+  SKU: Joi.string().required().messages({
+    "any.required": "SKU là bắt buộc",
+    "string.empty": "SKU không được để trống",
   }),
-  category: Joi.string().required().messages({
-    "any.required": "Danh mục sản phẩm là bắt buộc",
-    "string.empty": "Danh mục sản phẩm không được để trống",
-  }),
-  colors: Joi.array().items(Joi.string()).optional().messages({
-    "array.base": "Màu sắc phải là mảng các chuỗi ký tự",
-    "string.base": "Mỗi màu sắc phải là chuỗi ký tự",
-  }),
-  sizes: Joi.array().items(Joi.string()).optional().messages({
-    "array.base": "Kích thước phải là mảng các chuỗi ký tự",
-    "string.base": "Mỗi kích thước phải là chuỗi ký tự",
-  }),
-  SKU: Joi.number().optional().messages({
-    "number.base": "SKU phải là số",
-  }),
-  images: Joi.array().items(Joi.string()).min(1).required().messages({
-    "any.required": "Hình ảnh sản phẩm là bắt buộc",
+  images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự",
-    "array.min": "Cần ít nhất 1 hình ảnh",
     "string.base": "Mỗi hình ảnh phải là chuỗi ký tự",
   }),
-  createdAt: Joi.date().optional().messages({
-    "date.base": "Ngày tạo phải là ngày hợp lệ",
+  material: Joi.string().optional().allow("").messages({
+    "string.base": "Chất liệu phải là chuỗi ký tự",
   }),
+  status: Joi.string()
+    .valid("available", "out of stock", "discontinued")
+    .optional()
+    .messages({
+      "string.base": "Trạng thái phải là chuỗi ký tự",
+      "any.only": "Trạng thái không hợp lệ. Các giá trị hợp lệ là: available, out of stock, discontinued",
+    }),
 }).options({
   abortEarly: false,
 });
@@ -54,8 +43,8 @@ export const updateProductSchema = Joi.object({
   name: Joi.string().optional().messages({
     "string.base": "Tên sản phẩm phải là chuỗi ký tự",
   }),
-  title: Joi.string().optional().messages({
-    "string.base": "Tiêu đề sản phẩm phải là chuỗi ký tự",
+  category: Joi.string().optional().messages({
+    "string.base": "Danh mục sản phẩm phải là chuỗi ký tự",
   }),
   description: Joi.string().optional().allow("").messages({
     "string.base": "Mô tả phải là chuỗi ký tự",
@@ -64,31 +53,23 @@ export const updateProductSchema = Joi.object({
     "number.base": "Giá sản phẩm phải là số",
     "number.min": "Giá sản phẩm phải lớn hơn hoặc bằng 0",
   }),
-  quantity: Joi.number().min(0).optional().messages({
-    "number.base": "Số lượng sản phẩm phải là số",
-    "number.min": "Số lượng sản phẩm phải lớn hơn hoặc bằng 0",
-  }),
-  category: Joi.string().optional().messages({
-    "string.base": "Danh mục sản phẩm phải là chuỗi ký tự",
-  }),
-  colors: Joi.array().items(Joi.string()).optional().messages({
-    "array.base": "Màu sắc phải là mảng các chuỗi ký tự",
-    "string.base": "Mỗi màu sắc phải là chuỗi ký tự",
-  }),
-  sizes: Joi.array().items(Joi.string()).optional().messages({
-    "array.base": "Kích thước phải là mảng các chuỗi ký tự",
-    "string.base": "Mỗi kích thước phải là chuỗi ký tự",
-  }),
-  SKU: Joi.number().optional().messages({
-    "number.base": "SKU phải là số",
+  SKU: Joi.string().optional().messages({
+    "string.base": "SKU phải là chuỗi ký tự",
   }),
   images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự",
     "string.base": "Mỗi hình ảnh phải là chuỗi ký tự",
   }),
-  createdAt: Joi.date().optional().messages({
-    "date.base": "Ngày tạo phải là ngày hợp lệ",
+  material: Joi.string().optional().allow("").messages({
+    "string.base": "Chất liệu phải là chuỗi ký tự",
   }),
+  status: Joi.string()
+    .valid("available", "out of stock", "discontinued")
+    .optional()
+    .messages({
+      "string.base": "Trạng thái phải là chuỗi ký tự",
+      "any.only": "Trạng thái không hợp lệ. Các giá trị hợp lệ là: available, out of stock, discontinued",
+    }),
 }).options({
   abortEarly: false,
 });
