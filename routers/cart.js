@@ -8,6 +8,8 @@ routerCart.get("/limited", CartController.getLimited);
 routerCart.get("/:id", CartController.getById);
 routerCart.post("/", CartController.create);
 routerCart.put("/:id", CartController.update);
-routerCart.delete("/:id", CartController.delete);
+routerCart.delete("/:productID/:productItemID", CartController.delete);
+routerCart.patch("/increase/:userId/:productId/:productItemId", CartController.increaseQuantity)
+routerCart.patch("/decrease/:userId/:productId/:productItemId", CartController.decreaseQuantity)
 
 export default routerCart;
