@@ -28,3 +28,13 @@ export const employeeSchema = Joi.object({
     'string.empty': 'Vai trò không được để trống',
   }),
 });
+export const signinEmployeeSchema = Joi.object({
+  username: Joi.string().required().messages({
+    'string.email': 'Email không đúng định dạng',
+    'string.empty': 'Email không được để trống',
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Mật khẩu phải có ít nhất 8 ký tự',
+    'string.empty': 'Mật khẩu không được để trống',
+  }),
+});
