@@ -4,10 +4,7 @@ export const paymentSchema = new mongoose.Schema({
     type: String,
     enum: [
       "credit_card",
-      "debit_card",
-      "paypal",
-      "bank_transfer",
-      "cash_on_delivery",
+      "cash_on_delivery"
     ],
     required: true,
   },
