@@ -8,7 +8,10 @@ import {
 export const ProductController = {
   getAll: async (req, res) => {
     try {
-      const products = await ProductModel.find().populate('category','categoryName');
+      const products = await ProductModel.find().populate(
+        "category",
+        "categoryName"
+      );
       res.status(StatusCodes.OK).json({
         data: products,
         message: "Hiển thị tất cả sản phẩm thành công",
@@ -26,7 +29,10 @@ export const ProductController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
-      const products = await ProductModel.find().populate('category','categoryName').skip(skip).limit(limit);
+      const products = await ProductModel.find()
+        .populate("category", "categoryName")
+        .skip(skip)
+        .limit(limit);
       const totalData = await ProductModel.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
       res.status(StatusCodes.OK).json({
@@ -75,7 +81,7 @@ export const ProductController = {
         abortEarly: false,
         stripUnknown: true,
       });
-      
+
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
         return res
@@ -86,9 +92,9 @@ export const ProductController = {
       if (existingProduct) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'SKU đã tồn tại.' });
+          .json({ message: "SKU đã tồn tại." });
       }
-  
+
       const newProduct = new ProductModel(value);
       await newProduct.save();
       res.status(StatusCodes.CREATED).json({
@@ -102,7 +108,7 @@ export const ProductController = {
       });
     }
   },
-  
+
   updateProduct: async (req, res) => {
     try {
       const { id } = req.params;
@@ -110,7 +116,7 @@ export const ProductController = {
         abortEarly: false,
         stripUnknown: true,
       });
-  
+
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
         return res
@@ -119,25 +125,25 @@ export const ProductController = {
       }
       const existingProduct = await ProductModel.findOne({
         SKU: value.SKU,
-        _id: { $ne: id }, 
+        _id: { $ne: id },
       });
-      
+
       if (existingProduct) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'SKU đã tồn tại.' });
+          .json({ message: "SKU đã tồn tại." });
       }
       const updatedProduct = await ProductModel.findByIdAndUpdate(id, value, {
         new: true,
         runValidators: true,
       });
-  
+
       if (!updatedProduct) {
         return res
           .status(StatusCodes.NOT_FOUND)
           .json({ message: "Sản phẩm không tồn tại." });
       }
-  
+
       res.status(StatusCodes.OK).json({
         data: updatedProduct,
         message: "Cập nhật sản phẩm thành công.",
@@ -149,7 +155,6 @@ export const ProductController = {
       });
     }
   },
-  
 
   deleteProduct: async (req, res) => {
     try {
@@ -179,11 +184,17 @@ export const ProductController = {
     try {
       const { name } = req.query;
       if (!name) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: "Tên sản phẩm không được bỏ trống." });
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Tên sản phẩm không được bỏ trống." });
       }
-      const products = await ProductModel.find({ name: { $regex: name, $options: "i" } });
+      const products = await ProductModel.find({
+        name: { $regex: name, $options: "i" },
+      });
       if (products.length === 0) {
-        return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy sản phẩm." });
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "Không tìm thấy sản phẩm." });
       }
       res.status(StatusCodes.OK).json({
         data: products,

@@ -5,7 +5,7 @@ import { blogSchema } from "../validations/blog.js";
 const BlogController = {
   getAllBlogs: async (req, res) => {
     try {
-      const blogs = await BlogModel.find();
+      const blogs = await BlogModel.find().populate("employeeId", "fullName");
       return res.status(StatusCodes.OK).json({
         message: "Lấy tất cả bài viết thành công",
         data: blogs,
@@ -22,7 +22,10 @@ const BlogController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
-      const blogs = await BlogModel.find().skip(skip).limit(limit);
+      const blogs = await BlogModel.find()
+        .populate("employeeId", "fullName")
+        .skip(skip)
+        .limit(limit);
 
       if (!blogs || blogs.length === 0) {
         return res
@@ -54,7 +57,10 @@ const BlogController = {
         .json({ message: "Không tìm thấy bài viết" });
     }
     try {
-      const blog = await BlogModel.findById(id);
+      const blog = await BlogModel.findById(id).populate(
+        "employeeId",
+        "fullName"
+      ); // Thêm populate
       if (!blog) {
         return res
           .status(StatusCodes.NOT_FOUND)
