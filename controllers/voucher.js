@@ -14,7 +14,6 @@ const VoucherController = {
     }
     try {
       const voucher = new VoucherModel(value);
-
       await voucher.save();
       res
         .status(StatusCodes.CREATED)
