@@ -15,6 +15,7 @@ import routerPromotion from "./promotion.js";
 import routerVoucher from "./voucher.js";
 import routerWishlist from "./wishlist.js";
 import routerBlog from "./blog.js";
+import routerMaterial from "./material.js";
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("swagger.json"), "utf8")
@@ -35,5 +36,6 @@ export function Route(app) {
   app.use("/voucher", routerVoucher);
   app.use("/message", routeMessage);
   app.use("/locations", routerLocation);
+  app.use("/material", routerMaterial);
   app.use("/", authRoutes);
 }
