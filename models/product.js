@@ -17,10 +17,6 @@ const productSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
     SKU: {
       type: String,
       required: true,
@@ -32,9 +28,12 @@ const productSchema = new mongoose.Schema(
       default: [],
     },
     material: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Material",
+    },
+    materialDetail: {
       type: String,
       default: "",
-      trim: true,
     },
     status: {
       type: String,
