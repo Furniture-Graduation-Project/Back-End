@@ -25,5 +25,5 @@ const ReviewSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-const Review = mongoose.model("commemt", ReviewSchema);
+const Review = mongoose.model("review", ReviewSchema);
 export default Review;
