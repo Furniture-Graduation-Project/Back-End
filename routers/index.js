@@ -4,7 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import authRoutes from "./passport.js";
 import routerCart from "./cart.js";
 import CategoryRoute from "./category.js";
-import routerComment from "./comment.js";
+import routerReview from "./review.js";
 import routerEmployee from "./employee.js";
 import routerLocation from "./location.js";
 import routeMessage from "./message.js";
@@ -29,7 +29,7 @@ export function Route(app) {
   app.use("/order", orderRouter);
   app.use("/employee", routerEmployee);
   app.use("/wishlist", routerWishlist);
-  app.use("/comment", routerComment);
+  app.use("/review", routerReview);
   app.use("/cart", routerCart);
   app.use("/blog", routerBlog);
   app.use("/promotion", routerPromotion);
