@@ -1,18 +1,18 @@
-import { StatusCodes } from 'http-status-codes';
-import Comment from '../models/comment.js';
-import { commentSchema } from '../validations/comment.js';
+import { StatusCodes } from "http-status-codes";
+import Review from "../models/review.js";
+import { reviewSchema } from "../validations/review.js";
 
-const CommentController = {
+const ReviewController = {
   getAll: async (req, res) => {
     try {
-      const comments = await Comment.find();
+      const reviews = await Review.find();
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy tất cả bình luận thành công',
-        data: comments,
+        message: "Lấy tất cả bình luận thành công",
+        data: reviews,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -22,46 +22,46 @@ const CommentController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
-      const comment = await Comment.findById(id);
-      if (!comment) {
+      const review = await Review.findById(id);
+      if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy chi tiết bình luận thành công',
-        data: comment,
+        message: "Lấy chi tiết bình luận thành công",
+        data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
 
   create: async (req, res) => {
     try {
-      const { value, error } = commentSchema.validate(req.body, {
+      const { value, error } = reviewSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Lỗi: ' + errors.join(', '),
+          message: "Lỗi: " + errors.join(", "),
         });
       }
-      const comment = await Comment.create(value);
+      const review = await Review.create(value);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo bình luận thành công',
-        data: comment,
+        message: "Tạo bình luận thành công",
+        data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -72,34 +72,34 @@ const CommentController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
-      const { value, error } = commentSchema.validate(req.body, {
+      const { value, error } = reviewSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Lỗi: ' + errors.join(', '),
+          message: "Lỗi: " + errors.join(", "),
         });
       }
-      const comment = await Comment.findByIdAndUpdate(id, value, {
+      const review = await Review.findByIdAndUpdate(id, value, {
         new: true,
       });
-      if (!comment) {
+      if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Cập nhật bình luận thành công',
-        data: comment,
+        message: "Cập nhật bình luận thành công",
+        data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -110,25 +110,25 @@ const CommentController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
-      const comment = await Comment.findByIdAndDelete(id);
-      if (!comment) {
+      const review = await Review.findByIdAndDelete(id);
+      if (!review) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Xóa bình luận thành công',
-        data: comment,
+        message: "Xóa bình luận thành công",
+        data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
 };
 
-export default CommentController;
+export default ReviewController;
