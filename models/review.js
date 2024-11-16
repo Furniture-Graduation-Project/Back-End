@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const CommentSchema = new mongoose.Schema(
+const ReviewSchema = new mongoose.Schema(
   {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -25,5 +25,5 @@ const CommentSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-const Comment = mongoose.model("commemt", CommentSchema);
-export default Comment;
+const Review = mongoose.model("review", ReviewSchema);
+export default Review;

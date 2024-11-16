@@ -4,7 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import authRoutes from "./auth.js";
 import routerCart from "./cart.js";
 import CategoryRoute from "./category.js";
-import routerComment from "./comment.js";
+import routerReview from "./review.js";
 import routerEmployee from "./employee.js";
 import routerLocation from "./location.js";
 import routeMessage from "./message.js";
@@ -15,7 +15,7 @@ import routerPromotion from "./promotion.js";
 import routerVoucher from "./voucher.js";
 import routerWishlist from "./wishlist.js";
 import routerBlog from "./blog.js";
-import routerUser from "./user.js";
+import routerMaterial from "./material.js";
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("swagger.json"), "utf8")
@@ -29,13 +29,14 @@ export function Route(app) {
   app.use("/order", orderRouter);
   app.use("/employee", routerEmployee);
   app.use("/wishlist", routerWishlist);
-  app.use("/comment", routerComment);
+  app.use("/review", routerReview);
   app.use("/cart", routerCart);
   app.use("/blog", routerBlog);
   app.use("/promotion", routerPromotion);
   app.use("/voucher", routerVoucher);
   app.use("/message", routeMessage);
   app.use("/locations", routerLocation);
+  app.use("/material", routerMaterial);
   app.use("/", authRoutes);
   app.use("/users", routerUser);
 }

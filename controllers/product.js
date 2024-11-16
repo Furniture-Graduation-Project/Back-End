@@ -8,10 +8,10 @@ import {
 export const ProductController = {
   getAll: async (req, res) => {
     try {
-      const products = await ProductModel.find().populate(
-        "category",
-        "categoryName"
-      );
+      const products = await ProductModel.find()
+        .populate("category", "categoryName")
+        .populate("material", "materialName");
+
       res.status(StatusCodes.OK).json({
         data: products,
         message: "Hiển thị tất cả sản phẩm thành công",
@@ -29,12 +29,16 @@ export const ProductController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
+
       const products = await ProductModel.find()
         .populate("category", "categoryName")
+        .populate("material", "materialName")
         .skip(skip)
         .limit(limit);
+
       const totalData = await ProductModel.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
+
       res.status(StatusCodes.OK).json({
         data: products,
         totalPage,
