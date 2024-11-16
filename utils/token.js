@@ -1,18 +1,18 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 export const generateTokenAndSetCookie = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
-    expiresIn: "30s",
+    expiresIn: '1d',
   });
 
-  res.cookie("token", token, {
-    maxAge: 15 * 24 * 60 * 60 * 1000,
+  res.cookie('accessToken', token, {
+    maxAge: 1 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV !== "development",
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV !== 'development',
   });
 
   return token;
@@ -20,13 +20,13 @@ export const generateTokenAndSetCookie = (userId, res) => {
 
 export const generateRefreshToken = (userId, res) => {
   const refreshToken = jwt.sign({ userId }, process.env.REFRESH_SECRET_KEY, {
-    expiresIn: "7d",
+    expiresIn: '7d',
   });
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV !== "development",
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV !== 'development',
   });
 
   return refreshToken;

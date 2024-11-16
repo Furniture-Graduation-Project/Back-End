@@ -28,9 +28,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --legacy-watch server.js",
-    "auth": "nodemon authServer.js",
-    "swagger": "node ./swagger.js"
+    "dev": "nodemon --legacy-watch server.js"
   },
   "author": "",
   "license": "ISC",

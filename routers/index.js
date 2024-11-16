@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import swaggerUi from "swagger-ui-express";
-import authRoutes from "./passport.js";
+import authRoutes from "./auth.js";
 import routerCart from "./cart.js";
 import CategoryRoute from "./category.js";
 import routerReview from "./review.js";
@@ -38,4 +38,5 @@ export function Route(app) {
   app.use("/locations", routerLocation);
   app.use("/material", routerMaterial);
   app.use("/", authRoutes);
+  app.use("/users", routerUser);
 }
