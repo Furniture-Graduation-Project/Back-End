@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import swaggerUi from "swagger-ui-express";
-import authRoutes from "./passport.js";
+import authRoutes from "./auth.js";
 import routerCart from "./cart.js";
 import CategoryRoute from "./category.js";
 import routerComment from "./comment.js";
@@ -15,6 +15,7 @@ import routerPromotion from "./promotion.js";
 import routerVoucher from "./voucher.js";
 import routerWishlist from "./wishlist.js";
 import routerBlog from "./blog.js";
+import routerUser from "./user.js";
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("swagger.json"), "utf8")
@@ -36,4 +37,5 @@ export function Route(app) {
   app.use("/message", routeMessage);
   app.use("/locations", routerLocation);
   app.use("/", authRoutes);
+  app.use("/users", routerUser);
 }
