@@ -1,0 +1,20 @@
+const protectOrder = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ error: "Chưa xác thực - Không có thông tin của nhân viên" });
+    }
+    if (!["order", "admin"].includes(req.user.role)) {
+      return res
+        .status(403)
+        .json({ error: "Cấm truy cập - Quyền truy cập không đủ" });
+    }
+    next();
+  } catch (error) {
+    console.error("Lỗi trong middleware protectOrder:", error.message);
+    res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+  }
+};
+
+export default protectOrder;
