@@ -16,6 +16,7 @@ import routerVoucher from "./voucher.js";
 import routerWishlist from "./wishlist.js";
 import routerBlog from "./blog.js";
 import routerMaterial from "./material.js";
+import routerUser from "./user.js";
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("swagger.json"), "utf8")
