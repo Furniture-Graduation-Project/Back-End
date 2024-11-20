@@ -1,17 +1,20 @@
-import { Router } from "express";
-import OrderController from "../controllers/order.js";
-import protectRoute from "../middleware/protectRoute.js";
-import protectOrder from "../middleware/protectOrder.js";
+import { Router } from 'express';
+import OrderController from '../controllers/order.js';
+import protectRouteClient from '../middleware/protectRouteClient.js';
 
 const orderRouter = new Router();
 
-orderRouter.get("/", OrderController.getAll);
-orderRouter.get("/limited", OrderController.getLimited);
-orderRouter.get("/:id", OrderController.getByIdOrder);
-orderRouter.get("/user/:id", OrderController.getByIdUser);
+orderRouter.get('/', OrderController.getAll);
+orderRouter.get('/limited', OrderController.getLimited);
+orderRouter.get('/:id', OrderController.getByIdOrder);
+orderRouter.get('/user/:id', OrderController.getByIdUser);
+orderRouter.post('/', OrderController.create);
+orderRouter.put('/:id', OrderController.update);
+orderRouter.delete('/:id', OrderController.delete);
 
-orderRouter.post("/", protectRoute, protectOrder, OrderController.create);
-orderRouter.put("/:id", protectRoute, protectOrder, OrderController.update);
-orderRouter.delete("/:id", protectRoute, protectOrder, OrderController.delete);
-
+orderRouter.get(
+  '/client/limited',
+  protectRouteClient,
+  OrderController.getLimited,
+);
 export default orderRouter;

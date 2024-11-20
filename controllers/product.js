@@ -1,24 +1,24 @@
-import { StatusCodes } from "http-status-codes";
-import ProductModel from "../models/product.js";
+import { StatusCodes } from 'http-status-codes';
+import ProductModel from '../models/product.js';
 import {
   createProductSchema,
   updateProductSchema,
-} from "../validations/product.js";
+} from '../validations/product.js';
 
 export const ProductController = {
   getAll: async (req, res) => {
     try {
       const products = await ProductModel.find()
-        .populate("category", "categoryName")
-        .populate("material", "materialName");
+        .populate('category', 'categoryName')
+        .populate('material', 'materialName');
 
       res.status(StatusCodes.OK).json({
         data: products,
-        message: "Hiển thị tất cả sản phẩm thành công",
+        message: 'Hiển thị tất cả sản phẩm thành công',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        message: 'Có lỗi xảy ra khi lấy thông tin sản phẩm.',
         error: error.message,
       });
     }
@@ -31,8 +31,8 @@ export const ProductController = {
       const skip = (page - 1) * limit;
 
       const products = await ProductModel.find()
-        .populate("category", "categoryName")
-        .populate("material", "materialName")
+        .populate('category', 'categoryName')
+        .populate('material', 'materialName')
         .skip(skip)
         .limit(limit);
 
@@ -43,11 +43,11 @@ export const ProductController = {
         data: products,
         totalPage,
         totalData,
-        message: "Lấy sản phẩm thành công.",
+        message: 'Lấy sản phẩm thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        message: 'Có lỗi xảy ra khi lấy thông tin sản phẩm.',
         error: error.message,
       });
     }
@@ -59,21 +59,21 @@ export const ProductController = {
       if (!id) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Không tìm thấy sản phẩm" });
+          .json({ message: 'Không tìm thấy sản phẩm' });
       }
       const product = await ProductModel.findById(id);
       if (!product) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Sản phẩm không tồn tại." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Sản phẩm không tồn tại.' });
       }
       res.status(StatusCodes.OK).json({
         data: product,
-        message: "Lấy sản phẩm thành công.",
+        message: 'Lấy sản phẩm thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        message: 'Có lỗi xảy ra khi lấy thông tin sản phẩm.',
         error: error.message,
       });
     }
@@ -96,18 +96,18 @@ export const ProductController = {
       if (existingProduct) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "SKU đã tồn tại." });
+          .json({ message: 'SKU đã tồn tại.' });
       }
 
       const newProduct = new ProductModel(value);
       await newProduct.save();
       res.status(StatusCodes.CREATED).json({
         data: newProduct,
-        message: "Tạo sản phẩm thành công.",
+        message: 'Tạo sản phẩm thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi tạo sản phẩm.",
+        message: 'Có lỗi xảy ra khi tạo sản phẩm.',
         error: error.message,
       });
     }
@@ -135,7 +135,7 @@ export const ProductController = {
       if (existingProduct) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "SKU đã tồn tại." });
+          .json({ message: 'SKU đã tồn tại.' });
       }
       const updatedProduct = await ProductModel.findByIdAndUpdate(id, value, {
         new: true,
@@ -144,17 +144,17 @@ export const ProductController = {
 
       if (!updatedProduct) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Sản phẩm không tồn tại." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Sản phẩm không tồn tại.' });
       }
 
       res.status(StatusCodes.OK).json({
         data: updatedProduct,
-        message: "Cập nhật sản phẩm thành công.",
+        message: 'Cập nhật sản phẩm thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi cập nhật sản phẩm.",
+        message: 'Có lỗi xảy ra khi cập nhật sản phẩm.',
         error: error.message,
       });
     }
@@ -166,20 +166,20 @@ export const ProductController = {
       if (!id) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Không tìm thấy sản phẩm" });
+          .json({ message: 'Không tìm thấy sản phẩm' });
       }
       const deletedProduct = await ProductModel.findByIdAndDelete(id);
       if (!deletedProduct) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Sản phẩm không tồn tại." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Sản phẩm không tồn tại.' });
       }
       res
         .status(StatusCodes.OK)
-        .json({ message: "Sản phẩm đã được xóa thành công." });
+        .json({ message: 'Sản phẩm đã được xóa thành công.' });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi xóa sản phẩm.",
+        message: 'Có lỗi xảy ra khi xóa sản phẩm.',
         error: error.message,
       });
     }
@@ -190,23 +190,23 @@ export const ProductController = {
       if (!name) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Tên sản phẩm không được bỏ trống." });
+          .json({ message: 'Tên sản phẩm không được bỏ trống.' });
       }
       const products = await ProductModel.find({
-        name: { $regex: name, $options: "i" },
+        name: { $regex: name, $options: 'i' },
       });
       if (products.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy sản phẩm." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy sản phẩm.' });
       }
       res.status(StatusCodes.OK).json({
         data: products,
-        message: "Tìm kiếm sản phẩm thành công.",
+        message: 'Tìm kiếm sản phẩm thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi tìm kiếm sản phẩm.",
+        message: 'Có lỗi xảy ra khi tìm kiếm sản phẩm.',
         error: error.message,
       });
     }

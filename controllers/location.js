@@ -1,7 +1,7 @@
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from 'http-status-codes';
 // import Location from "../models/location.js";
-import User from "../models/user.js";
-import { locationSchema } from "../validations/location.js";
+import User from '../models/user.js';
+import { locationSchema } from '../validations/location.js';
 
 export const create = async (req, res) => {
   const userId = req.params.userId;
@@ -25,8 +25,8 @@ export const create = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không tồn tại !" });
+        .status(StatusCodes.OK)
+        .json({ message: 'Người dùng không tồn tại !' });
     }
 
     user.locations.push({
@@ -43,7 +43,7 @@ export const create = async (req, res) => {
 
     return res
       .status(StatusCodes.CREATED)
-      .json({ message: "Đã thêm địa chỉ thành công !", location: req.body });
+      .json({ message: 'Đã thêm địa chỉ thành công !', location: req.body });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -58,8 +58,8 @@ export const getByUserId = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không tồn tại !" });
+        .status(StatusCodes.OK)
+        .json({ message: 'Người dùng không tồn tại !' });
     }
 
     return res.status(StatusCodes.OK).json({ locations: user.locations });
@@ -83,8 +83,8 @@ export const update = async (req, res) => {
 
     if (!user) {
       return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không tồn tại !" });
+        .status(StatusCodes.OK)
+        .json({ message: 'Người dùng không tồn tại !' });
     }
 
     const location = user.locations.id(locationId);
@@ -117,19 +117,19 @@ export const remove = async (req, res) => {
 
     if (!user) {
       return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Người dùng không tồn tại !" });
+        .status(StatusCodes.OK)
+        .json({ message: 'Người dùng không tồn tại !' });
     }
 
     user.locations = user.locations.filter(
-      (location) => location._id.toString() !== locationId
+      (location) => location._id.toString() !== locationId,
     );
 
     await user.save();
 
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Đã xóa địa chỉ thành công !" });
+      .json({ message: 'Đã xóa địa chỉ thành công !' });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

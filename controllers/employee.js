@@ -1,14 +1,11 @@
-import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
-import Employee from "../models/employee.js";
+import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcrypt';
+import Employee from '../models/employee.js';
 import {
   employeeSchema,
   signinEmployeeSchema,
-  updateEmployeePassword,
-} from "../validations/employee.js";
-import { generateTokenAndSetCookie } from "../utils/token.js";
-import dotenv from "dotenv";
-dotenv.config();
+} from '../validations/employee.js';
+import { generateTokenAndSetCookie } from '../utils/token.js';
 
 const EmployeeController = {
   searchByFullName: async (req, res) => {
@@ -26,8 +23,8 @@ const EmployeeController = {
       });
 
       if (!employees || employees.length === 0) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Không tìm thấy nhân viên nào với fullName này.",
+        return res.status(StatusCodes.OK).json({
+          message: 'Không tìm thấy nhân viên nào với fullName này.',
         });
       }
 
@@ -51,8 +48,8 @@ const EmployeeController = {
       const employees = await Employee.find().skip(skip).limit(limit);
       if (!employees || employees.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không có nhân viên tồn tại." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không có nhân viên tồn tại.' });
       }
 
       const totalData = await Employee.countDocuments();
@@ -96,8 +93,8 @@ const EmployeeController = {
     try {
       const employee = await Employee.findById(id);
       if (!employee) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Nhân viên không tìm thấy",
+        return res.status(StatusCodes.OK).json({
+          message: 'Nhân viên không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
@@ -215,8 +212,8 @@ const EmployeeController = {
         new: true,
       });
       if (!employee) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Nhân viên không tìm thấy",
+        return res.status(StatusCodes.OK).json({
+          message: 'Nhân viên không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
@@ -284,8 +281,8 @@ const EmployeeController = {
     try {
       const employee = await Employee.findByIdAndDelete(id);
       if (!employee) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Nhân viên không tìm thấy",
+        return res.status(StatusCodes.OK).json({
+          message: 'Nhân viên không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({

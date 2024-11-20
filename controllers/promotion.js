@@ -1,6 +1,6 @@
-import { StatusCodes } from "http-status-codes";
-import PromotionModel from "../models/promotion.js";
-import { promotionSchema } from "../validations/promotion.js";
+import { StatusCodes } from 'http-status-codes';
+import PromotionModel from '../models/promotion.js';
+import { promotionSchema } from '../validations/promotion.js';
 
 const PromotionController = {
   create: async (req, res) => {
@@ -20,23 +20,23 @@ const PromotionController = {
       await promotion.save();
       res
         .status(StatusCodes.CREATED)
-        .json({ message: "Tạo promotion thành công", promotion });
+        .json({ message: 'Tạo promotion thành công', promotion });
     } catch (error) {
       res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Tạo promotion thất bại", error: error.message });
+        .json({ message: 'Tạo promotion thất bại', error: error.message });
     }
   },
 
   getAll: async (req, res) => {
     try {
       const promotions = await PromotionModel.find().populate(
-        "productID categoryID"
+        'productID categoryID',
       );
       res.status(StatusCodes.OK).json(promotions);
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lấy danh sách promotion thất bại",
+        message: 'Lấy danh sách promotion thất bại',
         error: error.message,
       });
     }
@@ -47,22 +47,22 @@ const PromotionController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy promotion" });
+        .json({ message: 'Không tìm thấy promotion' });
     }
     try {
       const promotion = await PromotionModel.findById(id).populate(
-        "productID categoryID"
+        'productID categoryID',
       );
       if (!promotion) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy promotion" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy promotion' });
       }
       res.status(StatusCodes.OK).json(promotion);
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ message: "Lấy promotion thất bại", error: error.message });
+        .json({ message: 'Lấy promotion thất bại', error: error.message });
     }
   },
 
@@ -71,7 +71,7 @@ const PromotionController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy promotion" });
+        .json({ message: 'Không tìm thấy promotion' });
     }
     const { value, error } = promotionSchema.validate(req.body, {
       abortEarly: false,
@@ -89,17 +89,17 @@ const PromotionController = {
 
       if (!promotion) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy promotion" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy promotion' });
       }
 
       res
         .status(StatusCodes.OK)
-        .json({ message: "Cập nhật promotion thành công", promotion });
+        .json({ message: 'Cập nhật promotion thành công', promotion });
     } catch (error) {
       res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Cập nhật promotion thất bại", error: error.message });
+        .json({ message: 'Cập nhật promotion thất bại', error: error.message });
     }
   },
 
@@ -108,21 +108,21 @@ const PromotionController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy promotion" });
+        .json({ message: 'Không tìm thấy promotion' });
     }
     try {
       const promotion = await PromotionModel.findByIdAndDelete(id);
       if (!promotion) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy promotion" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy promotion' });
       }
 
-      res.status(StatusCodes.OK).json({ message: "Xóa promotion thành công" });
+      res.status(StatusCodes.OK).json({ message: 'Xóa promotion thành công' });
     } catch (error) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ message: "Xóa promotion thất bại", error: error.message });
+        .json({ message: 'Xóa promotion thất bại', error: error.message });
     }
   },
 
@@ -133,14 +133,14 @@ const PromotionController = {
       const skip = (page - 1) * limit;
 
       const promotions = await PromotionModel.find()
-        .populate("productID categoryID")
+        .populate('productID categoryID')
         .skip(skip)
         .limit(limit);
 
       if (!promotions || promotions.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không có promotion nào." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không có promotion nào.' });
       }
 
       const totalData = await PromotionModel.countDocuments();
@@ -150,11 +150,11 @@ const PromotionController = {
         data: promotions,
         totalPage,
         totalData,
-        message: "Lấy danh sách promotion thành công.",
+        message: 'Lấy danh sách promotion thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin promotion.",
+        message: 'Có lỗi xảy ra khi lấy thông tin promotion.',
         error: error.message,
       });
     }

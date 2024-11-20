@@ -1,9 +1,9 @@
-import { StatusCodes } from "http-status-codes";
-import Material from "../models/material.js";
+import { StatusCodes } from 'http-status-codes';
+import Material from '../models/material.js';
 import {
   createMaterialSchema,
   updateMaterialSchema,
-} from "../validations/material.js";
+} from '../validations/material.js';
 
 const MaterialController = {
   getLimited: async (req, res) => {
@@ -16,8 +16,8 @@ const MaterialController = {
 
       if (!materials || materials.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không có nguyên liệu nào." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không có nguyên liệu nào.' });
       }
 
       const totalData = await Material.countDocuments();
@@ -27,11 +27,11 @@ const MaterialController = {
         data: materials,
         totalPage,
         totalData,
-        message: "Lấy danh sách nguyên liệu thành công.",
+        message: 'Lấy danh sách nguyên liệu thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin nguyên liệu.",
+        message: 'Có lỗi xảy ra khi lấy thông tin nguyên liệu.',
         error: error.message,
       });
     }
@@ -51,7 +51,7 @@ const MaterialController = {
       });
       if (existingMaterial) {
         return res.status(StatusCodes.CONFLICT).json({
-          message: "Nguyên liệu đã tồn tại.",
+          message: 'Nguyên liệu đã tồn tại.',
         });
       }
 
@@ -59,12 +59,12 @@ const MaterialController = {
       await newMaterial.save();
 
       return res.status(StatusCodes.CREATED).json({
-        message: "Tạo nguyên liệu thành công.",
+        message: 'Tạo nguyên liệu thành công.',
         data: newMaterial,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi tạo nguyên liệu.",
+        message: 'Có lỗi xảy ra khi tạo nguyên liệu.',
         error: error.message,
       });
     }
@@ -76,7 +76,7 @@ const MaterialController = {
       if (materials.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: "Không có nguyên liệu nào!" });
+          .json({ message: 'Không có nguyên liệu nào!' });
       }
       return res.status(StatusCodes.OK).json(materials);
     } catch (error) {
@@ -90,8 +90,8 @@ const MaterialController = {
       const material = await Material.findById(id);
       if (!material) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy nguyên liệu!" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy nguyên liệu!' });
       }
       return res.status(StatusCodes.OK).json(material);
     } catch (error) {
@@ -116,8 +116,8 @@ const MaterialController = {
 
       if (!updatedMaterial) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy nguyên liệu để cập nhật!" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy nguyên liệu để cập nhật!' });
       }
       return res.status(StatusCodes.OK).json(updatedMaterial);
     } catch (error) {
@@ -130,27 +130,27 @@ const MaterialController = {
       const { materialName } = req.query;
       if (!materialName) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Thiếu tham số materialName trong yêu cầu.",
+          message: 'Thiếu tham số materialName trong yêu cầu.',
         });
       }
 
       const materials = await Material.find({
-        materialName: { $regex: materialName, $options: "i" },
+        materialName: { $regex: materialName, $options: 'i' },
       });
 
       if (materials.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Không tìm thấy nguyên liệu nào." });
+          .status(StatusCodes.OK)
+          .json({ message: 'Không tìm thấy nguyên liệu nào.' });
       }
 
       return res.status(StatusCodes.OK).json({
         data: materials,
-        message: "Tìm kiếm nguyên liệu thành công.",
+        message: 'Tìm kiếm nguyên liệu thành công.',
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi tìm kiếm nguyên liệu.",
+        message: 'Có lỗi xảy ra khi tìm kiếm nguyên liệu.',
         error: error.message,
       });
     }

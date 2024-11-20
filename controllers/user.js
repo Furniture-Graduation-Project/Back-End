@@ -9,11 +9,11 @@ const UserController = {
         .sort({ createdAt: -1 });
       if (!users) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không có người dùng nào !' });
       }
 
-      return res.status(StatusCodes.OK).json({ users });
+      return res.status(StatusCodes.OK).json({ data: users });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -26,11 +26,11 @@ const UserController = {
       const user = await User.findById(req.params.id).select('-password');
       if (!user) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Người dùng không tồn tại !' });
       }
 
-      return res.status(StatusCodes.OK).json({ user });
+      return res.status(StatusCodes.OK).json({ data: user });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -42,7 +42,7 @@ const UserController = {
       const user = await User.findByIdAndDelete(req.params.id);
       if (!user) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Người dùng không tồn tại !' });
       }
       return res.status(StatusCodes.OK).json({ message: 'Xóa thành công !' });
