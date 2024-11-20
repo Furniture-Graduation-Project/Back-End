@@ -1,14 +1,14 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import session from 'express-session';
-import passport from 'passport';
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import session from "express-session";
+import passport from "passport";
 
-import './middleware/passport.js';
-import { app, server } from './services/socket.js';
-import { connectDB } from './utils/connect.js';
-import { Route } from './routers/index.js';
+import "./middleware/passport.js";
+import { app, server } from "./services/socket.js";
+import { connectDB } from "./utils/connect.js";
+import { Route } from "./routers/index.js";
 
 dotenv.config();
 
@@ -25,10 +25,10 @@ app.use(
     saveUninitialized: true,
     cookie: {
       httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV !== 'development',
+      sameSite: "strict",
+      secure: process.env.NODE_ENV !== "development",
     },
-  }),
+  })
 );
 app.use(passport.initialize());
 app.use(passport.session());
