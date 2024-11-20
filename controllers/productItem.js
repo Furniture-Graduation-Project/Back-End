@@ -61,7 +61,7 @@ const ProductItemController = {
 
       if (!productItem) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 
@@ -86,7 +86,7 @@ const ProductItemController = {
 
       if (!productItem) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy sản phẩm' });
       }
 
@@ -126,7 +126,7 @@ const ProductItemController = {
 
       if (!updatedProductItem) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 
@@ -152,7 +152,7 @@ const ProductItemController = {
 
       if (!deletedProductItem) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
 

@@ -12,7 +12,7 @@ const WishlistController = {
 
       if (!wishlists || wishlists.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: "Không có danh sách yêu thích nào tồn tại." });
       }
 
@@ -57,7 +57,7 @@ const WishlistController = {
     try {
       const wishlist = await WishlistModel.findById(id);
       if (!wishlist) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           message: "Không tìm thấy danh sách yêu thích",
         });
       }
@@ -118,7 +118,7 @@ const WishlistController = {
         new: true,
       });
       if (!wishlist) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           message: "Không tìm thấy danh sách yêu thích",
         });
       }
@@ -143,7 +143,7 @@ const WishlistController = {
     try {
       const wishlist = await WishlistModel.findByIdAndDelete(id);
       if (!wishlist) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           message: "Không tìm thấy danh sách yêu thích",
         });
       }

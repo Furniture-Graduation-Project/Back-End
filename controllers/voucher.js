@@ -30,7 +30,7 @@ const VoucherController = {
       const vouchers = await VoucherModel.find();
       res.status(StatusCodes.OK).json({
         data: vouchers,
-        message: 'Lấy danh sách voucher thành công'
+        message: 'Lấy danh sách voucher thành công',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -48,7 +48,7 @@ const VoucherController = {
       const vouchers = await VoucherModel.find().skip(skip).limit(limit);
       const total = await VoucherModel.countDocuments();
       res.status(StatusCodes.OK).json({
-        data : vouchers,
+        data: vouchers,
         page,
         totalPage: Math.ceil(total / limit),
         totalData: total,
@@ -72,7 +72,7 @@ const VoucherController = {
       const voucher = await VoucherModel.findById(id).populate('orders');
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
       res.status(StatusCodes.OK).json(voucher);
@@ -105,7 +105,7 @@ const VoucherController = {
 
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
 
@@ -130,7 +130,7 @@ const VoucherController = {
       const voucher = await VoucherModel.findByIdAndDelete(id);
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
 

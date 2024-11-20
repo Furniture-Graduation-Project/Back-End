@@ -78,7 +78,7 @@ const AuthController = {
 
       if (!data) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Người dùng không tồn tại !' });
       }
       return res.status(StatusCodes.OK).json({ data });

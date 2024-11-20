@@ -1,26 +1,37 @@
-import { StatusCodes } from "http-status-codes";
-import OrderModel from "../models/order.js";
-import { createOrderSchema, updateOrderSchema } from "../validations/order.js";
-import { io } from "../services/socket.js";
+import { StatusCodes } from 'http-status-codes';
+import OrderModel from '../models/order.js';
+import { createOrderSchema, updateOrderSchema } from '../validations/order.js';
+import { io } from '../services/socket.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
     try {
+      const user = req.user;
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
-
-      const orders = await OrderModel.find()
-        .skip(skip)
-        .limit(limit)
-        .populate({
-          path: "items",
-          populate: { path: "productId" },
-        });
+      let orders;
+      if (user) {
+        orders = await OrderModel.find({ userId: user._id })
+          .skip(skip)
+          .limit(limit)
+          .populate({
+            path: 'items',
+            populate: { path: 'productId' },
+          });
+      } else {
+        orders = await OrderModel.find()
+          .skip(skip)
+          .limit(limit)
+          .populate({
+            path: 'items',
+            populate: { path: 'productId' },
+          });
+      }
 
       if (!orders || orders.length === 0) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Không có đơn hàng nào tồn tại.",
+        return res.status(StatusCodes.OK).json({
+          message: 'Không có đơn hàng nào tồn tại.',
         });
       }
 
@@ -31,11 +42,11 @@ const OrderController = {
         data: orders,
         totalPage,
         totalData,
-        message: "Lấy danh sách đơn hàng thành công.",
+        message: 'Lấy danh sách đơn hàng thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy danh sách đơn hàng.",
+        message: 'Có lỗi xảy ra khi lấy danh sách đơn hàng.',
         error: error.message,
       });
     }
@@ -44,11 +55,11 @@ const OrderController = {
   getAll: async (req, res) => {
     try {
       const orders = await OrderModel.find().populate({
-        path: "items",
-        populate: { path: "productId" },
+        path: 'items',
+        populate: { path: 'productId' },
       });
       res.status(StatusCodes.OK).json({
-        message: "Lấy danh sách đơn hàng thành công",
+        message: 'Lấy danh sách đơn hàng thành công',
         data: orders,
       });
     } catch (error) {
@@ -62,21 +73,21 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
       const order = await OrderModel.findById(id).populate({
-        path: "items",
-        populate: { path: "productId" },
+        path: 'items',
+        populate: { path: 'productId' },
       });
       if (!order) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Đơn hàng không tồn tại",
+        return res.status(StatusCodes.OK).json({
+          message: 'Đơn hàng không tồn tại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Lấy đơn hàng thành công",
+        message: 'Lấy đơn hàng thành công',
         data: order,
       });
     } catch (error) {
@@ -90,18 +101,18 @@ const OrderController = {
     const { id } = req.params;
     try {
       const orders = await OrderModel.find({ userId: id }).populate({
-        path: "items",
-        populate: { path: "productId" },
+        path: 'items',
+        populate: { path: 'productId' },
       });
 
       if (!orders || orders.length === 0) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Người dùng chưa có đơn hàng nào",
+        return res.status(StatusCodes.OK).json({
+          message: 'Người dùng chưa có đơn hàng nào',
         });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: "Lấy đơn hàng của người dùng thành công",
+        message: 'Lấy đơn hàng của người dùng thành công',
         data: orders,
       });
     } catch (error) {
@@ -124,9 +135,9 @@ const OrderController = {
         });
       }
       const order = await OrderModel.create(value);
-      io.emit("Order", order);
+      io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
-        message: "Tạo đơn hàng thành công",
+        message: 'Tạo đơn hàng thành công',
         data: order,
       });
     } catch (error) {
@@ -140,7 +151,7 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
@@ -158,12 +169,12 @@ const OrderController = {
         new: true,
       });
       if (!updatedOrder) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Đơn hàng không tồn tại",
+        return res.status(StatusCodes.OK).json({
+          message: 'Đơn hàng không tồn tại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Cập nhật đơn hàng thành công",
+        message: 'Cập nhật đơn hàng thành công',
         data: updatedOrder,
       });
     } catch (error) {
@@ -177,18 +188,18 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
       const order = await OrderModel.findByIdAndDelete(id);
       if (!order) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Đơn hàng không tồn tại",
+        return res.status(StatusCodes.OK).json({
+          message: 'Đơn hàng không tồn tại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Xóa đơn hàng thành công",
+        message: 'Xóa đơn hàng thành công',
         data: order,
       });
     } catch (error) {
