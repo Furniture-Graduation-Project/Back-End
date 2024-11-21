@@ -14,15 +14,38 @@ const CartController = {
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
     try {
-      const cart = new CartModel({
-        ...value,
-      });
+      const cart = await CartModel.findOne({ UserID: req.user._id });
+      if (cart) {
+        const existingItemIndex = cart.carts.findIndex(
+          (item) =>
+            item.productID.toString() === value.productID.toString() &&
+            item.productItemID.toString() === value.productItemID.toString(),
+        );
 
-      await cart.save();
-      res
-        .status(StatusCodes.CREATED)
-        .json({ message: 'Tạo giỏ hàng thành công', cart });
+        if (existingItemIndex !== -1) {
+          cart.carts[existingItemIndex].quantity += value.quantity;
+          cart.carts[existingItemIndex].price += value.price;
+        } else {
+          cart.carts.push(value);
+        }
+
+        await cart.save();
+        res
+          .status(StatusCodes.OK)
+          .json({ message: 'Tạo giỏ hàng thành công', cart });
+      } else {
+        const newCart = new CartModel({
+          UserID: req.user._id,
+          carts: [value],
+        });
+
+        await newCart.save();
+        res
+          .status(StatusCodes.CREATED)
+          .json({ message: 'Tạo giỏ hàng thành công', cart: newCart });
+      }
     } catch (error) {
+      console.error('Error updating/creating cart:', error);
       res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: 'Tạo giỏ hàng thất bại', error: error.message });
@@ -152,52 +175,37 @@ const CartController = {
 
   delete: async (req, res) => {
     const { productID, productItemID } = req.params;
-
     if (!productID || !productItemID) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: 'Không tìm thấy giỏ hàng hợp lệ' });
     }
-
     try {
       const userId = req.user._id;
-      g;
-      const cart = await CartModel.findOne(
-        {
-          UserID: userId,
-          'carts.productID._id': new mongoose.Types.ObjectId(productID),
-          'carts.productItemID._id': new mongoose.Types.ObjectId(productItemID),
-        },
-        { 'carts.$': 1 },
+      const cart = await CartModel.findOne({ UserID: userId });
+      if (!cart) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Giỏ hàng không tồn tại' });
+      }
+      const updatedCarts = cart.carts.filter(
+        (item) =>
+          item.productID.toString() !== productID.toString() ||
+          item.productItemID.toString() !== productItemID.toString(),
       );
 
-      if (!cart || cart.carts.length === 0) {
+      if (updatedCarts.length === cart.carts.length) {
         return res
-          .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy sản phẩm trong giỏ hàng' });
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Sản phẩm không tồn tại trong giỏ hàng' });
       }
-      g;
-      const result = await CartModel.updateOne(
-        { UserID: userId },
-        {
-          $pull: {
-            carts: {
-              productID: new mongoose.Types.ObjectId(productID),
-              'productItemID._id': new mongoose.Types.ObjectId(productItemID),
-            },
-          },
-        },
-      );
 
-      if (result.modifiedCount === 0) {
-        return res
-          .status(StatusCodes.OK)
-          .json({ message: 'Không thể xóa sản phẩm khỏi giỏ hàng' });
-      }
+      cart.carts = updatedCarts;
+      await cart.save();
 
       return res
         .status(StatusCodes.OK)
-        .json({ message: 'Xóa sản phẩm khỏi giỏ hàng thành công' });
+        .json({ message: 'Xóa sản phẩm khỏi giỏ hàng thành công', cart });
     } catch (error) {
       console.error(error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
