@@ -5,18 +5,14 @@ import mongoose from 'mongoose';
 
 const CartController = {
   create: async (req, res) => {
-    console.log(req.body);
-    
     const { value, error } = createCartSchema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
     });
-    console.log(value);
     if (error) {
       const message = error.details.map((e) => e.message);
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
-
     try {
       const cart = new CartModel({
         ...value,
