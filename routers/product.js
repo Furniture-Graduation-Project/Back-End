@@ -1,27 +1,27 @@
-import { Router } from "express";
-import { ProductController } from "../controllers/product.js";
-import protectAdmin from "../middleware/protectAdmin.js";
-import protectRoute from "../middleware/protectRoute.js";
-import protectProduct from "../middleware/protectProduct.js";
+import { Router } from 'express';
+import { ProductController } from '../controllers/product.js';
+import protectAdmin from '../middleware/protectAdmin.js';
+import protectRoute from '../middleware/protectRoute.js';
+import protectProduct from '../middleware/protectProduct.js';
 
 const router = Router();
 
-router.get("", ProductController.getAll);
-router.get("/limited", ProductController.getLimited);
-router.get("/search", ProductController.getByName);
-router.get("/:id", protectRoute, protectProduct, ProductController.getById);
-router.post("/", protectRoute, protectProduct, ProductController.createProduct);
+router.get('', ProductController.getAll);
+router.get('/limited', ProductController.getLimited);
+router.get('/search', ProductController.getByName);
+router.get('/:id', ProductController.getById);
+router.post('/', protectRoute, protectProduct, ProductController.createProduct);
 router.put(
-  "/:id",
+  '/:id',
   protectRoute,
   protectProduct,
-  ProductController.updateProduct
+  ProductController.updateProduct,
 );
 router.delete(
-  "/:id",
+  '/:id',
   protectRoute,
   protectAdmin,
-  ProductController.deleteProduct
+  ProductController.deleteProduct,
 );
 
 export default router;
