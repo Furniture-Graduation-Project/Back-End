@@ -76,7 +76,10 @@ const CategoryController = {
           .status(StatusCodes.OK)
           .json({ message: 'Không có danh mục nào!' });
       }
-      return res.status(StatusCodes.OK).json(categories);
+      return res.status(StatusCodes.OK).json({
+        data: categories,
+        message: 'Lấy danh sách danh mục.',
+      });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
