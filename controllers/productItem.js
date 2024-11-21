@@ -24,10 +24,7 @@ const ProductItemController = {
           message: errors,
         });
       }
-
-      const newProductItem = new ProductItemModel({
-        value,
-      });
+      const newProductItem = new ProductItemModel(value);
       await newProductItem.save();
 
       return res.status(StatusCodes.CREATED).json(newProductItem);
