@@ -11,7 +11,7 @@ export const generateTokenAndSetCookie = (userId, res) => {
   res.cookie("accessToken", token, {
     maxAge: 1 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.SAME_SITE,
     secure: process.env.NODE_ENV !== "development",
   });
 
@@ -25,7 +25,7 @@ export const generateRefreshToken = (userId, res) => {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.SAME_SITE,
     secure: process.env.NODE_ENV !== "development",
   });
 
