@@ -129,16 +129,6 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: errorMessages });
       }
-      const existingProduct = await ProductModel.findOne({
-        SKU: value.SKU,
-        _id: { $ne: id },
-      });
-
-      if (existingProduct) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'SKU đã tồn tại.' });
-      }
       const updatedProduct = await ProductModel.findByIdAndUpdate(id, value, {
         new: true,
         runValidators: true,

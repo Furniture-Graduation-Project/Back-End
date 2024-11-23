@@ -14,11 +14,7 @@ export const createProductSchema = Joi.object({
   description: Joi.string().optional().allow("").messages({
     "string.base": "Mô tả phải là chuỗi ký tự.",
   }),
-  SKU: Joi.string().required().messages({
-    "any.required": "SKU là bắt buộc.",
-    "string.empty": "SKU không được để trống.",
-    "string.base": "SKU phải là chuỗi ký tự.",
-  }),
+
   images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự.",
     "string.base": "Mỗi hình ảnh phải là chuỗi ký tự.",
@@ -50,9 +46,6 @@ export const updateProductSchema = Joi.object({
   }),
   description: Joi.string().optional().allow("").messages({
     "string.base": "Mô tả phải là chuỗi ký tự.",
-  }),
-  SKU: Joi.string().optional().messages({
-    "string.base": "SKU phải là chuỗi ký tự.",
   }),
   images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự.",

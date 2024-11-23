@@ -26,6 +26,10 @@ const productItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  outStock: {
+    type: Number,
+    required: true,
+  },
   price: {
     type: Number,
     required: true,
@@ -33,6 +37,12 @@ const productItemSchema = new mongoose.Schema({
   image: {
     type: String,
     default: '',
+  },
+  SKU: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
   },
 });
 

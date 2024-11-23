@@ -218,7 +218,6 @@ const CartController = {
   increaseQuantity: async (req, res) => {
     const { productId, productItemId } = req.params;
     const userId = req.user._id;
-    console.log(userId, productId, productItemId);
     try {
       const cart = await CartModel.findOneAndUpdate(
         {
