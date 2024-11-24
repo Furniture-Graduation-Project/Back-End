@@ -10,17 +10,17 @@ routerCart.get('/:id', CartController.getById);
 routerCart.post('/', protectRouteClient, CartController.create);
 routerCart.put('/:id', CartController.update);
 routerCart.delete(
-  '/:productID/:productItemID',
+  '/:productId/:productOptionId',
   protectRouteClient,
   CartController.delete,
 );
 routerCart.patch(
-  '/increase/:productId/:productItemId',
+  '/increase/:productId/:productOptionId',
   protectRouteClient,
   CartController.increaseQuantity,
 );
 routerCart.patch(
-  '/decrease/:productId/:productItemId',
+  '/decrease/:productId/:productOptionId',
   protectRouteClient,
   CartController.decreaseQuantity,
 );
