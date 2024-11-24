@@ -1,5 +1,4 @@
 import { StatusCodes } from 'http-status-codes';
-// import Location from "../models/location.js";
 import User from '../models/user.js';
 import { locationSchema } from '../validations/location.js';
 
@@ -113,7 +112,7 @@ export const remove = async (req, res) => {
       locations: { $elemMatch: { _id: locationId } },
     });
 
-    console.log(user);
+
 
     if (!user) {
       return res

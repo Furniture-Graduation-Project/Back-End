@@ -78,7 +78,10 @@ const MaterialController = {
           .status(StatusCodes.OK)
           .json({ message: 'Không có nguyên liệu nào!' });
       }
-      return res.status(StatusCodes.OK).json(materials);
+      return res.status(StatusCodes.OK).json({
+        data: materials,
+        message: 'Lấy danh sách nguyên liệu.',
+      });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
@@ -93,7 +96,10 @@ const MaterialController = {
           .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy nguyên liệu!' });
       }
-      return res.status(StatusCodes.OK).json(material);
+      return res.status(StatusCodes.OK).json({
+        data: material,
+        message: 'Lấy nguyên liệu thành côn.',
+      });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }

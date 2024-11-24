@@ -31,8 +31,13 @@ export const ProductController = {
       const skip = (page - 1) * limit;
 
       const categoryId = req.query.categoryId;
+      const name = req.query.name;
       const query = categoryId ? { category: categoryId } : {};
-      console.log(categoryId);
+
+      if (name) {
+        query.name = { $regex: name, $options: "i" };
+      }
+      // query.status = "available";
 
       const products = await ProductModel.find(query)
         .populate("category", "categoryName")
@@ -47,7 +52,7 @@ export const ProductController = {
         data: products,
         totalPage,
         totalData,
-        message: "Lấy sản phẩm theo danh mục thành công.",
+        message: "Lấy danh sách sản phẩm thành công.",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -65,7 +70,9 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id);
+      const product = await ProductModel.findById(id)
+        .populate("category", "categoryName")
+        .populate("material", "materialName");
       if (!product) {
         return res
           .status(StatusCodes.OK)
@@ -130,16 +137,6 @@ export const ProductController = {
         return res
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: errorMessages });
-      }
-      const existingProduct = await ProductModel.findOne({
-        SKU: value.SKU,
-        _id: { $ne: id },
-      });
-
-      if (existingProduct) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "SKU đã tồn tại." });
       }
       const updatedProduct = await ProductModel.findByIdAndUpdate(id, value, {
         new: true,

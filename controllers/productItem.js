@@ -5,15 +5,17 @@ import { productItemSchema } from '../validations/productItem.js';
 const ProductItemController = {
   create: async (req, res) => {
     try {
-      const { productId, variants, stock, price, image } = req.body;
+      const { productId, variants, stock, price, image, SKU } = req.body;
 
       const { value, error } = productItemSchema.validate(
         {
           productId,
           variants,
           stock,
+          outStock: 0,
           price,
           image,
+          SKU,
         },
         { abortEarly: false, stripUnknown: true },
       );
@@ -24,10 +26,16 @@ const ProductItemController = {
           message: errors,
         });
       }
-
-      const newProductItem = new ProductItemModel({
-        value,
+      const existingProductItem = await ProductItemModel.findOne({
+        SKU: value.SKU,
       });
+
+      if (existingProductItem) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'SKU đã tồn tại.' });
+      }
+      const newProductItem = new ProductItemModel(value);
       await newProductItem.save();
 
       return res.status(StatusCodes.CREATED).json(newProductItem);
@@ -114,7 +122,16 @@ const ProductItemController = {
           message: errors,
         });
       }
+      const existingProductItem = await ProductItemModel.findOne({
+        SKU: value.SKU,
+        _id: { $ne: id },
+      });
 
+      if (existingProductItem) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'SKU đã tồn tại.' });
+      }
       const updatedProductItem = await ProductItemModel.findByIdAndUpdate(
         id,
         value,
