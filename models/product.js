@@ -17,7 +17,6 @@ const productSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-
     images: {
       type: [String],
       default: [],
@@ -32,8 +31,8 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "out of stock", "discontinued"],
-      default: "available",
+      enum: ["Đang tạo", "Còn hàng", "Khóa"],
+      default: "Đang tạo",
     },
   },
   { timestamps: true, versionKey: false }
