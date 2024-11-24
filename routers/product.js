@@ -10,7 +10,7 @@ router.get('', ProductController.getAll);
 router.get('/limited', ProductController.getLimited);
 router.get('/search', ProductController.getByName);
 router.get('/:id', ProductController.getById);
-router.post('/', ProductController.createProduct);
+router.post('/', protectRoute, protectProduct, ProductController.createProduct);
 router.put(
   '/:id',
   protectRoute,

@@ -4,6 +4,7 @@ import {
   createProductSchema,
   updateProductSchema,
 } from '../validations/product.js';
+import ProductItemModel from '../models/productItem.js';
 
 export const ProductController = {
   getAll: async (req, res) => {
@@ -201,6 +202,39 @@ export const ProductController = {
         message: 'Có lỗi xảy ra khi tìm kiếm sản phẩm.',
         error: error.message,
       });
+    }
+  },
+
+  checkProduct: async (items) => {
+    try {
+      if (!items || !Array.isArray(items)) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Danh sách sản phẩm không hợp lệ.',
+        });
+      }
+      const productDetails = await Promise.all(
+        items.map(async (item) => {
+          const product = await ProductModel.findOne({
+            _id: item.productId,
+            status: 'available',
+          });
+
+          const productItem = await ProductItemModel.findById(
+            item.productOptionId,
+          );
+          return {
+            productId: product ? product._id : '',
+            productOptionId: productItem ? productItem._id : '',
+            quantity: productItem
+              ? productItem.stock - productItem.outStock
+              : 0,
+            unitPrice: productItem ? productItem.price : 0,
+          };
+        }),
+      );
+      return productDetails;
+    } catch (error) {
+      return error;
     }
   },
 };
