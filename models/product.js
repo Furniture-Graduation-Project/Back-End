@@ -31,8 +31,8 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Đang tạo", "Còn hàng", "Khóa"],
-      default: "Đang tạo",
+      enum: ["creating", "avaliable", "disable"],
+      default: "creating",
     },
   },
   { timestamps: true, versionKey: false }
