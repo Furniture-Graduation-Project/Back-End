@@ -4,6 +4,7 @@ import {
   createProductSchema,
   updateProductSchema,
 } from "../validations/product.js";
+import ProductItemModel from "../models/productItem.js";
 
 export const ProductController = {
   getAll: async (req, res) => {
@@ -26,18 +27,27 @@ export const ProductController = {
 
   getLimited: async (req, res) => {
     try {
-      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
       const categoryId = req.query.categoryId;
+      const materialId = req.query.materialId;
       const name = req.query.name;
-      const query = categoryId ? { category: categoryId } : {};
+
+      const query = { status: "avaliable" };
+
+      if (categoryId) {
+        query.category = categoryId;
+      }
+
+      if (materialId) {
+        query.material = materialId;
+      }
 
       if (name) {
         query.name = { $regex: name, $options: "i" };
       }
-      // query.status = "available";
 
       const products = await ProductModel.find(query)
         .populate("category", "categoryName")
@@ -70,9 +80,7 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id)
-        .populate("category", "categoryName")
-        .populate("material", "materialName");
+      const product = await ProductModel.findById(id);
       if (!product) {
         return res
           .status(StatusCodes.OK)
@@ -103,13 +111,6 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: errorMessages });
       }
-      const existingProduct = await ProductModel.findOne({ SKU: value.SKU });
-      if (existingProduct) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "SKU đã tồn tại." });
-      }
-
       const newProduct = new ProductModel(value);
       await newProduct.save();
       res.status(StatusCodes.CREATED).json({
@@ -210,6 +211,39 @@ export const ProductController = {
         message: "Có lỗi xảy ra khi tìm kiếm sản phẩm.",
         error: error.message,
       });
+    }
+  },
+
+  checkProduct: async (items) => {
+    try {
+      if (!items || !Array.isArray(items)) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Danh sách sản phẩm không hợp lệ.",
+        });
+      }
+      const productDetails = await Promise.all(
+        items.map(async (item) => {
+          const product = await ProductModel.findOne({
+            _id: item.productId,
+            status: "available",
+          });
+
+          const productItem = await ProductItemModel.findById(
+            item.productOptionId
+          );
+          return {
+            productId: product ? product._id : "",
+            productOptionId: productItem ? productItem._id : "",
+            quantity: productItem
+              ? productItem.stock - productItem.outStock
+              : 0,
+            unitPrice: productItem ? productItem.price : 0,
+          };
+        })
+      );
+      return productDetails;
+    } catch (error) {
+      return error;
     }
   },
 };

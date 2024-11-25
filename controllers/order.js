@@ -2,6 +2,9 @@ import { StatusCodes } from 'http-status-codes';
 import OrderModel from '../models/order.js';
 import { createOrderSchema, updateOrderSchema } from '../validations/order.js';
 import { io } from '../services/socket.js';
+import ProductItemModel from '../models/productItem.js';
+import { ProductController } from './product.js';
+import CartModel from '../models/cart.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -134,10 +137,55 @@ const OrderController = {
           message: errors,
         });
       }
+      const items = await ProductController.checkProduct(value.items);
+      const isChanged = items.some((item, index) => {
+        const originalItem = value.items[index];
+        return (
+          item.productId.toString() !== originalItem.productId ||
+          item.productOptionId.toString() !== originalItem.productOptionId ||
+          item.quantity < originalItem.quantity ||
+          item.unitPrice !== originalItem.unitPrice
+        );
+      });
+
+      if (isChanged) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          data: items,
+          message: 'Sản phẩm trong đơn hàng đã có sự thay đổi.',
+        });
+      }
+      await Promise.all(
+        value.items.map(async (item) => {
+          const productItem = await ProductItemModel.findById(
+            item.productOptionId,
+          );
+          productItem.outStock += item.quantity;
+          await productItem.save();
+        }),
+      );
+ await Promise.all(
+   value.items.map(async (item) => {
+     await CartModel.findOneAndUpdate(
+       {
+         UserID: value.userId,
+         'carts.productId': item.productId,
+         'carts.productOptionId': item.productOptionId,
+       },
+       {
+         $pull: {
+           carts: {
+             productId: item.productId,
+             productOptionId: item.productOptionId,
+           },
+         },
+       },
+     );
+   }),
+ );
       const order = await OrderModel.create(value);
       io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo đơn hàng thành công',
+        message: 'Tạo đơn hàng thành công.',
         data: order,
       });
     } catch (error) {
@@ -201,6 +249,21 @@ const OrderController = {
       return res.status(StatusCodes.OK).json({
         message: 'Xóa đơn hàng thành công',
         data: order,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+
+  checkProductOrder: async (req, res) => {
+    try {
+      const productDetails = await ProductController.checkProduct(req.body);
+
+      return res.status(StatusCodes.OK).json({
+        message: 'Kiểm tra sản phẩm thành công',
+        data: productDetails,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

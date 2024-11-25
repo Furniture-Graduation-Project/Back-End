@@ -18,8 +18,9 @@ const CartController = {
       if (cart) {
         const existingItemIndex = cart.carts.findIndex(
           (item) =>
-            item.productID.toString() === value.productID.toString() &&
-            item.productItemID.toString() === value.productItemID.toString(),
+            item.productId.toString() === value.productId.toString() &&
+            item.productOptionId.toString() ===
+              value.productOptionId.toString(),
         );
 
         if (existingItemIndex !== -1) {
@@ -111,11 +112,11 @@ const CartController = {
     try {
       const cart = await CartModel.findOne({ UserID: id })
         .populate({
-          path: 'carts.productID',
+          path: 'carts.productId',
           model: 'Product',
         })
         .populate({
-          path: 'carts.productItemID',
+          path: 'carts.productOptionId',
           model: 'ProductItem',
         });
 
@@ -174,12 +175,14 @@ const CartController = {
   },
 
   delete: async (req, res) => {
-    const { productID, productItemID } = req.params;
-    if (!productID || !productItemID) {
+    const { productId, productOptionId } = req.params;
+    console.log(productId, productOptionId);
+    if (!productId || !productOptionId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: 'Không tìm thấy giỏ hàng hợp lệ' });
     }
+
     try {
       const userId = req.user._id;
       const cart = await CartModel.findOne({ UserID: userId });
@@ -190,8 +193,8 @@ const CartController = {
       }
       const updatedCarts = cart.carts.filter(
         (item) =>
-          item.productID.toString() !== productID.toString() ||
-          item.productItemID.toString() !== productItemID.toString(),
+          item.productId.toString() !== productId.toString() ||
+          item.productOptionId.toString() !== productOptionId.toString(),
       );
 
       if (updatedCarts.length === cart.carts.length) {
@@ -216,14 +219,14 @@ const CartController = {
   },
 
   increaseQuantity: async (req, res) => {
-    const { productId, productItemId } = req.params;
+    const { productId, productOptionId } = req.params;
     const userId = req.user._id;
     try {
       const cart = await CartModel.findOneAndUpdate(
         {
           UserID: userId,
-          'carts.productID': productId,
-          'carts.productItemID': productItemId,
+          'carts.productId': productId,
+          'carts.productOptionId': productOptionId,
         },
         {
           $inc: { 'carts.$.quantity': 1 },
@@ -249,14 +252,14 @@ const CartController = {
   },
 
   decreaseQuantity: async (req, res) => {
-    const { productId, productItemId } = req.params;
+    const { productId, productOptionId } = req.params;
     const userId = req.user._id;
     try {
       const cart = await CartModel.findOneAndUpdate(
         {
           UserID: userId,
-          'carts.productID': productId,
-          'carts.productItemID': productItemId,
+          'carts.productId': productId,
+          'carts.productOptionId': productOptionId,
         },
         {
           $inc: { 'carts.$.quantity': -1 },
@@ -274,8 +277,8 @@ const CartController = {
         {
           $pull: {
             carts: {
-              productID: productId,
-              productItemID: new mongoose.Types.ObjectId(productItemId),
+              productId: productId,
+              productOptionId: new mongoose.Types.ObjectId(productOptionId),
               quantity: { $lte: 0 },
             },
           },
