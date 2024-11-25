@@ -37,11 +37,24 @@ export const ProductController = {
         .skip(skip)
         .limit(limit);
 
+      const productsWithPrices = await Promise.all(
+        products.map(async (product) => {
+          const prices = await ProductItemModel.find({
+            productId: product._id,
+          }).select('price');
+          const priceList = prices.map((item) => item.price);
+          return {
+            ...product.toObject(),
+            prices: priceList,
+          };
+        }),
+      );
+
       const totalData = await ProductModel.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        data: products,
+        data: productsWithPrices,
         totalPage,
         totalData,
         message: "Lấy sản phẩm thành công.",
