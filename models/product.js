@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["creating", "avaliable", "disable"],
+      enum: ["creating", "available", "disable"],
       default: "creating",
     },
   },
