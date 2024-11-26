@@ -130,6 +130,31 @@ const CategoryController = {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
   },
+  deleteCategoryById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const deletedCategory = await Category.findByIdAndDelete(id);
+
+      if (!deletedCategory) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Không tìm thấy danh mục để xóa!" });
+      }
+
+      const updatedCategories = await Category.find();
+
+      return res.status(StatusCodes.OK).json({
+        message: `Xóa danh mục thành công.`,
+        updatedCategories,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi xóa danh mục.",
+        error: error.message,
+      });
+    }
+  },
 
   searchByName: async (req, res) => {
     try {
