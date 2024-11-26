@@ -25,7 +25,7 @@ export const createProductSchema = Joi.object({
     "string.base": "Chi tiết chất liệu phải là chuỗi ký tự.",
   }),
   status: Joi.string()
-    .valid("creating", "avaliable", "disable")
+    .valid("creating", "available", "disable")
     .optional()
     .messages({
       "string.base": "Trạng thái phải là chuỗi ký tự.",
@@ -56,7 +56,7 @@ export const updateProductSchema = Joi.object({
     "string.base": "Chi tiết chất liệu phải là chuỗi ký tự.",
   }),
   status: Joi.string()
-    .valid("creating", "avaliable", "disable")
+    .valid("creating", "available", "disable")
     .optional()
     .messages({
       "string.base": "Trạng thái phải là chuỗi ký tự.",
