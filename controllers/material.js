@@ -130,7 +130,31 @@ const MaterialController = {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
   },
-
+  deleteMaterialById: async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const deletedMaterial = await Material.findByIdAndDelete(id);
+  
+      if (!deletedMaterial) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Không tìm thấy chất liệu để xóa!" });
+      }
+  
+      const updatedMaterials = await Material.find();
+  
+      return res.status(StatusCodes.OK).json({
+        message: `Xóa chất liệu thành công.`,
+        updatedMaterials,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi xóa chất liệu.",
+        error: error.message,
+      });
+    }
+  },  
   searchByName: async (req, res) => {
     try {
       const { materialName } = req.query;

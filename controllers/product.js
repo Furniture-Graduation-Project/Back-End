@@ -228,4 +228,48 @@ export const ProductController = {
       return error;
     }
   },
+  countProductsByCategory: async (req, res) => {
+    try {
+      const { categoryId } = req.query;
+      if (!categoryId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Không tìm thấy danh mục" });
+      }
+      const productCount = await ProductModel.countDocuments({
+        category: categoryId,
+      });
+      res.status(StatusCodes.OK).json({
+        data: productCount,
+        message: "Số lượng sản phẩm theo danh mục.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi đếm sản phẩm theo danh mục.",
+        error: error.message,
+      });
+    }
+  },
+  countProductsByMaterial: async (req, res) => {
+    try {
+      const { materialId } = req.query;
+      if (!materialId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Không tìm thấy chất liệu" });
+      }
+      const productCount = await ProductModel.countDocuments({
+        material: materialId,
+      });
+      res.status(StatusCodes.OK).json({
+        data: productCount,
+        message: "Số lượng sản phẩm theo chất liệu.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi đếm sản phẩm theo chất liệu.",
+        error: error.message,
+      });
+    }
+  },
 };
