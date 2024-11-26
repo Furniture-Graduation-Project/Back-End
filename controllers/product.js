@@ -31,7 +31,25 @@ export const ProductController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const products = await ProductModel.find()
+      const categoryId = req.query.categoryId;
+      const materialId = req.query.materialId;
+      const name = req.query.name;
+
+      const query = { status: "available" };
+
+      if (categoryId) {
+        query.category = categoryId;
+      }
+
+      if (materialId) {
+        query.material = materialId;
+      }
+
+      if (name) {
+        query.name = { $regex: name, $options: "i" };
+      }
+
+      const products = await ProductModel.find(query)
         .populate("category", "categoryName")
         .populate("material", "materialName")
         .skip(skip)
@@ -41,13 +59,13 @@ export const ProductController = {
         products.map(async (product) => {
           const prices = await ProductItemModel.find({
             productId: product._id,
-          }).select('price');
+          }).select("price");
           const priceList = prices.map((item) => item.price);
           return {
             ...product.toObject(),
             prices: priceList,
           };
-        }),
+        })
       );
 
       const totalData = await ProductModel.countDocuments();
@@ -57,7 +75,7 @@ export const ProductController = {
         data: productsWithPrices,
         totalPage,
         totalData,
-        message: "Lấy sản phẩm thành công.",
+        message: "Lấy danh sách sản phẩm thành công.",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
