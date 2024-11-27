@@ -1,10 +1,10 @@
-import { StatusCodes } from 'http-status-codes';
-import Category from '../models/category.js';
-import Product from '../models/product.js';
+import { StatusCodes } from "http-status-codes";
+import Category from "../models/category.js";
 import {
   createCategorySchema,
   updateCategorySchema,
-} from '../validations/category.js';
+} from "../validations/category.js";
+
 const CategoryController = {
   getLimited: async (req, res) => {
     try {
@@ -17,7 +17,7 @@ const CategoryController = {
       if (!categories || categories.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không có danh mục nào.' });
+          .json({ message: "Không có danh mục nào." });
       }
 
       const totalData = await Category.countDocuments();
@@ -27,11 +27,11 @@ const CategoryController = {
         data: categories,
         totalPage,
         totalData,
-        message: 'Lấy danh sách danh mục thành công.',
+        message: "Lấy danh sách danh mục thành công.",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Có lỗi xảy ra khi lấy thông tin danh mục.',
+        message: "Có lỗi xảy ra khi lấy thông tin danh mục.",
         error: error.message,
       });
     }
@@ -45,24 +45,26 @@ const CategoryController = {
           details: error.details.map((err) => err.message),
         });
       }
+
       const existingCategory = await Category.findOne({
         categoryName: req.body.categoryName,
       });
       if (existingCategory) {
         return res.status(StatusCodes.CONFLICT).json({
-          message: 'Danh mục đã tồn tại.',
+          message: "Danh mục đã tồn tại.",
         });
       }
+
       const newCategory = new Category(req.body);
       await newCategory.save();
 
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo danh mục thành công.',
+        message: "Tạo danh mục thành công.",
         data: newCategory,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Có lỗi xảy ra khi tạo danh mục.',
+        message: "Có lỗi xảy ra khi tạo danh mục.",
         error: error.message,
       });
     }
@@ -74,11 +76,11 @@ const CategoryController = {
       if (categories.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không có danh mục nào!' });
+          .json({ message: "Không có danh mục nào!" });
       }
       return res.status(StatusCodes.OK).json({
         data: categories,
-        message: 'Lấy danh sách danh mục.',
+        message: "Lấy danh sách danh mục.",
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
@@ -88,21 +90,21 @@ const CategoryController = {
   getCategoryById: async (req, res) => {
     try {
       const { id } = req.params;
-      const products = await Product.find({ categoryId: id });
       const category = await Category.findById(id);
       if (!category) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy danh mục!' });
+          .json({ message: "Không tìm thấy danh mục!" });
       }
       return res.status(StatusCodes.OK).json({
-        category,
-        products,
+        data: category,
+        message: "Lấy danh mục thành công.",
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
   },
+
   updateCategoryById: async (req, res) => {
     try {
       const { error } = updateCategorySchema.validate(req.body);
@@ -121,39 +123,65 @@ const CategoryController = {
       if (!updatedCategory) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy danh mục để cập nhật!' });
+          .json({ message: "Không tìm thấy danh mục để cập nhật!" });
       }
       return res.status(StatusCodes.OK).json(updatedCategory);
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
   },
+  deleteCategoryById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const deletedCategory = await Category.findByIdAndDelete(id);
+
+      if (!deletedCategory) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Không tìm thấy danh mục để xóa!" });
+      }
+
+      const updatedCategories = await Category.find();
+
+      return res.status(StatusCodes.OK).json({
+        message: `Xóa danh mục thành công.`,
+        updatedCategories,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi xóa danh mục.",
+        error: error.message,
+      });
+    }
+  },
+
   searchByName: async (req, res) => {
     try {
       const { categoryName } = req.query;
       if (!categoryName) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Thiếu tham số categoryName trong yêu cầu.',
+          message: "Thiếu tham số categoryName trong yêu cầu.",
         });
       }
 
       const categories = await Category.find({
-        categoryName: { $regex: categoryName, $options: 'i' },
+        categoryName: { $regex: categoryName, $options: "i" },
       });
 
       if (categories.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy danh mục nào.' });
+          .json({ message: "Không tìm thấy danh mục nào." });
       }
 
       return res.status(StatusCodes.OK).json({
         data: categories,
-        message: 'Tìm kiếm danh mục thành công.',
+        message: "Tìm kiếm danh mục thành công.",
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Có lỗi xảy ra khi tìm kiếm danh mục.',
+        message: "Có lỗi xảy ra khi tìm kiếm danh mục.",
         error: error.message,
       });
     }

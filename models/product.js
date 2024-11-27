@@ -17,7 +17,6 @@ const productSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-
     images: {
       type: [String],
       default: [],
@@ -32,8 +31,8 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "out of stock", "discontinued"],
-      default: "available",
+      enum: ["creating", "available", "disable"],
+      default: "creating",
     },
   },
   { timestamps: true, versionKey: false }

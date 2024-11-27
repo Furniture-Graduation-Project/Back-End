@@ -14,7 +14,6 @@ export const createProductSchema = Joi.object({
   description: Joi.string().optional().allow("").messages({
     "string.base": "Mô tả phải là chuỗi ký tự.",
   }),
-
   images: Joi.array().items(Joi.string()).optional().messages({
     "array.base": "Hình ảnh phải là mảng các chuỗi ký tự.",
     "string.base": "Mỗi hình ảnh phải là chuỗi ký tự.",
@@ -26,12 +25,11 @@ export const createProductSchema = Joi.object({
     "string.base": "Chi tiết chất liệu phải là chuỗi ký tự.",
   }),
   status: Joi.string()
-    .valid("available", "out of stock", "discontinued")
+    .valid("creating", "available", "disable")
     .optional()
     .messages({
       "string.base": "Trạng thái phải là chuỗi ký tự.",
-      "any.only":
-        "Trạng thái không hợp lệ. Các giá trị hợp lệ là: available, out of stock, discontinued.",
+      "any.only": "Trạng thái không hợp lệ.",
     }),
 }).options({
   abortEarly: false,
@@ -58,12 +56,11 @@ export const updateProductSchema = Joi.object({
     "string.base": "Chi tiết chất liệu phải là chuỗi ký tự.",
   }),
   status: Joi.string()
-    .valid("available", "out of stock", "discontinued")
+    .valid("creating", "available", "disable")
     .optional()
     .messages({
       "string.base": "Trạng thái phải là chuỗi ký tự.",
-      "any.only":
-        "Trạng thái không hợp lệ. Các giá trị hợp lệ là: available, out of stock, discontinued.",
+      "any.only": "Trạng thái không hợp lệ.",
     }),
 }).options({
   abortEarly: false,
