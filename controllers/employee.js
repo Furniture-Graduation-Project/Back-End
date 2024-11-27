@@ -4,6 +4,7 @@ import Employee from "../models/employee.js";
 import { employeeSchema } from "../validations/employee.js";
 import { generateTokenAndSetCookie } from "../utils/token.js";
 import dotenv from "dotenv";
+import { signInAdmin, signinSchema } from "../validations/user.js";
 dotenv.config();
 
 const EmployeeController = {
@@ -139,7 +140,7 @@ const EmployeeController = {
 
   signin: async (req, res) => {
     try {
-      const { value, error } = signinSchema.validate(req.body, {
+      const { value, error } = signInAdmin.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });

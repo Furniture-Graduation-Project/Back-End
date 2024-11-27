@@ -14,7 +14,12 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: process.env.ADMIN_URL || process.env.CLIENT_URL, // URL client
+    credentials: true, // Cho phép cookie và thông tin xác thực
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

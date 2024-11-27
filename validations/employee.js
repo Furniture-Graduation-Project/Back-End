@@ -9,7 +9,7 @@ export const employeeSchema = Joi.object({
     "any.required": "Mật khẩu không được để trống",
     "string.empty": "Mật khẩu không được để trống",
   }),
-  fullName: Joi.string().required().messages({
+  userName: Joi.string().required().messages({
     "any.required": "Họ tên không được để trống",
     "string.empty": "Họ tên không được để trống",
   }),
