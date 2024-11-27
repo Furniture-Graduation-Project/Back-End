@@ -1,10 +1,10 @@
-import { StatusCodes } from 'http-status-codes';
-import OrderModel from '../models/order.js';
-import { createOrderSchema, updateOrderSchema } from '../validations/order.js';
-import { io } from '../services/socket.js';
-import ProductItemModel from '../models/productItem.js';
-import { ProductController } from './product.js';
-import CartModel from '../models/cart.js';
+import { StatusCodes } from "http-status-codes";
+import OrderModel from "../models/order.js";
+import { createOrderSchema, updateOrderSchema } from "../validations/order.js";
+import { io } from "../services/socket.js";
+import ProductItemModel from "../models/productItem.js";
+import { ProductController } from "./product.js";
+import CartModel from "../models/cart.js";
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -15,26 +15,26 @@ const OrderController = {
       const skip = (page - 1) * limit;
       let orders;
       if (user) {
-        orders = await OrderModel.find({ userId: user._id })
+        orders = await OrderModel.find({ userId: user._id, deleted: false })
           .skip(skip)
           .limit(limit)
           .populate({
-            path: 'items',
-            populate: { path: 'productId' },
+            path: "items",
+            populate: { path: "productId" },
           });
       } else {
         orders = await OrderModel.find()
           .skip(skip)
           .limit(limit)
           .populate({
-            path: 'items',
-            populate: { path: 'productId' },
+            path: "items",
+            populate: { path: "productId" },
           });
       }
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: 'Không có đơn hàng nào tồn tại.',
+          message: "Không có đơn hàng nào tồn tại.",
         });
       }
 
@@ -45,11 +45,11 @@ const OrderController = {
         data: orders,
         totalPage,
         totalData,
-        message: 'Lấy danh sách đơn hàng thành công.',
+        message: "Lấy danh sách đơn hàng thành công.",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Có lỗi xảy ra khi lấy danh sách đơn hàng.',
+        message: "Có lỗi xảy ra khi lấy danh sách đơn hàng.",
         error: error.message,
       });
     }
@@ -58,11 +58,11 @@ const OrderController = {
   getAll: async (req, res) => {
     try {
       const orders = await OrderModel.find().populate({
-        path: 'items',
-        populate: { path: 'productId' },
+        path: "items",
+        populate: { path: "productId" },
       });
       res.status(StatusCodes.OK).json({
-        message: 'Lấy danh sách đơn hàng thành công',
+        message: "Lấy danh sách đơn hàng thành công",
         data: orders,
       });
     } catch (error) {
@@ -76,21 +76,21 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Không tìm thấy đơn hàng',
+        message: "Không tìm thấy đơn hàng",
       });
     }
     try {
       const order = await OrderModel.findById(id).populate({
-        path: 'items',
-        populate: { path: 'productId' },
+        path: "items",
+        populate: { path: "productId" },
       });
       if (!order) {
         return res.status(StatusCodes.OK).json({
-          message: 'Đơn hàng không tồn tại',
+          message: "Đơn hàng không tồn tại",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy đơn hàng thành công',
+        message: "Lấy đơn hàng thành công",
         data: order,
       });
     } catch (error) {
@@ -104,18 +104,18 @@ const OrderController = {
     const { id } = req.params;
     try {
       const orders = await OrderModel.find({ userId: id }).populate({
-        path: 'items',
-        populate: { path: 'productId' },
+        path: "items",
+        populate: { path: "productId" },
       });
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: 'Người dùng chưa có đơn hàng nào',
+          message: "Người dùng chưa có đơn hàng nào",
         });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy đơn hàng của người dùng thành công',
+        message: "Lấy đơn hàng của người dùng thành công",
         data: orders,
       });
     } catch (error) {
@@ -151,41 +151,41 @@ const OrderController = {
       if (isChanged) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           data: items,
-          message: 'Sản phẩm trong đơn hàng đã có sự thay đổi.',
+          message: "Sản phẩm trong đơn hàng đã có sự thay đổi.",
         });
       }
       await Promise.all(
         value.items.map(async (item) => {
           const productItem = await ProductItemModel.findById(
-            item.productOptionId,
+            item.productOptionId
           );
           productItem.outStock += item.quantity;
           await productItem.save();
-        }),
+        })
       );
- await Promise.all(
-   value.items.map(async (item) => {
-     await CartModel.findOneAndUpdate(
-       {
-         UserID: value.userId,
-         'carts.productId': item.productId,
-         'carts.productOptionId': item.productOptionId,
-       },
-       {
-         $pull: {
-           carts: {
-             productId: item.productId,
-             productOptionId: item.productOptionId,
-           },
-         },
-       },
-     );
-   }),
- );
+      await Promise.all(
+        value.items.map(async (item) => {
+          await CartModel.findOneAndUpdate(
+            {
+              UserID: value.userId,
+              "carts.productId": item.productId,
+              "carts.productOptionId": item.productOptionId,
+            },
+            {
+              $pull: {
+                carts: {
+                  productId: item.productId,
+                  productOptionId: item.productOptionId,
+                },
+              },
+            }
+          );
+        })
+      );
       const order = await OrderModel.create(value);
-      io.emit('Order', order);
+      io.emit("Order", order);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo đơn hàng thành công.',
+        message: "Tạo đơn hàng thành công.",
         data: order,
       });
     } catch (error) {
@@ -199,7 +199,7 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Không tìm thấy đơn hàng',
+        message: "Không tìm thấy đơn hàng",
       });
     }
     try {
@@ -218,11 +218,11 @@ const OrderController = {
       });
       if (!updatedOrder) {
         return res.status(StatusCodes.OK).json({
-          message: 'Đơn hàng không tồn tại',
+          message: "Đơn hàng không tồn tại",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Cập nhật đơn hàng thành công',
+        message: "Cập nhật đơn hàng thành công",
         data: updatedOrder,
       });
     } catch (error) {
@@ -236,18 +236,18 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Không tìm thấy đơn hàng',
+        message: "Không tìm thấy đơn hàng",
       });
     }
     try {
       const order = await OrderModel.findByIdAndDelete(id);
       if (!order) {
         return res.status(StatusCodes.OK).json({
-          message: 'Đơn hàng không tồn tại',
+          message: "Đơn hàng không tồn tại",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Xóa đơn hàng thành công',
+        message: "Xóa đơn hàng thành công",
         data: order,
       });
     } catch (error) {
@@ -262,7 +262,7 @@ const OrderController = {
       const productDetails = await ProductController.checkProduct(req.body);
 
       return res.status(StatusCodes.OK).json({
-        message: 'Kiểm tra sản phẩm thành công',
+        message: "Kiểm tra sản phẩm thành công",
         data: productDetails,
       });
     } catch (error) {
