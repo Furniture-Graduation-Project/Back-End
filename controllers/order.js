@@ -5,6 +5,9 @@ import { io } from '../services/socket.js';
 import ProductItemModel from '../models/productItem.js';
 import { ProductController } from './product.js';
 import CartModel from '../models/cart.js';
+import generateQrCode from '../services/qrcode.js';
+import { checkPaidSchema } from '../validations/payment.js';
+import paymentApiCall from '../services/payment.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -13,15 +16,17 @@ const OrderController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
+      let totalData;
       let orders;
       if (user) {
-        orders = await OrderModel.find({ userId: user._id })
+        orders = await OrderModel.find({ userId: user._id, deleted: false })
           .skip(skip)
           .limit(limit)
           .populate({
             path: 'items',
             populate: { path: 'productId' },
           });
+        totalData = await OrderModel.countDocuments({ deleted: false });
       } else {
         orders = await OrderModel.find()
           .skip(skip)
@@ -30,6 +35,7 @@ const OrderController = {
             path: 'items',
             populate: { path: 'productId' },
           });
+        totalData = await OrderModel.countDocuments();
       }
 
       if (!orders || orders.length === 0) {
@@ -38,7 +44,6 @@ const OrderController = {
         });
       }
 
-      const totalData = await OrderModel.countDocuments();
       const totalPage = Math.ceil(totalData / limit);
 
       res.status(StatusCodes.OK).json({
@@ -163,25 +168,25 @@ const OrderController = {
           await productItem.save();
         }),
       );
- await Promise.all(
-   value.items.map(async (item) => {
-     await CartModel.findOneAndUpdate(
-       {
-         UserID: value.userId,
-         'carts.productId': item.productId,
-         'carts.productOptionId': item.productOptionId,
-       },
-       {
-         $pull: {
-           carts: {
-             productId: item.productId,
-             productOptionId: item.productOptionId,
-           },
-         },
-       },
-     );
-   }),
- );
+      await Promise.all(
+        value.items.map(async (item) => {
+          await CartModel.findOneAndUpdate(
+            {
+              UserID: value.userId,
+              'carts.productId': item.productId,
+              'carts.productOptionId': item.productOptionId,
+            },
+            {
+              $pull: {
+                carts: {
+                  productId: item.productId,
+                  productOptionId: item.productOptionId,
+                },
+              },
+            },
+          );
+        }),
+      );
       const order = await OrderModel.create(value);
       io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
@@ -257,10 +262,84 @@ const OrderController = {
     }
   },
 
+  createQrCode: async (req, res) => {
+    try {
+      const { amount, addInfo } = req.body;
+      if (!amount || !addInfo) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Không tìm thấy dữ liệu đầu vào',
+        });
+      }
+      const qrCode = await generateQrCode({ amount, addInfo });
+      if (!qrCode) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Tạo QRCode thất bại',
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: 'Tạo QRCode thành công',
+        data: qrCode,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+  payment: async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Không tìm thấy đơn hàng',
+      });
+    }
+    try {
+      const order = await OrderModel.findById(id);
+      if (!order) {
+        return res.status(StatusCodes.OK).json({
+          message: 'Đơn hàng không tồn tại',
+        });
+      }
+      const { value, error } = checkPaidSchema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+      const date = new Date();
+      console.log(date);
+
+      if (error) {
+        const errors = error.details.map((err) => err.message);
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: errors,
+        });
+      }
+      const checkPayment = await paymentApiCall({
+        ...value,
+        startTime: date,
+      });
+
+      if (!checkPayment) {
+        return res.status().json({
+          message: 'Thanh toán thất bại, vui lòng thực hiện lại!',
+        });
+      }
+      order.payment.paymentStatus = 'paid';
+      order.status = 'pending';
+      await order.save();
+      return res.status(StatusCodes.OK).json({
+        message: 'Thanh toán thành công!',
+        data: order,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
+
   checkProductOrder: async (req, res) => {
     try {
       const productDetails = await ProductController.checkProduct(req.body);
-
       return res.status(StatusCodes.OK).json({
         message: 'Kiểm tra sản phẩm thành công',
         data: productDetails,

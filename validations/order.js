@@ -42,9 +42,11 @@ export const createOrderSchema = Joi.object({
       'processing',
       'shipped',
       'delivered',
+      'received',
       'cancelled',
       'returned',
       'refunded',
+      'unpaid',
     )
     .messages({
       'any.only': 'Trạng thái đơn hàng không hợp lệ',
@@ -82,6 +84,7 @@ export const updateOrderSchema = Joi.object({
       'cancelled',
       'returned',
       'refunded',
+      'unpaid',
     )
     .optional()
     .messages({

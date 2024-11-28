@@ -10,7 +10,9 @@ orderRouter.get('/:id', OrderController.getByIdOrder);
 orderRouter.get('/user/:id', OrderController.getByIdUser);
 orderRouter.post('/', OrderController.create);
 orderRouter.post('/check', OrderController.checkProductOrder);
-orderRouter.put('/:id', OrderController.update);
+orderRouter.post('/create-qr', OrderController.createQrCode);
+orderRouter.put('/:id', OrderController.update);  
+orderRouter.put('/payment/:id', OrderController.payment);
 orderRouter.delete('/:id', OrderController.delete);
 
 orderRouter.get(

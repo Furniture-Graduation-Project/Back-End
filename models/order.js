@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
-import { paymentSchema } from './payment.js';
-import { shipmentSchema } from './shipment.js';
-import { orderItemSchema } from './orderItem.js';
+import mongoose from "mongoose";
+import { paymentSchema } from "./payment.js";
+import { shipmentSchema } from "./shipment.js";
+import { orderItemSchema } from "./orderItem.js";
 
 const orderSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     orderName: {
@@ -32,21 +32,26 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        'pending',
-        'confirmed',
-        'processing',
-        'shipped',
-        'delivered',
-        'cancelled',
-        'returned',
-        'refunded',
+        "pending",
+        "unpaid",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "returned",
+        "refunded",
       ],
-      default: 'pending',
+      default: "pending",
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
     },
   },
-  { timestamps: true, versionKey: false },
+  { timestamps: true, versionKey: false }
 );
 
-const OrderModel = mongoose.model('Order', orderSchema);
+const OrderModel = mongoose.model("Order", orderSchema);
 
 export default OrderModel;
