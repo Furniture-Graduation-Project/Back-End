@@ -177,7 +177,6 @@ const CartController = {
 
   delete: async (req, res) => {
     const { productId, productOptionId } = req.params;
-    console.log(productId, productOptionId);
     if (!productId || !productOptionId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
