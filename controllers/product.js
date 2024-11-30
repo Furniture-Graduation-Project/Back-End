@@ -33,9 +33,11 @@ export const ProductController = {
 
       const categoryId = req.query.categoryId;
       const materialId = req.query.materialId;
+      const status = req.query.status;
       const name = req.query.name;
 
-      const query = { status: "available" };
+      const query =
+        status == "all" ? {} : status ? { status } : { status: "available" };
 
       if (categoryId) {
         query.category = categoryId;
@@ -67,8 +69,17 @@ export const ProductController = {
           };
         })
       );
+      let totalData;
+      if (status == "available") {
+        totalData = await ProductModel.countDocuments({ status: "available" });
+      } else if (status == "creating") {
+        totalData = await ProductModel.countDocuments({ status: "creating" });
+      } else if (status == "disable") {
+        totalData = await ProductModel.countDocuments({ status: "disable" });
+      } else {
+        totalData = await ProductModel.countDocuments();
+      }
 
-      const totalData = await ProductModel.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
