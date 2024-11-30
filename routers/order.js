@@ -6,12 +6,14 @@ const orderRouter = new Router();
 
 orderRouter.get('/', OrderController.getAll);
 orderRouter.get('/limited', OrderController.getLimited);
+orderRouter.get('/count', OrderController.countOrder);
+orderRouter.get('/revenue', OrderController.revenueOrder);
 orderRouter.get('/:id', OrderController.getByIdOrder);
 orderRouter.get('/user/:id', OrderController.getByIdUser);
 orderRouter.post('/', OrderController.create);
 orderRouter.post('/check', OrderController.checkProductOrder);
 orderRouter.post('/create-qr', OrderController.createQrCode);
-orderRouter.put('/:id', OrderController.update);  
+orderRouter.put('/:id', OrderController.update);
 orderRouter.put('/payment/:id', OrderController.payment);
 orderRouter.delete('/:id', OrderController.delete);
 
