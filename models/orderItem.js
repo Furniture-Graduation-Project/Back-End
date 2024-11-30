@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 export const orderItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+    ref: 'Product',
     required: true,
   },
   productOptionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "ProductOption",
+    ref: 'ProductItem',
     required: true,
   },
   unitPrice: {
