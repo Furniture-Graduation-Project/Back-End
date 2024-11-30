@@ -355,6 +355,165 @@ const OrderController = {
       });
     }
   },
+  countOrder: async (req, res) => {
+    try {
+      const { period } = req.query;
+
+      const now = new Date();
+      const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+      const startOfThisWeek = new Date(
+        now.setDate(now.getDate() - now.getDay()),
+      );
+      const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfThisYear = new Date(now.getFullYear(), 0, 1);
+      const startOfYesterday = new Date(startOfToday);
+
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      const startOfLastWeek = new Date(startOfThisWeek);
+      startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+      const startOfLastMonth = new Date(startOfThisMonth);
+      startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
+
+      const startOfLastYear = new Date(startOfThisYear);
+      startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1);
+      let filterToday = {};
+      let filterPrevious = {};
+      if (period === 'day') {
+        filterToday = { createdAt: { $gte: startOfToday } };
+        filterPrevious = {
+          createdAt: { $gte: startOfYesterday, $lt: startOfToday },
+        };
+      } else if (period === 'week') {
+        const endOfLastWeek = new Date(startOfThisWeek);
+        filterToday = { createdAt: { $gte: startOfThisWeek } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek },
+        };
+      } else if (period === 'month') {
+        filterToday = { createdAt: { $gte: startOfThisMonth } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
+        };
+      } else if (period === 'year') {
+        filterToday = { createdAt: { $gte: startOfThisYear } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastYear, $lt: startOfThisYear },
+        };
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message:
+            'Vui lòng cung cấp period là "day", "week", "month", hoặc "year".',
+        });
+      }
+
+      const countToday = await OrderModel.countDocuments(filterToday);
+      const countPrevious = await OrderModel.countDocuments(filterPrevious);
+      return res.status(StatusCodes.OK).json({
+        current: countToday,
+        previous: countPrevious,
+      });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  },
+  revenueOrder: async (req, res) => {
+    try {
+      const { period } = req.query;
+
+      const now = new Date();
+      const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+      const startOfThisWeek = new Date(
+        now.setDate(now.getDate() - now.getDay()),
+      );
+      const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfThisYear = new Date(now.getFullYear(), 0, 1);
+      const startOfYesterday = new Date(startOfToday);
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      const startOfLastWeek = new Date(startOfThisWeek);
+      startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+      const startOfLastMonth = new Date(startOfThisMonth);
+      startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
+      const startOfLastYear = new Date(startOfThisYear);
+      startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1);
+
+      let filterToday = {};
+      let filterPrevious = {};
+      if (period === 'day') {
+        filterToday = { createdAt: { $gte: startOfToday } };
+        filterPrevious = {
+          createdAt: { $gte: startOfYesterday, $lt: startOfToday },
+        };
+      } else if (period === 'week') {
+        const endOfLastWeek = new Date(startOfThisWeek);
+        filterToday = { createdAt: { $gte: startOfThisWeek } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek },
+        };
+      } else if (period === 'month') {
+        filterToday = { createdAt: { $gte: startOfThisMonth } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
+        };
+      } else if (period === 'year') {
+        filterToday = { createdAt: { $gte: startOfThisYear } };
+        filterPrevious = {
+          createdAt: { $gte: startOfLastYear, $lt: startOfThisYear },
+        };
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message:
+            'Vui lòng cung cấp period là "day", "week", "month", hoặc "year".',
+        });
+      }
+
+      const revenueToday = await OrderModel.aggregate([
+        {
+          $match: {
+            ...filterToday,
+            'payment.paymentStatus': 'paid',
+            status: 'delivered',
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$totalPrice' },
+          },
+        },
+      ]);
+
+      const revenuePrevious = await OrderModel.aggregate([
+        {
+          $match: {
+            ...filterPrevious,
+            'payment.paymentStatus': 'paid',
+            status: 'delivered',
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$totalPrice' },
+          },
+        },
+      ]);
+
+      const currentRevenue = revenueToday[0]?.totalRevenue || 0;
+      const previousRevenue = revenuePrevious[0]?.totalRevenue || 0;
+
+      return res.status(StatusCodes.OK).json({
+        current: currentRevenue,
+        previous: previousRevenue,
+      });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  },
 };
 
 export default OrderController;
