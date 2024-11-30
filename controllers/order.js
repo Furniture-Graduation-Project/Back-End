@@ -85,10 +85,15 @@ const OrderController = {
       });
     }
     try {
-      const order = await OrderModel.findById(id).populate({
-        path: 'items',
-        populate: { path: 'productId' },
-      });
+      const order = await OrderModel.findById(id)
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productOptionId' },
+        });
       if (!order) {
         return res.status(StatusCodes.OK).json({
           message: 'Đơn hàng không tồn tại',
