@@ -17,6 +17,9 @@ const protectRouteClient = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ error: 'Người dùng không tìm thấy' });
     }
+    if (user.active === false) {
+      return res.status(401).json({ error: 'Tài khoản người người dùng đã bị xóa' });
+    }
     req.user = user;
     next();
   } catch (error) {
