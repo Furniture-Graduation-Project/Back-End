@@ -2,13 +2,7 @@ import mongoose from "mongoose";
 export const paymentSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
-    enum: [
-      "credit_card",
-      "debit_card",
-      "paypal",
-      "bank_transfer",
-      "cash_on_delivery",
-    ],
+    enum: ["credit_card", "cash_on_delivery"],
     required: true,
   },
   amount: {

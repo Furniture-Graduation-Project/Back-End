@@ -1,29 +1,50 @@
 import Joi from "joi";
 
 export const employeeSchema = Joi.object({
-  email: Joi.string().required().messages({
-    "any.required": "Email không được để trống",
-    "string.empty": "Email không được để trống",
+  username: Joi.string().required().messages({
+    "any.required": "Username không được để trống",
+    "string.empty": "Username không được để trống",
   }),
-  password: Joi.string().required().messages({
-    "any.required": "Mật khẩu không được để trống",
+  password: Joi.string().optional().messages({
     "string.empty": "Mật khẩu không được để trống",
   }),
-  userName: Joi.string().required().messages({
-    "any.required": "Họ tên không được để trống",
+  avatar: Joi.string().messages({
+    "string.empty": "Ảnh dại diện không được để trống",
+  }),
+  fullName: Joi.string().messages({
     "string.empty": "Họ tên không được để trống",
   }),
-  phoneNumber: Joi.number().required().messages({
-    "any.required": "Số điện thoại không được để trống",
-    "number.base": "Số điện thoại phải là số",
-    "number.empty": "Số điện thoại không được để trống",
+  phoneNumber: Joi.string().min(10).max(15).messages({
+    "string.empty": "Số điện thoại không được để trống",
+    "string.min": "Số điện thoại lớn hơn 10 ký tự",
+    "string.max": "Số điện thoại nhỏ hơn 15 ký tự",
   }),
-  address: Joi.string().required().messages({
-    "any.required": "Địa chỉ không được để trống",
+  address: Joi.string().messages({
     "string.empty": "Địa chỉ không được để trống",
   }),
-  role: Joi.string().required().messages({
-    "any.required": "Vai trò không được để trống",
+  role: Joi.string().optional().messages({
     "string.empty": "Vai trò không được để trống",
+  }),
+});
+
+export const signinEmployeeSchema = Joi.object({
+  username: Joi.string().required().messages({
+    "string.email": "Email không đúng định dạng",
+    "string.empty": "Email không được để trống",
+  }),
+  password: Joi.string().min(6).optional().messages({
+    "string.min": "Mật khẩu phải có ít nhất 8 ký tự",
+    "string.empty": "Mật khẩu không được để trống",
+  }),
+});
+
+export const updateEmployeePassword = Joi.object({
+  oldPassword: Joi.string().required().messages({
+    "any.required": "Mật khẩu cũ không được để trống",
+    "string.empty": "Mật khẩu cũ không được để trống",
+  }),
+  newPassword: Joi.string().required().messages({
+    "any.required": "Mật khẩu mới không được để trống",
+    "string.empty": "Mật khẩu mới không được để trống",
   }),
 });

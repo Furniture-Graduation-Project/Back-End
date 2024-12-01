@@ -13,10 +13,7 @@ const VoucherController = {
       return res.status(StatusCodes.BAD_REQUEST).json({ message });
     }
     try {
-      const voucher = new VoucherModel({
-        value,
-      });
-
+      const voucher = new VoucherModel(value);
       await voucher.save();
       res
         .status(StatusCodes.CREATED)
@@ -29,21 +26,32 @@ const VoucherController = {
   },
 
   getAll: async (req, res) => {
-    const page = parseInt(req.query.page, 10) || 1;
+    try {
+      const vouchers = await VoucherModel.find();
+      res.status(StatusCodes.OK).json({
+        data: vouchers,
+        message: 'Lấy danh sách voucher thành công',
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: 'Lấy danh sách voucher thất bại',
+        error: error.message,
+      });
+    }
+  },
+  getLimited: async (req, res) => {
+    const page = parseInt(req.query.page, 10) + 1 || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
     try {
-      const vouchers = await VoucherModel.find()
-        .skip(skip)
-        .limit(limit)
-        .populate('orders');
+      const vouchers = await VoucherModel.find().skip(skip).limit(limit);
       const total = await VoucherModel.countDocuments();
       res.status(StatusCodes.OK).json({
-        vouchers,
+        data: vouchers,
         page,
-        totalPages: Math.ceil(total / limit),
-        totalVouchers: total,
+        totalPage: Math.ceil(total / limit),
+        totalData: total,
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -64,7 +72,7 @@ const VoucherController = {
       const voucher = await VoucherModel.findById(id).populate('orders');
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
       res.status(StatusCodes.OK).json(voucher);
@@ -97,7 +105,7 @@ const VoucherController = {
 
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
 
@@ -122,7 +130,7 @@ const VoucherController = {
       const voucher = await VoucherModel.findByIdAndDelete(id);
       if (!voucher) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy voucher' });
       }
 

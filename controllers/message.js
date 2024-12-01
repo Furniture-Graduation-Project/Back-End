@@ -16,7 +16,7 @@ export const MessageController = {
       });
       if (!conversation) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không có cuộc trò chuyện tồn tại.' });
       }
       res.status(StatusCodes.OK).json({
@@ -42,7 +42,7 @@ export const MessageController = {
         });
       if (!conversation || conversation.length === 0) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Không có cuộc trò chuyên tồn tại.' });
       }
       const totalData = await ConversationModel.countDocuments();
@@ -75,7 +75,7 @@ export const MessageController = {
       });
       if (!conversation) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Cuộc trò chuyện không tồn tại.' });
       }
 
@@ -106,7 +106,7 @@ export const MessageController = {
         path: 'userId',
       });
       if (!conversation) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           error: 'Không tìm thấy cuộc trò chuyên',
         });
       }
@@ -274,7 +274,7 @@ export const MessageController = {
 
       if (!updatedConversation) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Cuộc trò chuyện không tồn tại.' });
       }
 
@@ -309,7 +309,7 @@ export const MessageController = {
       const conversation = await ConversationModel.findOne({ userId: id });
       if (!conversation) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Cuộc trò chuyện không tồn tại.' });
       }
       const newMessage = {
@@ -345,7 +345,7 @@ export const MessageController = {
       const conversation = await ConversationModel.findByIdAndDelete(id);
       if (!conversation) {
         return res
-          .status(StatusCodes.NOT_FOUND)
+          .status(StatusCodes.OK)
           .json({ message: 'Cuộc trò chuyện không tồn tại.' });
       }
       res

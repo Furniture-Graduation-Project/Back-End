@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const categorySchema = new mongoose.Schema(
+const materialSchema = new mongoose.Schema(
   {
-    categoryName: {
+    materialName: {
       type: String,
       required: true,
       unique: true,
@@ -16,5 +16,5 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-const CategoryModel = mongoose.model("Category", categorySchema);
-export default CategoryModel;
+const MaterialModel = mongoose.model("Material", materialSchema);
+export default MaterialModel;

@@ -1,46 +1,50 @@
-import Joi from "joi";
+import Joi from 'joi';
+
+const objectIdPattern = /^[0-9a-fA-F]{24}$/;
 
 export const createCartSchema = Joi.object({
-  userId: Joi.string().required().messages({
-    "any.required": "UserID là bắt buộc",
-    "string.empty": "UserID không được để trống",
+  productId: Joi.string().pattern(objectIdPattern).required().messages({
+    'any.required': 'ProductId là bắt buộc',
+    'string.empty': 'ProductId không được để trống',
+    'string.pattern.base': 'ProductId phải là một ObjectId hợp lệ',
   }),
-  productId: Joi.string().required().messages({
-    "any.required": "ProductID là bắt buộc",
-    "string.empty": "ProductID không được để trống",
+  productOptionId: Joi.string().pattern(objectIdPattern).required().messages({
+    'any.required': 'productOptionId là bắt buộc',
+    'string.empty': 'productOptionId không được để trống',
+    'string.pattern.base': 'productOptionId phải là một ObjectId hợp lệ',
   }),
-  quantity: Joi.number().min(1).required().messages({
-    "any.required": "Số lượng là bắt buộc",
-    "number.base": "Số lượng phải là một số",
-    "number.min": "Số lượng phải ít nhất là 1",
+  quantity: Joi.number().integer().min(1).required().messages({
+    'any.required': 'Số lượng là bắt buộc',
+    'number.base': 'Số lượng phải là một số',
+    'number.integer': 'Số lượng phải là một số nguyên',
+    'number.min': 'Số lượng phải ít nhất là 1',
   }),
-  price: Joi.number().required().messages({
-    "any.required": "Giá là bắt buộc",
-    "number.base": "Giá phải là một số",
-  }),
-  dateAdded: Joi.date().optional().messages({
-    "date.base": "Ngày thêm phải là một ngày hợp lệ",
+  unitPrice: Joi.number().greater(0).required().messages({
+    'any.required': 'Giá là bắt buộc',
+    'number.base': 'Giá phải là một số',
+    'number.greater': 'Giá phải lớn hơn 0',
   }),
 }).options({
   abortEarly: false,
 });
 
 export const updateCartSchema = Joi.object({
-  userId: Joi.string().optional().messages({
-    "string.base": "UserID phải là một chuỗi",
+  productId: Joi.string().pattern(objectIdPattern).optional().messages({
+    'string.empty': 'ProductId không được để trống',
+    'string.pattern.base': 'ProductId phải là một ObjectId hợp lệ',
   }),
-  productId: Joi.string().optional().messages({
-    "string.base": "ProductID phải là một chuỗi",
+  productOptionId: Joi.string().pattern(objectIdPattern).optional().messages({
+    'string.empty': 'productOptionId không được để trống',
+    'string.pattern.base': 'productOptionId phải là một ObjectId hợp lệ',
   }),
-  quantity: Joi.number().min(1).optional().messages({
-    "number.base": "Số lượng phải là một số",
-    "number.min": "Số lượng phải ít nhất là 1",
+  quantity: Joi.number().integer().min(1).optional().messages({
+    'number.base': 'Số lượng phải là một số',
+    'number.integer': 'Số lượng phải là một số nguyên',
+    'number.min': 'Số lượng phải ít nhất là 1',
   }),
-  price: Joi.number().optional().messages({
-    "number.base": "Giá phải là một số",
-  }),
-  dateAdded: Joi.date().optional().messages({
-    "date.base": "Ngày thêm phải là một ngày hợp lệ",
+  unitPrice: Joi.number().greater(0).optional().messages({
+    'number.base': 'Giá phải là một số',
+    'number.greater': 'Giá phải lớn hơn 0',
   }),
 }).options({
   abortEarly: false,

@@ -1,31 +1,30 @@
-import User from "../models/user.js";
-import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
-import { signupSchema, signinSchema } from "../validations/user.js";
-import dotenv from "dotenv";
-import generateTokenAndSetCookie from "../utils/generateToken.js";
-dotenv.config();
+import User from '../models/user.js';
+import { StatusCodes } from 'http-status-codes';
 
 const UserController = {
-  signup: async (req, res) => {
+  getAll: async (req, res) => {
     try {
-      const { value, error } = signupSchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+      const users = await User.find()
+        .skip(skip)
+        .limit(limit)
+        .select('-password')
+        .sort({ createdAt: -1 });
+      const totalData = await User.countDocuments();
+      if (!users) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: 'Không có người dùng nào !' });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        data: users,
+        totalPage: Math.ceil(totalData / limit),
+        totalData: totalData,
+        message: 'Lấy danh sách người dùng thành công.',
       });
-      if (error) {
-        const message = error.details.map((e) => e.message);
-        return res.status(StatusCodes.BAD_REQUEST).json({ message });
-      }
-      const isExist = await User.findOne({ email: value.email });
-      if (isExist) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Email đã tồn tại!",
-        });
-      }
-      const hashPass = await bcrypt.hash(value.password, 10);
-      const user = await User.create({ ...value, password: hashPass });
-      return res.status(StatusCodes.CREATED).json({ user });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -33,69 +32,33 @@ const UserController = {
     }
   },
 
-  signin: async (req, res) => {
+  getOne: async (req, res) => {
     try {
-      const { value, error } = signinSchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
-      if (error) {
-        const message = error.details.map((e) => e.message);
-        return res.status(StatusCodes.BAD_REQUEST).json({ message });
-      }
-      const user = await User.findOne({ email: value.email });
+      const user = await User.findById(req.params.id).select('-password');
       if (!user) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Email không tồn tại!",
-        });
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: 'Người dùng không tồn tại !' });
       }
-      const isMatch = await bcrypt.compare(value.password, user.password);
-      if (!isMatch) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Sai mật khẩu!",
-        });
-      }
-      generateTokenAndSetCookie(user._id, res);
-      return res.status(StatusCodes.OK).json({ user });
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ data: user, message: 'Lấy người dùng thàng công.' });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error.message });
     }
   },
-
-  update: async (req, res) => {
+  deleteUser: async (req, res) => {
     try {
-      const id = req.params.id;
-      if (!id) {
+      const user = await User.findByIdAndDelete(req.params.id);
+      if (!user) {
         return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Không tìm thấy người dùng" });
+          .status(StatusCodes.OK)
+          .json({ message: 'Người dùng không tồn tại !' });
       }
-      const { value, error } = signinSchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
-      if (error) {
-        const message = error.details.map((e) => e.message);
-        return res.status(StatusCodes.BAD_REQUEST).json({ message });
-      }
-      if (value.password) {
-        const hashPass = await bcrypt.hash(value.password, 10);
-        value.password = hashPass;
-      }
-
-      const data = await User.findByIdAndUpdate(id, value, {
-        new: true,
-        runValidators: true,
-      });
-
-      if (!data) {
-        return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "Người dùng không tồn tại!" });
-      }
-      return res.status(StatusCodes.OK).json({ data });
+      return res.status(StatusCodes.OK).json({ message: 'Xóa thành công !' });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
