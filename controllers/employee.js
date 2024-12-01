@@ -7,9 +7,6 @@ import {
   updateEmployeePassword,
 } from "../validations/employee.js";
 import { generateTokenAndSetCookie } from "../utils/token.js";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const EmployeeController = {
   searchByFullName: async (req, res) => {
