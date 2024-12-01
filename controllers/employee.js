@@ -1,11 +1,12 @@
-import { StatusCodes } from 'http-status-codes';
-import bcrypt from 'bcrypt';
-import Employee from '../models/employee.js';
+import { StatusCodes } from "http-status-codes";
+import bcrypt from "bcrypt";
+import Employee from "../models/employee.js";
 import {
   employeeSchema,
   signinEmployeeSchema,
-} from '../validations/employee.js';
-import { generateTokenAndSetCookie } from '../utils/token.js';
+  updateEmployeePassword,
+} from "../validations/employee.js";
+import { generateTokenAndSetCookie } from "../utils/token.js";
 
 const EmployeeController = {
   searchByFullName: async (req, res) => {
@@ -24,7 +25,7 @@ const EmployeeController = {
 
       if (!employees || employees.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: 'Không tìm thấy nhân viên nào với fullName này.',
+          message: "Không tìm thấy nhân viên nào với fullName này.",
         });
       }
 
@@ -45,24 +46,25 @@ const EmployeeController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
+
       const employees = await Employee.find().skip(skip).limit(limit);
       if (!employees || employees.length === 0) {
-        return res
-          .status(StatusCodes.OK)
-          .json({ message: 'Không có nhân viên tồn tại.' });
+        return res.status(StatusCodes.OK).json({
+          message: "Không có nhân viên tồn tại.",
+        });
       }
 
       const totalData = await Employee.countDocuments();
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
-      res.status(StatusCodes.OK).json({
+      return res.status(StatusCodes.OK).json({
         data: employees,
         totalPage,
         totalData,
         message: "Lấy danh sách nhân viên thành công.",
       });
     } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Có lỗi xảy ra khi lấy thông tin nhân viên.",
         error: error.message,
       });
@@ -77,24 +79,24 @@ const EmployeeController = {
         data: employees,
       });
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Lỗi: " + error.message,
       });
     }
   },
 
   getDetail: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy nhân viên" });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Không tìm thấy nhân viên",
+      });
     }
     try {
       const employee = await Employee.findById(id);
       if (!employee) {
         return res.status(StatusCodes.OK).json({
-          message: 'Nhân viên không tìm thấy',
+          message: "Nhân viên không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
@@ -102,7 +104,7 @@ const EmployeeController = {
         data: employee,
       });
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Lỗi: " + error.message,
       });
     }
@@ -157,6 +159,7 @@ const EmployeeController = {
         abortEarly: false,
         stripUnknown: true,
       });
+
       if (error) {
         const message = error.details.map((e) => e.message);
         return res.status(StatusCodes.BAD_REQUEST).json({ message });
@@ -191,31 +194,35 @@ const EmployeeController = {
   },
 
   update: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy nhân viên" });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Không tìm thấy nhân viên",
+      });
     }
     try {
       const { value, error } = employeeSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
+
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
+
       const employee = await Employee.findByIdAndUpdate(id, value, {
         new: true,
       });
+
       if (!employee) {
-        return res.status(StatusCodes.OK).json({
-          message: 'Nhân viên không tìm thấy',
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Nhân viên không tìm thấy",
         });
       }
+
       return res.status(StatusCodes.OK).json({
         message: "Cập nhật nhân viên thành công",
         data: employee,
@@ -226,18 +233,20 @@ const EmployeeController = {
       });
     }
   },
+
   updatePassword: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy nhân viên" });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Không tìm thấy nhân viên",
+      });
     }
     try {
       const { value, error } = updateEmployeePassword.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
+
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -251,17 +260,23 @@ const EmployeeController = {
           message: "Nhân viên không tìm thấy",
         });
       }
-      const check = await bcrypt.compare(value.oldPassword, employee.password);
-      if (!check) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Mật khẩu cũ sai",
+
+      const isMatch = await bcrypt.compare(
+        value.oldPassword,
+        employee.password
+      );
+      if (!isMatch) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Mật khẩu cũ không đúng",
         });
       }
-      const hashPass = await bcrypt.hash(value.newPassword, 10);
-      employee.password = hashPass;
+
+      const hashedPassword = await bcrypt.hash(value.newPassword, 10);
+      employee.password = hashedPassword;
       await employee.save();
+
       return res.status(StatusCodes.OK).json({
-        message: "Cập nhật password thành công",
+        message: "Cập nhật mật khẩu thành công",
         data: employee,
       });
     } catch (error) {
@@ -272,17 +287,17 @@ const EmployeeController = {
   },
 
   delete: async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy nhân viên" });
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Không tìm thấy nhân viên",
+      });
     }
     try {
       const employee = await Employee.findByIdAndDelete(id);
       if (!employee) {
-        return res.status(StatusCodes.OK).json({
-          message: 'Nhân viên không tìm thấy',
+        return res.status(StatusCodes.NOT_FOUND).json({
+          message: "Nhân viên không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({

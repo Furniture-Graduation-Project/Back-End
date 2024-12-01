@@ -1,18 +1,18 @@
-import { StatusCodes } from 'http-status-codes';
-import BlogModel from '../models/blog.js';
-import { blogSchema } from '../validations/blog.js';
+import { StatusCodes } from "http-status-codes";
+import BlogModel from "../models/blog.js";
+import { blogSchema } from "../validations/blog.js";
 
 const BlogController = {
   getAllBlogs: async (req, res) => {
     try {
-      const blogs = await BlogModel.find().populate('employeeId', 'fullName');
+      const blogs = await BlogModel.find().populate("employeeId", "fullName");
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy tất cả bài viết thành công',
+        message: "Lấy tất cả bài viết thành công",
         data: blogs,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -23,14 +23,14 @@ const BlogController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
       const blogs = await BlogModel.find()
-        .populate('employeeId', 'fullName')
+        .populate("employeeId", "fullName")
         .skip(skip)
         .limit(limit);
 
       if (!blogs || blogs.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không có bài viết nào tồn tại.' });
+          .json({ message: "Không có bài viết nào tồn tại." });
       }
 
       const totalData = await BlogModel.countDocuments();
@@ -39,11 +39,11 @@ const BlogController = {
         data: blogs,
         totalPage,
         totalData,
-        message: 'Lấy danh sách bài viết thành công.',
+        message: "Lấy danh sách bài viết thành công.",
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Có lỗi xảy ra khi lấy danh sách bài viết.',
+        message: "Có lỗi xảy ra khi lấy danh sách bài viết.",
         error: error.message,
       });
     }
@@ -54,25 +54,22 @@ const BlogController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bài viết' });
+        .json({ message: "Không tìm thấy bài viết" });
     }
     try {
-      const blog = await BlogModel.findById(id).populate(
-        'employeeId',
-        'fullName',
-      ); // Thêm populate
+      const blog = await BlogModel.findById(id);
       if (!blog) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy bài viết' });
+          .json({ message: "Không tìm thấy bài viết" });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy chi tiết bài viết thành công',
+        message: "Lấy chi tiết bài viết thành công",
         data: blog,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -92,12 +89,12 @@ const BlogController = {
       const newBlog = new BlogModel(value);
       await newBlog.save();
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo bài viết thành công',
+        message: "Tạo bài viết thành công",
         data: newBlog,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -107,7 +104,7 @@ const BlogController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bài viết' });
+        .json({ message: "Không tìm thấy bài viết" });
     }
     try {
       const { value, error } = blogSchema.validate(req.body, {
@@ -128,16 +125,16 @@ const BlogController = {
       if (!updatedBlog) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy bài viết để cập nhật' });
+          .json({ message: "Không tìm thấy bài viết để cập nhật" });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: 'Cập nhật bài viết thành công',
+        message: "Cập nhật bài viết thành công",
         data: updatedBlog,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -147,22 +144,22 @@ const BlogController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bài viết' });
+        .json({ message: "Không tìm thấy bài viết" });
     }
     try {
       const deletedBlog = await BlogModel.findByIdAndDelete(id);
       if (!deletedBlog) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy bài viết để xóa' });
+          .json({ message: "Không tìm thấy bài viết để xóa" });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Xóa bài viết thành công',
+        message: "Xóa bài viết thành công",
         data: deletedBlog,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -172,22 +169,22 @@ const BlogController = {
     if (!employeeId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy ID tác giả' });
+        .json({ message: "Không tìm thấy ID tác giả" });
     }
     try {
       const blogs = await BlogModel.find({ employeeId });
       if (!blogs || blogs.length === 0) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy bài viết nào của tác giả này.' });
+          .json({ message: "Không tìm thấy bài viết nào của tác giả này." });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy bài viết theo tác giả thành công',
+        message: "Lấy bài viết theo tác giả thành công",
         data: blogs,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
