@@ -2,6 +2,7 @@ import CartModel from '../models/cart.js';
 import { StatusCodes } from 'http-status-codes';
 import { createCartSchema, updateCartSchema } from '../validations/cart.js';
 import mongoose from 'mongoose';
+import ProductItemModel from '../models/productItem.js';
 
 const CartController = {
   create: async (req, res) => {
@@ -176,7 +177,6 @@ const CartController = {
 
   delete: async (req, res) => {
     const { productId, productOptionId } = req.params;
-    console.log(productId, productOptionId);
     if (!productId || !productOptionId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -222,24 +222,32 @@ const CartController = {
     const { productId, productOptionId } = req.params;
     const userId = req.user._id;
     try {
-      const cart = await CartModel.findOneAndUpdate(
-        {
-          UserID: userId,
-          'carts.productId': productId,
-          'carts.productOptionId': productOptionId,
-        },
-        {
-          $inc: { 'carts.$.quantity': 1 },
-        },
-        { new: true },
-      );
-
+      const cart = await CartModel.findOne({
+        UserID: userId,
+        'carts.productId': productId,
+        'carts.productOptionId': productOptionId,
+      });
       if (!cart) {
         return res
           .status(StatusCodes.OK)
           .json({ message: 'Không tìm thấy giỏ hàng hoặc sản phẩm.' });
       }
+      const cartItem = cart.carts.find(
+        (item) =>
+          item.productId.toString() === productId &&
+          item.productOptionId.toString() === productOptionId,
+      );
+      const productItem = await ProductItemModel.findById(productOptionId);
 
+      if (productItem.stock - productItem.outStock < cartItem.quantity + 1) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: 'Số lượng trong kho không còn đủ.' });
+      }
+      if (cartItem) {
+        cartItem.quantity += 1;
+      }
+      await cart.save();
       res.status(StatusCodes.OK).json({
         data: cart,
         message: 'Tăng số lượng sản phẩm thành công.',
