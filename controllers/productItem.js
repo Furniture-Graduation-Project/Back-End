@@ -17,7 +17,7 @@ const ProductItemController = {
           image,
           SKU,
         },
-        { abortEarly: false, stripUnknown: true },
+        { abortEarly: false, stripUnknown: true }
       );
 
       if (error) {
@@ -112,40 +112,30 @@ const ProductItemController = {
   update: async (req, res) => {
     try {
       const { id } = req.params;
-      const { value, error } = productItemSchema.validate(req.body, {
-        abortEarly: false,
-        stripUnknown: true,
-      });
-      if (error) {
-        const errors = error.details.map((err) => err.message);
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          message: errors,
-        });
-      }
-      const existingProductItem = await ProductItemModel.findOne({
-        SKU: value.SKU,
-        _id: { $ne: id },
-      });
-
-      if (existingProductItem) {
+      const existingProductItem = await ProductItemModel.findById(id);
+      if (!existingProductItem) {
         return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: 'SKU đã tồn tại.' });
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: 'Không tìm thấy sản phẩm biến thể.' });
+      }
+      const updatedData = { ...existingProductItem._doc, ...req.body };
+      if (updatedData.SKU && updatedData.SKU !== existingProductItem.SKU) {
+        const existingSKUProduct = await ProductItemModel.findOne({
+          SKU: updatedData.SKU,
+          _id: { $ne: id },
+        });
+
+        if (existingSKUProduct) {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: 'SKU đã tồn tại.' });
+        }
       }
       const updatedProductItem = await ProductItemModel.findByIdAndUpdate(
         id,
-        value,
-        {
-          new: true,
-          runValidators: true,
-        },
+        { $set: updatedData },
+        { new: true, runValidators: true }
       );
-
-      if (!updatedProductItem) {
-        return res
-          .status(StatusCodes.OK)
-          .json({ message: 'Không tìm thấy sản phẩm biến thể' });
-      }
 
       return res.status(StatusCodes.OK).json(updatedProductItem);
     } catch (err) {
