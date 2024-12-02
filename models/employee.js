@@ -29,6 +29,7 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
       enum: ["admin", "product", "support", "order"],
     },
+    refreshToken: { type: String },
   },
   { timestamps: true, versionKey: false }
 );

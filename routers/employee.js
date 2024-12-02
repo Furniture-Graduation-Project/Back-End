@@ -15,6 +15,7 @@ routerEmployee.get("/search", EmployeeController.searchByFullName);
 routerEmployee.get("/limited", EmployeeController.getLimited);
 routerEmployee.get("/:id", EmployeeController.getDetail);
 routerEmployee.post("/", protectRoute, protectAdmin, EmployeeController.create);
+routerEmployee.post("/refreshToken", EmployeeController.refreshToken);
 routerEmployee.put("/:id", protectRoute, EmployeeController.update);
 routerEmployee.put("/password/:id", EmployeeController.updatePassword);
 routerEmployee.delete(
