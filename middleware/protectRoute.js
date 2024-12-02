@@ -3,11 +3,10 @@ import Employee from "../models/employee.js";
 
 const protectRoute = async (req, res, next) => {
   try {
-    // const authorizationHeader = req.headers["authorization"];
-    // const token = authorizationHeader && authorizationHeader.split(" ")[1];
     const token = req.cookies.accessToken;
     if (!token) {
       return res.status(401).json({ error: "Chưa xác thực - Không có Token" });
+      
     }
 
     let decoded;
