@@ -82,7 +82,10 @@ const BlogController = {
         .json({ message: "Không tìm thấy bài viết" });
     }
     try {
-      const blog = await BlogModel.findById(id);
+      const blog = await BlogModel.findById(id).populate(
+        "employeeId",
+        "fullName"
+      );
       if (!blog) {
         return res
           .status(StatusCodes.OK)
