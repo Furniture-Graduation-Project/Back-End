@@ -6,9 +6,9 @@ import protectProduct from "../middleware/protectProduct.js";
 
 const router = Router();
 
-router.get("", ProductController.getAll);
-router.get("/new", ProductController.getProductNew);
-router.get("/limited", ProductController.getLimited);
+router.get("/", ProductController.getAll);
+router.get("/limited", ProductController.getLimitedAndItems);
+router.get("/count", ProductController.countProduct);
 router.get("/search", ProductController.getByName);
 router.get("/count-by-category", ProductController.countProductsByCategory);
 router.get("/count-by-material", ProductController.countProductsByMaterial);

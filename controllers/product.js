@@ -25,39 +25,6 @@ export const ProductController = {
     }
   },
 
-  getProductNew: async (req, res) => {
-    try {
-      const products = await ProductModel.find({ status: "available" })
-        .sort({ createdAt: -1 })
-        .limit(10)
-        .populate("category", "categoryName")
-        .populate("material", "materialName");
-
-      const productsWithPrices = await Promise.all(
-        products.map(async (product) => {
-          const prices = await ProductItemModel.find({
-            productId: product._id,
-          }).select("price");
-          const priceList = prices.map((item) => item.price);
-          return {
-            ...product.toObject(),
-            prices: priceList,
-          };
-        })
-      );
-
-      res.status(StatusCodes.OK).json({
-        data: productsWithPrices,
-        message: "Hiển thị 10 sản phẩm mới nhất thành công.",
-      });
-    } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm mới nhất.",
-        error: error.message,
-      });
-    }
-  },
-
   getLimited: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) + 1 || 1;
@@ -121,6 +88,63 @@ export const ProductController = {
     }
   },
 
+  getLimitedAndItems: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+
+      const categoryId = req.query.categoryId;
+      const materialId = req.query.materialId;
+      const status = req.query.status;
+      const name = req.query.name;
+
+      const query =
+        status === "all" ? {} : status ? { status } : { status: "available" };
+
+      if (categoryId && categoryId !== "all") {
+        query.category = categoryId;
+      }
+
+      if (materialId) {
+        query.material = materialId;
+      }
+
+      if (name) {
+        query.name = { $regex: name, $options: "i" };
+      }
+
+      const products = await ProductModel.find(query)
+        .populate("category", "categoryName")
+        .populate("material", "materialName")
+        .skip(skip)
+        .limit(limit);
+      const productsWithItems = await Promise.all(
+        products.map(async (product) => {
+          const items = await ProductItemModel.find({ productId: product._id });
+          return {
+            ...product.toObject(),
+            items,
+          };
+        })
+      );
+
+      const totalData = await ProductModel.countDocuments(query);
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
+
+      res.status(StatusCodes.OK).json({
+        data: productsWithItems,
+        totalPage,
+        totalData,
+        message: "Lấy danh sách sản phẩm thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        error: error.message,
+      });
+    }
+  },
   getById: async (req, res) => {
     try {
       const { id } = req.params;
