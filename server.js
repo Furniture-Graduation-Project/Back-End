@@ -1,9 +1,9 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import session from 'express-session';
-import passport from 'passport';
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import session from "express-session";
+import passport from "passport";
 
 import './middleware/passport.js';
 import { app, server } from './services/socket.js';
@@ -23,11 +23,11 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());
@@ -41,9 +41,9 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: process.env.SAME_SITE,
-      secure: process.env.NODE_ENV !== 'development',
+      secure: process.env.NODE_ENV !== "development",
     },
-  }),
+  })
 );
 app.use(passport.initialize());
 app.use(passport.session());

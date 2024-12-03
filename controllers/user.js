@@ -1,5 +1,6 @@
-import User from '../models/user.js';
-import { StatusCodes } from 'http-status-codes';
+import User from "../models/user.js";
+import { StatusCodes } from "http-status-codes";
+import bcryptjs from "bcryptjs";
 
 const UserController = {
   getAll: async (req, res) => {
@@ -10,20 +11,20 @@ const UserController = {
       const users = await User.find()
         .skip(skip)
         .limit(limit)
-        .select('-password')
+        .select("-password")
         .sort({ createdAt: -1 });
       const totalData = await User.countDocuments();
       if (!users) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Không có người dùng nào !' });
+          .json({ message: "Không có người dùng nào !" });
       }
 
       return res.status(StatusCodes.OK).json({
         data: users,
         totalPage: Math.ceil(totalData / limit),
         totalData: totalData,
-        message: 'Lấy danh sách người dùng thành công.',
+        message: "Lấy danh sách người dùng thành công.",
       });
     } catch (error) {
       return res
@@ -39,7 +40,7 @@ const UserController = {
       const now = new Date();
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const startOfThisWeek = new Date(
-        now.setDate(now.getDate() - now.getDay()),
+        now.setDate(now.getDate() - now.getDay())
       );
       const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const startOfThisYear = new Date(now.getFullYear(), 0, 1);
@@ -56,23 +57,23 @@ const UserController = {
       startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1);
       let filterToday = {};
       let filterPrevious = {};
-      if (period === 'day') {
+      if (period === "day") {
         filterToday = { createdAt: { $gte: startOfToday } };
         filterPrevious = {
           createdAt: { $gte: startOfYesterday, $lt: startOfToday },
         };
-      } else if (period === 'week') {
+      } else if (period === "week") {
         const endOfLastWeek = new Date(startOfThisWeek);
         filterToday = { createdAt: { $gte: startOfThisWeek } };
         filterPrevious = {
           createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek },
         };
-      } else if (period === 'month') {
+      } else if (period === "month") {
         filterToday = { createdAt: { $gte: startOfThisMonth } };
         filterPrevious = {
           createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
         };
-      } else if (period === 'year') {
+      } else if (period === "year") {
         filterToday = { createdAt: { $gte: startOfThisYear } };
         filterPrevious = {
           createdAt: { $gte: startOfLastYear, $lt: startOfThisYear },
@@ -98,16 +99,16 @@ const UserController = {
   },
   getOne: async (req, res) => {
     try {
-      const user = await User.findById(req.params.id).select('-password');
+      const user = await User.findById(req.params.id).select("-password");
       if (!user) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Người dùng không tồn tại !' });
+          .json({ message: "Người dùng không tồn tại !" });
       }
 
       return res
         .status(StatusCodes.OK)
-        .json({ data: user, message: 'Lấy người dùng thàng công.' });
+        .json({ data: user, message: "Lấy người dùng thàng công." });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -120,9 +121,53 @@ const UserController = {
       if (!user) {
         return res
           .status(StatusCodes.OK)
-          .json({ message: 'Người dùng không tồn tại !' });
+          .json({ message: "Người dùng không tồn tại !" });
       }
-      return res.status(StatusCodes.OK).json({ message: 'Xóa thành công !' });
+      return res.status(StatusCodes.OK).json({ message: "Xóa thành công !" });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  },
+  update: async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(req.params.id);
+      if (!user) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Người dùng không tồn tại !" });
+      }
+      let { name, email, avatar, password, newPassword, confirmPassword } =
+        req.body;
+
+      if (newPassword && newPassword !== confirmPassword) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Mật khẩu mới không khớp !" });
+      }
+
+      if (password) {
+        const isMatch = await bcryptjs.compare(password, user.password);
+        if (!isMatch) {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: "Mật khẩu cũ không đúng !" });
+        }
+        if (newPassword) {
+          const hashedPassword = await bcryptjs.hash(newPassword, 10);
+          user.password = hashedPassword;
+        }
+      }
+
+      user.name = name || user.name;
+      user.email = email || user.email;
+      user.avatar = avatar || user.avatar;
+      await user.save();
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Cập nhật người dùng thành công !" });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
