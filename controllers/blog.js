@@ -17,6 +17,31 @@ const BlogController = {
     }
   },
 
+  getBlogNew: async (req, res) => {
+    try {
+      const blogs = await BlogModel.find()
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .populate("employeeId", "fullName");
+
+      if (!blogs || blogs.length === 0) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Không có bài viết nào." });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        message: "Lấy 3 bài viết mới nhất thành công.",
+        data: blogs,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy bài viết mới nhất.",
+        error: error.message,
+      });
+    }
+  },
+
   getLimited: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) + 1 || 1;
