@@ -50,7 +50,10 @@ const EmployeeController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const employees = await Employee.find().skip(skip).limit(limit);
+      const employees = await Employee.find()
+        .skip(skip)
+        .limit(limit)
+        .select("-password");
       if (!employees || employees.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: "Không có nhân viên tồn tại.",
@@ -96,7 +99,7 @@ const EmployeeController = {
       });
     }
     try {
-      const employee = await Employee.findById(id);
+      const employee = await Employee.findById(id).select("-password");
       if (!employee) {
         return res.status(StatusCodes.OK).json({
           message: "Nhân viên không tìm thấy",
@@ -200,7 +203,9 @@ const EmployeeController = {
         return res.status(StatusCodes.BAD_REQUEST).json({ message });
       }
 
-      const employee = await Employee.findOne({ username: value.username });
+      const employee = await Employee.findOne({
+        Employeename: value.Employeename,
+      });
       if (!employee) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: "Tên đăng nhập không tồn tại!",
@@ -344,6 +349,39 @@ const EmployeeController = {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Lỗi: " + error.message,
       });
+    }
+  },
+  logout: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Token làm mới không hợp lệ" });
+      }
+      const employee = await Employee.findOne({ refreshToken });
+      if (!employee) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Không tìm thấy nhân viên" });
+      }
+      employee.refreshToken = null;
+      await employee.save();
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+      });
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+      });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Đăng xuất thành công" });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   },
 };
