@@ -6,33 +6,33 @@ const scheduleOrderStatusUpdate = () => {
     '0 0 * * *',
     async () => {
       try {
-        console.log('Running order status check...');
+        console.log('Đang kiểm tra và cập nhật trạng thái đơn hàng...');
 
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const ordersToUpdate = await OrderModel.find({
-          status: 'delivered',
-          deliveredAt: { $lte: sevenDaysAgo },
-        });
+        const result = await OrderModel.updateMany(
+          {
+            status: 'delivered',
+            'statusHistory.status': 'delivered',
+          },
+          { $set: { status: 'received' } },
+        );
+        if (result.modifiedCount > 0) {
+          console.log(result);
 
-        if (ordersToUpdate.length > 0) {
-          await OrderModel.updateMany(
-            {
-              _id: { $in: ordersToUpdate.map((order) => order._id) },
-            },
-            { $set: { status: 'received' } },
+          console.log(
+            `Đã cập nhật ${result.modifiedCount} đơn hàng sang trạng thái 'đã nhận hàng'.`,
           );
-          console.log(`Updated ${ordersToUpdate.length} orders to 'received'.`);
         } else {
-          console.log('No orders to update.');
+          console.log('Không có đơn hàng nào cần cập nhật.');
         }
       } catch (error) {
-        console.error('Error updating order statuses:', error);
+        console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
       }
     },
     null,
     false,
-    'UTC',
+    'Asia/Ho_Chi_Minh',
   );
   job.start();
 };
