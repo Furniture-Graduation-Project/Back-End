@@ -72,7 +72,7 @@ export const ProductController = {
       const query =
         status == "all" ? {} : status ? { status } : { status: "available" };
 
-      if (categoryId && categoryId != "all") {
+      if (categoryId && categoryId != 'all') {
         query.category = categoryId;
       }
 
@@ -129,7 +129,9 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id);
+      const product = await ProductModel.findById(id)
+        .populate('category')
+        .populate('material');
       if (!product) {
         return res
           .status(StatusCodes.OK)
