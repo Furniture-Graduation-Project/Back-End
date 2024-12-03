@@ -16,10 +16,45 @@ export const ProductController = {
       res.status(StatusCodes.OK).json({
         data: products,
         message: "Hiển thị tất cả sản phẩm thành công",
+        message: "Hiển thị tất cả sản phẩm thành công",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        error: error.message,
+      });
+    }
+  },
+
+  getProductNew: async (req, res) => {
+    try {
+      const products = await ProductModel.find({ status: "available" })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate("category", "categoryName")
+        .populate("material", "materialName");
+
+      const productsWithPrices = await Promise.all(
+        products.map(async (product) => {
+          const prices = await ProductItemModel.find({
+            productId: product._id,
+          }).select("price");
+          const priceList = prices.map((item) => item.price);
+          return {
+            ...product.toObject(),
+            prices: priceList,
+          };
+        })
+      );
+
+      res.status(StatusCodes.OK).json({
+        data: productsWithPrices,
+        message: "Hiển thị 10 sản phẩm mới nhất thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm mới nhất.",
         error: error.message,
       });
     }
@@ -153,7 +188,9 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id);
+      const product = await ProductModel.findById(id)
+        .populate("category")
+        .populate("material");
       if (!product) {
         return res
           .status(StatusCodes.OK)

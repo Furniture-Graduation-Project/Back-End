@@ -51,6 +51,41 @@ export const createOrderSchema = Joi.object({
     .messages({
       'any.only': 'Trạng thái đơn hàng không hợp lệ',
     }),
+  statusHistory: Joi.array()
+    .items(
+      Joi.object({
+        status: Joi.string()
+          .valid(
+            'pending',
+            'unpaid',
+            'confirmed',
+            'processing',
+            'shipped',
+            'delivered',
+            'received',
+            'cancelled',
+            'returned',
+            'refunded',
+          )
+          .required()
+          .messages({
+            'any.required': 'Trạng thái là bắt buộc',
+            'any.only': 'Trạng thái không hợp lệ',
+          }),
+        date: Joi.date()
+          .iso()
+          .default(() => new Date())
+          .messages({
+            'date.base': 'Ngày phải là một giá trị hợp lệ',
+            'date.iso': 'Ngày phải tuân theo định dạng ISO 8601',
+          }),
+      }),
+    )
+    .min(1)
+    .required()
+    .messages({
+      'array.min': 'Phải có ít nhất một trạng thái trong lịch sử trạng thái',
+    }),
 });
 
 export const updateOrderSchema = Joi.object({
@@ -81,6 +116,7 @@ export const updateOrderSchema = Joi.object({
       'processing',
       'shipped',
       'delivered',
+      'received',
       'cancelled',
       'returned',
       'refunded',
@@ -90,4 +126,39 @@ export const updateOrderSchema = Joi.object({
     .messages({
       'any.only': 'Trạng thái đơn hàng không hợp lệ',
     }),
+  statusHistory: Joi.array()
+    .items(
+      Joi.object({
+        status: Joi.string()
+          .valid(
+            'pending',
+            'unpaid',
+            'confirmed',
+            'processing',
+            'shipped',
+            'delivered',
+            'received',
+            'cancelled',
+            'returned',
+            'refunded',
+          )
+          .required()
+          .messages({
+            'any.required': 'Trạng thái là bắt buộc',
+            'any.only': 'Trạng thái không hợp lệ',
+          }),
+        date: Joi.date()
+          .iso()
+          .default(() => new Date())
+          .messages({
+            'date.base': 'Ngày phải là một giá trị hợp lệ',
+            'date.iso': 'Ngày phải tuân theo định dạng ISO 8601',
+          }),
+      }),
+    )
+    .min(1)
+    .messages({
+      'array.min': 'Phải có ít nhất một trạng thái trong lịch sử trạng thái',
+    }),
+  deleted: Joi.boolean().optional(),
 });
