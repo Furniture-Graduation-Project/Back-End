@@ -188,9 +188,7 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id)
-        .populate("category")
-        .populate("material");
+      const product = await ProductModel.findById(id);
       if (!product) {
         return res
           .status(StatusCodes.OK)
