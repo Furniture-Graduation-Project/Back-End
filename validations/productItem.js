@@ -48,4 +48,9 @@ export const productItemSchema = Joi.object({
     "string.empty": "SKU không được để trống.",
     "string.base": "SKU phải là chuỗi ký tự.",
   }),
+  // status: Joi.string().valid("active", "deleted").required().messages({
+  //   "string.base": "Trạng thái phải là một chuỗi ký tự.",
+  //   "any.required": "Trường status là bắt buộc.",
+  //   "any.only": "Trạng thái phải là 'active' hoặc 'deleted'.",
+  // }),
 });

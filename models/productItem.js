@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const variantSchema = new mongoose.Schema({
   variant: {
@@ -15,7 +15,7 @@ const variantSchema = new mongoose.Schema({
 const productItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   variants: {
@@ -36,7 +36,7 @@ const productItemSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    default: '',
+    default: "",
   },
   SKU: {
     type: String,
@@ -44,8 +44,14 @@ const productItemSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+  status: {
+    type: String,
+    enum: ["active", "deleted"],
+    default: "active",
+    required: true,
+  },
 });
 
-const ProductItemModel = mongoose.model('ProductItem', productItemSchema);
+const ProductItemModel = mongoose.model("ProductItem", productItemSchema);
 
 export default ProductItemModel;

@@ -1,12 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import Employee from "../models/employee.js";
 import {
   employeeSchema,
   signinEmployeeSchema,
-  updateEmployeePassword,
 } from "../validations/employee.js";
-import { generateTokenAndSetCookie } from "../utils/token.js";
+import {
+  generateRefreshToken,
+  generateTokenAndSetCookie,
+} from "../utils/token.js";
 
 const EmployeeController = {
   searchByFullName: async (req, res) => {
@@ -47,7 +50,10 @@ const EmployeeController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const employees = await Employee.find().skip(skip).limit(limit);
+      const employees = await Employee.find()
+        .skip(skip)
+        .limit(limit)
+        .select("-password");
       if (!employees || employees.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: "Không có nhân viên tồn tại.",
@@ -93,7 +99,7 @@ const EmployeeController = {
       });
     }
     try {
-      const employee = await Employee.findById(id);
+      const employee = await Employee.findById(id).select("-password");
       if (!employee) {
         return res.status(StatusCodes.OK).json({
           message: "Nhân viên không tìm thấy",
@@ -125,7 +131,7 @@ const EmployeeController = {
       }
 
       const existingEmployee = await Employee.findOne({
-        username: value.username,
+        employeename: value.employeename,
       });
       if (existingEmployee) {
         return res.status(StatusCodes.CONFLICT).json({
@@ -152,7 +158,39 @@ const EmployeeController = {
       });
     }
   },
-
+  refreshToken: async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    try {
+      if (!refreshToken)
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Không có refresh token" });
+      const employee = await Employee.findOne({ refreshToken });
+      if (!employee)
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Không tìm thấy nhân viên với token này" });
+      jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err) => {
+        if (err)
+          return res.status(
+            StatusCodes.FORBIDDEN,
+            json({ message: "Không thể truy cập token này" })
+          );
+        const newAccessToken = generateTokenAndSetCookie(
+          String(employee._id),
+          res
+        );
+        return res.status(StatusCodes.OK).json({
+          token: newAccessToken,
+          message: "Làm mới token thành công !",
+        });
+      });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
+    }
+  },
   signin: async (req, res) => {
     try {
       const { value, error } = signinEmployeeSchema.validate(req.body, {
@@ -165,7 +203,9 @@ const EmployeeController = {
         return res.status(StatusCodes.BAD_REQUEST).json({ message });
       }
 
-      const employee = await Employee.findOne({ username: value.username });
+      const employee = await Employee.findOne({
+        Employeename: value.Employeename,
+      });
       if (!employee) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: "Tên đăng nhập không tồn tại!",
@@ -180,10 +220,11 @@ const EmployeeController = {
       }
 
       const token = generateTokenAndSetCookie(employee._id, res);
-
+      const refreshToken = generateRefreshToken(employee._id, res);
+      employee.refreshToken = refreshToken;
+      employee.save();
       return res.status(StatusCodes.OK).json({
         message: "Đăng nhập thành công",
-        data: employee,
         token,
       });
     } catch (error) {
@@ -218,7 +259,7 @@ const EmployeeController = {
       });
 
       if (!employee) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           message: "Nhân viên không tìm thấy",
         });
       }
@@ -296,7 +337,7 @@ const EmployeeController = {
     try {
       const employee = await Employee.findByIdAndDelete(id);
       if (!employee) {
-        return res.status(StatusCodes.NOT_FOUND).json({
+        return res.status(StatusCodes.OK).json({
           message: "Nhân viên không tìm thấy",
         });
       }
@@ -308,6 +349,39 @@ const EmployeeController = {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Lỗi: " + error.message,
       });
+    }
+  },
+  logout: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Token làm mới không hợp lệ" });
+      }
+      const employee = await Employee.findOne({ refreshToken });
+      if (!employee) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ message: "Không tìm thấy nhân viên" });
+      }
+      employee.refreshToken = null;
+      await employee.save();
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+      });
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+      });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Đăng xuất thành công" });
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
     }
   },
 };

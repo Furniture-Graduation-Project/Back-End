@@ -5,10 +5,11 @@ import cors from "cors";
 import session from "express-session";
 import passport from "passport";
 
-import "./middleware/passport.js";
-import { app, server } from "./services/socket.js";
-import { connectDB } from "./utils/connect.js";
-import { Route } from "./routers/index.js";
+import './middleware/passport.js';
+import { app, server } from './services/socket.js';
+import { connectDB } from './utils/connect.js';
+import { Route } from './routers/index.js';
+import scheduleOrderStatusUpdate from './services/cronStatusOrder.js';
 
 dotenv.config();
 
@@ -48,6 +49,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 connectDB(process.env.DB_URL);
+
+scheduleOrderStatusUpdate();
 
 Route(app);
 

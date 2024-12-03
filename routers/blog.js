@@ -5,6 +5,7 @@ import protectSupport from "../middleware/protectSupport.js";
 const routerBlog = new Router();
 
 routerBlog.get("/", BlogController.getAllBlogs);
+routerBlog.get("/new", BlogController.getBlogNew);
 routerBlog.get("/limited", BlogController.getLimited);
 routerBlog.get("/:id", BlogController.getBlogById);
 routerBlog.post("/", protectRoute, protectSupport, BlogController.createBlog);

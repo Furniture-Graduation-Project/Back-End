@@ -102,25 +102,17 @@ const AuthController = {
       if (!user)
         return res
           .status(StatusCodes.FORBIDDEN)
-          .json({ message: "User not found" });
+          .json({ message: "Không tìm thấy tài khoản tuana" });
 
-      jwt.verify(
-        refreshToken,
-        process.env.REFRESH_SECRET_KEY,
-        (err, userData) => {
-          if (err)
-            return res.sendStatus(
-              StatusCodes.FORBIDDEN,
-              json({ message: "ERROR" })
-            );
-
-          const newAccessToken = generateTokenAndSetCookie(user._id, res);
-
-          return res
-            .status(StatusCodes.OK)
-            .json({ accessToken: newAccessToken, refreshToken });
-        }
-      );
+      jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err) => {
+        if (err)
+          return res.sendStatus(
+            StatusCodes.FORBIDDEN,
+            json({ message: "ERROR" })
+          );
+        const newAccessToken = generateTokenAndSetCookie(user._id, res);
+        return res.status(StatusCodes.OK).json({ token: newAccessToken });
+      });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -165,17 +157,14 @@ const AuthController = {
 
       user.refreshToken = null;
       await user.save();
-
       res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV !== "development",
       });
-
-      res.clearCookie("token", {
+      res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV !== "development",
       });
-
       return res.status(StatusCodes.OK).json({ message: "Logout successful" });
     } catch (error) {
       return res
