@@ -153,9 +153,13 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
+<<<<<<< HEAD
       const product = await ProductModel.findById(id)
         .populate('category')
         .populate('material');
+=======
+      const product = await ProductModel.findById(id);
+>>>>>>> 39351aa (truongtk update)
       if (!product) {
         return res
           .status(StatusCodes.OK)
