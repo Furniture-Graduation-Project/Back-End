@@ -178,7 +178,9 @@ const AuthController = {
       const accessToken = generateTokenAndSetCookie(req.user._id, res);
       const refreshToken = generateRefreshToken(req.user._id, res);
       await User.findByIdAndUpdate(req.user._id, { refreshToken });
-      res.redirect(`http://localhost:5173/auth/callback?token=${accessToken}`);
+      res.redirect(
+        `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}`
+      );
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -191,7 +193,9 @@ const AuthController = {
       const accessToken = generateTokenAndSetCookie(req.user._id, res);
       const refreshToken = generateRefreshToken(req.user._id, res);
       await User.findByIdAndUpdate(req.user._id, { refreshToken });
-      res.redirect(`http://localhost:5173/auth/callback?token=${accessToken}`);
+      res.redirect(
+        `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}`
+      );
     } catch (error) {
       console.error("Error during Facebook sign-in:", error);
       return res

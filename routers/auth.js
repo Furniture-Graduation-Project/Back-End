@@ -32,18 +32,8 @@ const isLoggedIn = (req, res, next) => {
   req.user ? next() : res.send("Not logged in");
 };
 
-router.get("http://localhost:5173", isLoggedIn, (req, res) => {
+router.get(process.env.CLIENT_URL, isLoggedIn, (req, res) => {
   res.send(`Welcome ${req.user.name}`);
-});
-
-router.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).send("Error logging out");
-    }
-    req.session.destroy();
-    res.send("Logged out");
-  });
 });
 
 router.post("/signup", AuthController.signup);
