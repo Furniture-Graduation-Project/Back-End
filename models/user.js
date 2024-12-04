@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String },
     password: { type: String },
-    avatar: { type: String, default: '' },
+    avatar: { type: String, default: "" },
     phone: { type: String },
     refreshToken: { type: String },
     account: {
@@ -23,25 +23,27 @@ const userSchema = new mongoose.Schema(
     wishlist: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: "Product",
       },
     ],
     locations: [
       {
-        street: { type: String },
-        city: { type: String },
-        state: { type: String },
-        postalCode: { type: String },
+        addressName: { type: String },
+        firstName: { type: String },
+        lastName: { type: String },
+        phone: { type: String },
         country: { type: String },
-        recipientName: { type: String },
-        phoneNumber: { type: String },
+        city: { type: String },
+        district: { type: String },
+        ward: { type: String },
+        street: { type: String },
       },
     ],
     active: { type: Boolean, default: true },
   },
-  { versionKey: false, timestamps: true },
+  { versionKey: false, timestamps: true }
 );
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;
