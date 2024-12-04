@@ -89,21 +89,50 @@ export const ProductController = {
         .populate("material", "materialName")
         .skip(skip)
         .limit(limit);
-      const productsWithItems = await Promise.all(
-        products.map(async (product) => {
-          const items = await ProductItemModel.find({ productId: product._id });
-          return {
-            ...product.toObject(),
-            items,
-          };
-        })
+      const productIds = products.map((product) => product._id);
+
+      const productDetails = await ProductItemModel.aggregate([
+        { $match: { productId: { $in: productIds } } },
+        {
+          $group: {
+            _id: "$productId",
+            prices: { $push: "$price" },
+            stock: { $sum: "$stock" },
+            outStock: { $sum: "$outStock" },
+          },
+        },
+      ]);
+
+      const detailsMap = new Map(
+        productDetails.map((item) => [
+          item._id.toString(),
+          {
+            prices: item.prices,
+            stock: item.stock,
+            outStock: item.outStock,
+          },
+        ])
       );
+
+      const results = products.map((product) => {
+        const details = detailsMap.get(product._id.toString()) || {
+          prices: [],
+          stock: 0,
+          outStock: 0,
+        };
+        return {
+          ...product.toObject(),
+          prices: details.prices,
+          stock: details.stock,
+          outStock: details.outStock,
+        };
+      });
 
       const totalData = await ProductModel.countDocuments(query);
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        data: productsWithItems,
+        data: results,
         totalPage,
         totalData,
         message: "Lấy danh sách sản phẩm thành công.",
@@ -123,7 +152,9 @@ export const ProductController = {
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: "Không tìm thấy sản phẩm" });
       }
-      const product = await ProductModel.findById(id);
+      const product = await ProductModel.findById(id)
+        .populate("category")
+        .populate("material");
       if (!product) {
         return res
           .status(StatusCodes.OK)
