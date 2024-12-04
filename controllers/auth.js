@@ -165,11 +165,38 @@ const AuthController = {
         httpOnly: true,
         secure: process.env.NODE_ENV !== "development",
       });
+      req.session.destroy();
       return res.status(StatusCodes.OK).json({ message: "Logout successful" });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ message: "An error occurred during logout" });
+    }
+  },
+  signinGoogle: async (req, res) => {
+    try {
+      const accessToken = generateTokenAndSetCookie(req.user._id, res);
+      const refreshToken = generateRefreshToken(req.user._id, res);
+      await User.findByIdAndUpdate(req.user._id, { refreshToken });
+      res.redirect(`http://localhost:5173/auth/callback?token=${accessToken}`);
+    } catch (error) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: "ERROR : " + error.message });
+    }
+  },
+
+  signinFacebook: async (req, res) => {
+    try {
+      const accessToken = generateTokenAndSetCookie(req.user._id, res);
+      const refreshToken = generateRefreshToken(req.user._id, res);
+      await User.findByIdAndUpdate(req.user._id, { refreshToken });
+      res.redirect(`http://localhost:5173/auth/callback?token=${accessToken}`);
+    } catch (error) {
+      console.error("Error during Facebook sign-in:", error);
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: "ERROR : " + error.message });
     }
   },
 };

@@ -10,10 +10,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/auth/failure" }),
-  (req, res) => {
-    const token = AuthController.generateToken(req.user);
-    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
-  }
+  AuthController.signinGoogle
 );
 
 router.get(
@@ -24,10 +21,7 @@ router.get(
 router.get(
   "/facebook/callback",
   passport.authenticate("facebook", { failureRedirect: "/auth/failure" }),
-  (req, res) => {
-    const token = AuthController.generateToken(req.user);
-    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
-  }
+  AuthController.signinFacebook
 );
 
 router.get("/auth/failure", (req, res) => {
