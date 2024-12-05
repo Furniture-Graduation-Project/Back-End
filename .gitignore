@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+jwt.http
 .env
 docker-compose.yml
 
