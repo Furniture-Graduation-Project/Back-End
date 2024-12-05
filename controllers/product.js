@@ -16,6 +16,7 @@ export const ProductController = {
       res.status(StatusCodes.OK).json({
         data: products,
         message: "Hiển thị tất cả sản phẩm thành công",
+        message: "Hiển thị tất cả sản phẩm thành công",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -52,12 +53,12 @@ export const ProductController = {
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
         message: "Có lỗi xảy ra khi lấy thông tin sản phẩm mới nhất.",
         error: error.message,
       });
     }
   },
-
   getLimited: async (req, res) => {
     try {
       const page = parseInt(req.query.page, 10) + 1 || 1;
@@ -70,9 +71,9 @@ export const ProductController = {
       const name = req.query.name;
 
       const query =
-        status == "all" ? {} : status ? { status } : { status: "available" };
+        status === "all" ? {} : status ? { status } : { status: "available" };
 
-      if (categoryId && categoryId != 'all') {
+      if (categoryId && categoryId !== "all") {
         query.category = categoryId;
       }
 
@@ -89,26 +90,50 @@ export const ProductController = {
         .populate("material", "materialName")
         .skip(skip)
         .limit(limit);
+      const productIds = products.map((product) => product._id);
 
-      const productsWithPrices = await Promise.all(
-        products.map(async (product) => {
-          const prices = await ProductItemModel.find({
-            productId: product._id,
-          }).select("price");
-          const priceList = prices.map((item) => item.price);
-          return {
-            ...product.toObject(),
-            prices: priceList,
-          };
-        })
+      const productDetails = await ProductItemModel.aggregate([
+        { $match: { productId: { $in: productIds } } },
+        {
+          $group: {
+            _id: "$productId",
+            prices: { $push: "$price" },
+            stock: { $sum: "$stock" },
+            outStock: { $sum: "$outStock" },
+          },
+        },
+      ]);
+
+      const detailsMap = new Map(
+        productDetails.map((item) => [
+          item._id.toString(),
+          {
+            prices: item.prices,
+            stock: item.stock,
+            outStock: item.outStock,
+          },
+        ])
       );
 
-      const totalData = await ProductModel.countDocuments(query);
+      const results = products.map((product) => {
+        const details = detailsMap.get(product._id.toString()) || {
+          prices: [],
+          stock: 0,
+          outStock: 0,
+        };
+        return {
+          ...product.toObject(),
+          prices: details.prices,
+          stock: details.stock,
+          outStock: details.outStock,
+        };
+      });
 
+      const totalData = await ProductModel.countDocuments(query);
       const totalPage = limit ? Math.ceil(totalData / limit) : 1;
 
       res.status(StatusCodes.OK).json({
-        data: productsWithPrices,
+        data: results,
         totalPage,
         totalData,
         message: "Lấy danh sách sản phẩm thành công.",
@@ -120,7 +145,6 @@ export const ProductController = {
       });
     }
   },
-
   getById: async (req, res) => {
     try {
       const { id } = req.params;
@@ -130,8 +154,8 @@ export const ProductController = {
           .json({ message: "Không tìm thấy sản phẩm" });
       }
       const product = await ProductModel.findById(id)
-        .populate('category')
-        .populate('material');
+        .populate("category")
+        .populate("material");
       if (!product) {
         return res
           .status(StatusCodes.OK)
