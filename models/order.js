@@ -59,7 +59,7 @@ const orderSchema = new mongoose.Schema(
             "received",
             "cancelled",
             "returned",
-            "refunded", 
+            "refunded",
           ],
         },
         date: { type: Date, default: Date.now },
@@ -69,8 +69,19 @@ const orderSchema = new mongoose.Schema(
       reason: { type: String },
       items: [
         {
-          productOptionId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductItem" },
+          productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+          },
+          productOptionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "ProductItem",
+          },
           quantity: { type: Number, required: true },
+          unitPrice: {
+            type: Number,
+            required: true,
+          },
           status: {
             type: String,
             enum: ["pending", "approved", "rejected"],

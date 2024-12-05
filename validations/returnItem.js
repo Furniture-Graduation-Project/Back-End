@@ -1,17 +1,28 @@
 import Joi from "joi";
 
 export const returnItemSchema = Joi.object({
-  productOptionId: Joi.string()
+  productId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
       "string.pattern.base": "Mã sản phẩm không hợp lệ",
       "any.required": "Mã sản phẩm là bắt buộc",
     }),
+  productOptionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Mã sản phẩm biến thể không hợp lệ",
+      "any.required": "Mã sản phẩm biến thể là bắt buộc",
+    }),
   quantity: Joi.number().integer().min(1).required().messages({
     "number.base": "Số lượng phải là một số nguyên",
     "number.min": "Số lượng phải lớn hơn hoặc bằng 1",
     "any.required": "Số lượng là bắt buộc",
+  }),
+  unitPrice: Joi.number().required().messages({
+    "any.required": "Giá đơn vị là bắt buộc",
+    "number.base": "Giá đơn vị phải là số",
   }),
   status: Joi.string()
     .valid("pending", "approved", "rejected")
