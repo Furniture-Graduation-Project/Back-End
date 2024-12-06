@@ -72,8 +72,7 @@ export const ProductController = {
 
       const query =
         status === "all" ? {} : status ? { status } : { status: "available" };
-
-      if (categoryId && categoryId !== "all") {
+      if (categoryId && categoryId != "all") {
         query.category = categoryId;
       }
 

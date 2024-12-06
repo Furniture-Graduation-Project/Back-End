@@ -8,5 +8,6 @@ routerReview.get("/:id", ReviewController.getDetail);
 routerReview.post("/", ReviewController.create);
 routerReview.put("/:id", ReviewController.edit);
 routerReview.delete("/", ReviewController.delete);
+routerReview.get("/product/:productId", ReviewController.getByProductId);
 
 export default routerReview;
