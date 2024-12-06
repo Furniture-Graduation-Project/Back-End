@@ -8,6 +8,7 @@ import CartModel from "../models/cart.js";
 import generateQrCode from "../services/qrcode.js";
 import { checkPaidSchema } from "../validations/payment.js";
 import paymentApiCall from "../services/payment.js";
+import { populate } from "dotenv";
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -94,6 +95,14 @@ const OrderController = {
         .populate({
           path: "items",
           populate: { path: "productOptionId" },
+        })
+        .populate({
+          path: "returnInfo",
+          populate: { path: "items", populate: { path: "productId" } },
+        })
+        .populate({
+          path: "returnInfo",
+          populate: { path: "items", populate: { path: "productOptionId" } },
         });
       if (!order) {
         return res.status(StatusCodes.OK).json({
