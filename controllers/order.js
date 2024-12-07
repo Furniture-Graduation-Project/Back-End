@@ -10,6 +10,10 @@ import { checkPaidSchema } from '../validations/payment.js';
 import paymentApiCall from '../services/payment.js';
 import { populate } from 'dotenv';
 import generateOrderCode from '../utils/orderCode.js';
+import {
+  sendDeliveredNotificationEmail,
+  sendShipmentNotificationEmail,
+} from '../services/emailOrder.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -238,9 +242,28 @@ const OrderController = {
           message: errors,
         });
       }
-      const updatedOrder = await OrderModel.findByIdAndUpdate(id, value, {
-        new: true,
-      });
+      const updatedOrder = await OrderModel.findById(id)
+        .populate({
+          path: 'userId',
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productOptionId' },
+        });
+      if (
+        value.status === 'cancelled' &&
+        !['pending', 'unpaid', 'confirmed'].includes(updatedOrder.status)
+      ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Trạng thái đơn hàng không hợp lệ',
+        });
+      }
+      updatedOrder.set(value);
+      await updatedOrder.save();
       if (!updatedOrder) {
         return res.status(StatusCodes.OK).json({
           message: 'Đơn hàng không tồn tại',
@@ -256,6 +279,13 @@ const OrderController = {
             await productItem.save();
           }),
         );
+      }
+      if (updatedOrder.status === 'delivered' && updatedOrder.payment.paymentStatus === 'unpaid') {
+        io.emit(String(updatedOrder.userId._id), updatedOrder);
+        sendShipmentNotificationEmail(updatedOrder);
+      }
+      if (updatedOrder.status === 'received') {
+        sendDeliveredNotificationEmail(updatedOrder);
       }
       return res.status(StatusCodes.OK).json({
         message: 'Cập nhật đơn hàng thành công',
