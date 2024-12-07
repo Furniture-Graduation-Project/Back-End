@@ -1,13 +1,18 @@
-import mongoose from "mongoose";
-import { paymentSchema } from "./payment.js";
-import { shipmentSchema } from "./shipment.js";
-import { orderItemSchema } from "./orderItem.js";
+import mongoose from 'mongoose';
+import { paymentSchema } from './payment.js';
+import { shipmentSchema } from './shipment.js';
+import { orderItemSchema } from './orderItem.js';
 
 const orderSchema = new mongoose.Schema(
   {
+    code: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     orderName: {
@@ -32,50 +37,52 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        "pending",
-        "unpaid",
-        "confirmed",
-        "processing",
-        "shipped",
-        "delivered",
-        "received",
-        "cancelled",
-        "returned",
-        "refunded",
+        'pending',
+        'unpaid',
+        'confirmed',
+        'processing',
+        'shipped',
+        'delivered',
+        'received',
+        'cancelled',
       ],
-      default: "pending",
+      default: 'pending',
     },
     statusHistory: [
       {
         status: {
           type: String,
           enum: [
-            "pending",
-            "unpaid",
-            "confirmed",
-            "processing",
-            "shipped",
-            "delivered",
-            "received",
-            "cancelled",
-            "returned",
-            "refunded",
+            'pending',
+            'unpaid',
+            'confirmed',
+            'processing',
+            'shipped',
+            'delivered',
+            'received',
+            'cancelled',
           ],
         },
         date: { type: Date, default: Date.now },
       },
     ],
     returnInfo: {
+      status: {
+        type: String,
+        enum: ['pending', 'processing', 'returned', 'refunded', 'finished'],
+        default: 'pending',
+      },
       reason: { type: String },
+      confirmation: { type: String },
       items: [
         {
           productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
+            ref: 'Product',
           },
           productOptionId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "ProductItem",
+            ref: 'ProductItem',
           },
           quantity: { type: Number, required: true },
           unitPrice: {
@@ -84,8 +91,8 @@ const orderSchema = new mongoose.Schema(
           },
           status: {
             type: String,
-            enum: ["pending", "approved", "rejected"],
-            default: "pending",
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending',
           },
         },
       ],
@@ -97,9 +104,9 @@ const orderSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
-const OrderModel = mongoose.model("Order", orderSchema);
+const OrderModel = mongoose.model('Order', orderSchema);
 
 export default OrderModel;
