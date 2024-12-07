@@ -16,6 +16,7 @@ export const ProductController = {
       res.status(StatusCodes.OK).json({
         data: products,
         message: "Hiển thị tất cả sản phẩm thành công",
+        message: "Hiển thị tất cả sản phẩm thành công",
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -71,8 +72,7 @@ export const ProductController = {
 
       const query =
         status === "all" ? {} : status ? { status } : { status: "available" };
-
-      if (categoryId && categoryId !== "all") {
+      if (categoryId && categoryId != "all") {
         query.category = categoryId;
       }
 

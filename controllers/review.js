@@ -1,43 +1,68 @@
-import { StatusCodes } from 'http-status-codes';
-import Review from '../models/review.js';
-import { reviewSchema } from '../validations/review.js';
+import { StatusCodes } from "http-status-codes";
+import Review from "../models/review.js";
+import { reviewSchema } from "../validations/review.js";
 
 const ReviewController = {
   getAll: async (req, res) => {
     try {
       const reviews = await Review.find();
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy tất cả bình luận thành công',
+        message: "Lấy tất cả bình luận thành công",
         data: reviews,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
+  getByProductId: async (req, res) => {
+    const productId = req.params.productId;
 
+    if (!productId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Không tìm thấy productID" });
+    }
+
+    try {
+      const reviews = await Review.find({ productId: productId });
+      if (reviews.length === 0) {
+        return res.status(StatusCodes.OK).json({
+          message: "Không tìm thấy bình luận cho sản phẩm này",
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        message: "Lấy bình luận theo productID thành công",
+        data: reviews,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Lỗi: " + error.message,
+      });
+    }
+  },
   getDetail: async (req, res) => {
     const id = req.params.id;
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
       const review = await Review.findById(id);
       if (!review) {
         return res.status(StatusCodes.OK).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Lấy chi tiết bình luận thành công',
+        message: "Lấy chi tiết bình luận thành công",
         data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -51,17 +76,17 @@ const ReviewController = {
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Lỗi: ' + errors.join(', '),
+          message: "Lỗi: " + errors.join(", "),
         });
       }
       const review = await Review.create(value);
       return res.status(StatusCodes.CREATED).json({
-        message: 'Tạo bình luận thành công',
+        message: "Tạo bình luận thành công",
         data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -72,7 +97,7 @@ const ReviewController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
       const { value, error } = reviewSchema.validate(req.body, {
@@ -82,7 +107,7 @@ const ReviewController = {
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Lỗi: ' + errors.join(', '),
+          message: "Lỗi: " + errors.join(", "),
         });
       }
       const review = await Review.findByIdAndUpdate(id, value, {
@@ -90,16 +115,16 @@ const ReviewController = {
       });
       if (!review) {
         return res.status(StatusCodes.OK).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Cập nhật bình luận thành công',
+        message: "Cập nhật bình luận thành công",
         data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
@@ -110,22 +135,22 @@ const ReviewController = {
     if (!id) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: 'Không tìm thấy bình luận' });
+        .json({ message: "Không tìm thấy bình luận" });
     }
     try {
       const review = await Review.findByIdAndDelete(id);
       if (!review) {
         return res.status(StatusCodes.OK).json({
-          message: 'Bình luận không tìm thấy',
+          message: "Bình luận không tìm thấy",
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: 'Xóa bình luận thành công',
+        message: "Xóa bình luận thành công",
         data: review,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: 'Lỗi: ' + error.message,
+        message: "Lỗi: " + error.message,
       });
     }
   },
