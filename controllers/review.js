@@ -31,9 +31,10 @@ const ReviewController = {
       const skip = (page - 1) * limit;
 
       const reviews = await Review.find({ productId: productId })
-        .populate('userId')
+        .populate('userId', 'name avatar')
         .skip(skip)
         .limit(limit);
+
       if (reviews.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: 'Không tìm có đánh giá cho sản phẩm này',
