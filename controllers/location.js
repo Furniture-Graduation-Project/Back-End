@@ -14,6 +14,7 @@ export const create = async (req, res) => {
     district,
     ward,
     street,
+    default: isDefault,
   } = req.body;
 
   const { error } = locationSchema.validate(req.body);
@@ -40,6 +41,7 @@ export const create = async (req, res) => {
       district,
       ward,
       street,
+      default: isDefault || false,
     });
 
     await user.save();
@@ -120,6 +122,16 @@ export const update = async (req, res) => {
       location[key] = req.body[key];
     }
 
+    if (req.body.default) {
+      user.locations.forEach((location) => {
+        if (location._id.toString() === locationId) {
+          location.default = true;
+        } else {
+          location.default = false;
+        }
+      });
+    }
+
     await user.save();
 
     return res.status(StatusCodes.OK).json({ location });
@@ -157,6 +169,38 @@ export const remove = async (req, res) => {
       .json({ message: "Đã xóa địa chỉ thành công !" });
   } catch (error) {
     return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
+  }
+};
+
+export const changeDefaultLocation = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { locationId } = req.query;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Người dùng không tồn tại !" });
+    }
+
+    user.locations.forEach((location) => {
+      if (location._id.toString() === locationId) {
+        location.default = true;
+      } else {
+        location.default = false;
+      }
+    });
+
+    await user.save();
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Đã cập nhật địa chỉ mặc định thành công !" });
+  } catch (error) {
+    res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: error.message });
   }
