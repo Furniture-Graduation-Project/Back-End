@@ -1,13 +1,19 @@
-import { StatusCodes } from "http-status-codes";
-import OrderModel from "../models/order.js";
-import { createOrderSchema, updateOrderSchema } from "../validations/order.js";
-import { io } from "../services/socket.js";
-import ProductItemModel from "../models/productItem.js";
-import { ProductController } from "./product.js";
-import CartModel from "../models/cart.js";
-import generateQrCode from "../services/qrcode.js";
-import { checkPaidSchema } from "../validations/payment.js";
-import paymentApiCall from "../services/payment.js";
+import { StatusCodes } from 'http-status-codes';
+import OrderModel from '../models/order.js';
+import { createOrderSchema, updateOrderSchema } from '../validations/order.js';
+import { io } from '../services/socket.js';
+import ProductItemModel from '../models/productItem.js';
+import { ProductController } from './product.js';
+import CartModel from '../models/cart.js';
+import generateQrCode from '../services/qrcode.js';
+import { checkPaidSchema } from '../validations/payment.js';
+import paymentApiCall from '../services/payment.js';
+import { populate } from 'dotenv';
+import generateOrderCode from '../utils/orderCode.js';
+import {
+  sendDeliveredNotificationEmail,
+  sendShipmentNotificationEmail,
+} from '../services/emailOrder.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -24,24 +30,27 @@ const OrderController = {
           .skip(skip)
           .limit(limit)
           .populate({
-            path: "items",
-            populate: { path: "productId" },
+            path: 'items',
+            populate: { path: 'productId' },
           });
-        totalData = await OrderModel.countDocuments({ deleted: false });
+        totalData = await OrderModel.countDocuments({
+          userId: user._id,
+          deleted: false,
+        });
       } else {
         orders = await OrderModel.find()
           .skip(skip)
           .limit(limit)
           .populate({
-            path: "items",
-            populate: { path: "productId" },
+            path: 'items',
+            populate: { path: 'productId' },
           });
         totalData = await OrderModel.countDocuments();
       }
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: "Không có đơn hàng nào tồn tại.",
+          message: 'Không có đơn hàng nào tồn tại.',
         });
       }
 
@@ -51,11 +60,11 @@ const OrderController = {
         data: orders,
         totalPage,
         totalData,
-        message: "Lấy danh sách đơn hàng thành công.",
+        message: 'Lấy danh sách đơn hàng thành công.',
       });
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy danh sách đơn hàng.",
+        message: 'Có lỗi xảy ra khi lấy danh sách đơn hàng.',
         error: error.message,
       });
     }
@@ -64,11 +73,11 @@ const OrderController = {
   getAll: async (req, res) => {
     try {
       const orders = await OrderModel.find().populate({
-        path: "items",
-        populate: { path: "productId" },
+        path: 'items',
+        populate: { path: 'productId' },
       });
       res.status(StatusCodes.OK).json({
-        message: "Lấy danh sách đơn hàng thành công",
+        message: 'Lấy danh sách đơn hàng thành công',
         data: orders,
       });
     } catch (error) {
@@ -82,26 +91,34 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
       const order = await OrderModel.findById(id)
         .populate({
-          path: "items",
-          populate: { path: "productId" },
+          path: 'items',
+          populate: { path: 'productId' },
         })
         .populate({
-          path: "items",
-          populate: { path: "productOptionId" },
+          path: 'items',
+          populate: { path: 'productOptionId' },
+        })
+        .populate({
+          path: 'returnInfo',
+          populate: { path: 'items', populate: { path: 'productId' } },
+        })
+        .populate({
+          path: 'returnInfo',
+          populate: { path: 'items', populate: { path: 'productOptionId' } },
         });
       if (!order) {
         return res.status(StatusCodes.OK).json({
-          message: "Đơn hàng không tồn tại",
+          message: 'Đơn hàng không tồn tại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Lấy đơn hàng thành công",
+        message: 'Lấy đơn hàng thành công',
         data: order,
       });
     } catch (error) {
@@ -115,18 +132,18 @@ const OrderController = {
     const { id } = req.params;
     try {
       const orders = await OrderModel.find({ userId: id }).populate({
-        path: "items",
-        populate: { path: "productId" },
+        path: 'items',
+        populate: { path: 'productId' },
       });
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: "Người dùng chưa có đơn hàng nào",
+          message: 'Người dùng chưa có đơn hàng nào',
         });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: "Lấy đơn hàng của người dùng thành công",
+        message: 'Lấy đơn hàng của người dùng thành công',
         data: orders,
       });
     } catch (error) {
@@ -162,25 +179,25 @@ const OrderController = {
       if (isChanged) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           data: items,
-          message: "Sản phẩm trong đơn hàng đã có sự thay đổi.",
+          message: 'Sản phẩm trong đơn hàng đã có sự thay đổi.',
         });
       }
       await Promise.all(
         value.items.map(async (item) => {
           const productItem = await ProductItemModel.findById(
-            item.productOptionId
+            item.productOptionId,
           );
           productItem.outStock += item.quantity;
           await productItem.save();
-        })
+        }),
       );
       await Promise.all(
         value.items.map(async (item) => {
           await CartModel.findOneAndUpdate(
             {
               UserID: value.userId,
-              "carts.productId": item.productId,
-              "carts.productOptionId": item.productOptionId,
+              'carts.productId': item.productId,
+              'carts.productOptionId': item.productOptionId,
             },
             {
               $pull: {
@@ -189,14 +206,15 @@ const OrderController = {
                   productOptionId: item.productOptionId,
                 },
               },
-            }
+            },
           );
-        })
+        }),
       );
-      const order = await OrderModel.create(value);
-      io.emit("Order", order);
+      const code = generateOrderCode();
+      const order = await OrderModel.create({ ...value, code });
+      io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
-        message: "Tạo đơn hàng thành công.",
+        message: 'Tạo đơn hàng thành công.',
         data: order,
       });
     } catch (error) {
@@ -210,7 +228,7 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
@@ -224,16 +242,53 @@ const OrderController = {
           message: errors,
         });
       }
-      const updatedOrder = await OrderModel.findByIdAndUpdate(id, value, {
-        new: true,
-      });
-      if (!updatedOrder) {
-        return res.status(StatusCodes.OK).json({
-          message: "Đơn hàng không tồn tại",
+      const updatedOrder = await OrderModel.findById(id)
+        .populate({
+          path: 'userId',
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productOptionId' },
+        });
+      if (
+        value.status === 'cancelled' &&
+        !['pending', 'unpaid', 'confirmed'].includes(updatedOrder.status)
+      ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Trạng thái đơn hàng không hợp lệ',
         });
       }
+      updatedOrder.set(value);
+      await updatedOrder.save();
+      if (!updatedOrder) {
+        return res.status(StatusCodes.OK).json({
+          message: 'Đơn hàng không tồn tại',
+        });
+      }
+      if (updatedOrder.status === 'cancelled') {
+        await Promise.all(
+          updatedOrder.items.map(async (item) => {
+            const productItem = await ProductItemModel.findById(
+              item.productOptionId,
+            );
+            productItem.outStock -= item.quantity;
+            await productItem.save();
+          }),
+        );
+      }
+      if (updatedOrder.status === 'delivered' && updatedOrder.payment.paymentStatus === 'unpaid') {
+        io.emit(String(updatedOrder.userId._id), updatedOrder);
+        sendShipmentNotificationEmail(updatedOrder);
+      }
+      if (updatedOrder.status === 'received') {
+        sendDeliveredNotificationEmail(updatedOrder);
+      }
       return res.status(StatusCodes.OK).json({
-        message: "Cập nhật đơn hàng thành công",
+        message: 'Cập nhật đơn hàng thành công',
         data: updatedOrder,
       });
     } catch (error) {
@@ -247,18 +302,18 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
       const order = await OrderModel.findByIdAndDelete(id);
       if (!order) {
         return res.status(StatusCodes.OK).json({
-          message: "Đơn hàng không tồn tại",
+          message: 'Đơn hàng không tồn tại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Xóa đơn hàng thành công",
+        message: 'Xóa đơn hàng thành công',
         data: order,
       });
     } catch (error) {
@@ -273,17 +328,17 @@ const OrderController = {
       const { amount, addInfo } = req.body;
       if (!amount || !addInfo) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Không tìm thấy dữ liệu đầu vào",
+          message: 'Không tìm thấy dữ liệu đầu vào',
         });
       }
       const qrCode = await generateQrCode({ amount, addInfo });
       if (!qrCode) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Tạo QRCode thất bại",
+          message: 'Tạo QRCode thất bại',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Tạo QRCode thành công",
+        message: 'Tạo QRCode thành công',
         data: qrCode,
       });
     } catch (error) {
@@ -296,14 +351,14 @@ const OrderController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy đơn hàng",
+        message: 'Không tìm thấy đơn hàng',
       });
     }
     try {
       const order = await OrderModel.findById(id);
       if (!order) {
         return res.status(StatusCodes.OK).json({
-          message: "Đơn hàng không tồn tại",
+          message: 'Đơn hàng không tồn tại',
         });
       }
       const { value, error } = checkPaidSchema.validate(req.body, {
@@ -326,14 +381,14 @@ const OrderController = {
 
       if (!checkPayment) {
         return res.status().json({
-          message: "Thanh toán thất bại, vui lòng thực hiện lại!",
+          message: 'Thanh toán thất bại, vui lòng thực hiện lại!',
         });
       }
-      order.payment.paymentStatus = "paid";
-      order.status = "pending";
+      order.payment.paymentStatus = 'paid';
+      order.status = 'pending';
       await order.save();
       return res.status(StatusCodes.OK).json({
-        message: "Thanh toán thành công!",
+        message: 'Thanh toán thành công!',
         data: order,
       });
     } catch (error) {
@@ -347,7 +402,7 @@ const OrderController = {
     try {
       const productDetails = await ProductController.checkProduct(req.body);
       return res.status(StatusCodes.OK).json({
-        message: "Kiểm tra sản phẩm thành công",
+        message: 'Kiểm tra sản phẩm thành công',
         data: productDetails,
       });
     } catch (error) {
@@ -363,7 +418,7 @@ const OrderController = {
       const now = new Date();
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const startOfThisWeek = new Date(
-        now.setDate(now.getDate() - now.getDay())
+        now.setDate(now.getDate() - now.getDay()),
       );
       const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const startOfThisYear = new Date(now.getFullYear(), 0, 1);
@@ -380,23 +435,23 @@ const OrderController = {
       startOfLastYear.setFullYear(startOfLastYear.getFullYear() - 1);
       let filterToday = {};
       let filterPrevious = {};
-      if (period === "day") {
+      if (period === 'day') {
         filterToday = { createdAt: { $gte: startOfToday } };
         filterPrevious = {
           createdAt: { $gte: startOfYesterday, $lt: startOfToday },
         };
-      } else if (period === "week") {
+      } else if (period === 'week') {
         const endOfLastWeek = new Date(startOfThisWeek);
         filterToday = { createdAt: { $gte: startOfThisWeek } };
         filterPrevious = {
           createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek },
         };
-      } else if (period === "month") {
+      } else if (period === 'month') {
         filterToday = { createdAt: { $gte: startOfThisMonth } };
         filterPrevious = {
           createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
         };
-      } else if (period === "year") {
+      } else if (period === 'year') {
         filterToday = { createdAt: { $gte: startOfThisYear } };
         filterPrevious = {
           createdAt: { $gte: startOfLastYear, $lt: startOfThisYear },
@@ -427,7 +482,7 @@ const OrderController = {
       const now = new Date();
       const startOfToday = new Date(now.setHours(0, 0, 0, 0));
       const startOfThisWeek = new Date(
-        now.setDate(now.getDate() - now.getDay())
+        now.setDate(now.getDate() - now.getDay()),
       );
       const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const startOfThisYear = new Date(now.getFullYear(), 0, 1);
@@ -442,23 +497,23 @@ const OrderController = {
 
       let filterToday = {};
       let filterPrevious = {};
-      if (period === "day") {
+      if (period === 'day') {
         filterToday = { createdAt: { $gte: startOfToday } };
         filterPrevious = {
           createdAt: { $gte: startOfYesterday, $lt: startOfToday },
         };
-      } else if (period === "week") {
+      } else if (period === 'week') {
         const endOfLastWeek = new Date(startOfThisWeek);
         filterToday = { createdAt: { $gte: startOfThisWeek } };
         filterPrevious = {
           createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek },
         };
-      } else if (period === "month") {
+      } else if (period === 'month') {
         filterToday = { createdAt: { $gte: startOfThisMonth } };
         filterPrevious = {
           createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
         };
-      } else if (period === "year") {
+      } else if (period === 'year') {
         filterToday = { createdAt: { $gte: startOfThisYear } };
         filterPrevious = {
           createdAt: { $gte: startOfLastYear, $lt: startOfThisYear },
@@ -474,14 +529,14 @@ const OrderController = {
         {
           $match: {
             ...filterToday,
-            "payment.paymentStatus": "paid",
-            status: "delivered",
+            'payment.paymentStatus': 'paid',
+            status: 'delivered',
           },
         },
         {
           $group: {
             _id: null,
-            totalRevenue: { $sum: "$totalPrice" },
+            totalRevenue: { $sum: '$totalPrice' },
           },
         },
       ]);
@@ -490,14 +545,14 @@ const OrderController = {
         {
           $match: {
             ...filterPrevious,
-            "payment.paymentStatus": "paid",
-            status: "delivered",
+            'payment.paymentStatus': 'paid',
+            status: 'delivered',
           },
         },
         {
           $group: {
             _id: null,
-            totalRevenue: { $sum: "$totalPrice" },
+            totalRevenue: { $sum: '$totalPrice' },
           },
         },
       ]);

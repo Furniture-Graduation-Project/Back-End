@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import User from "../models/user.js";
 import { signinSchema, signupSchema } from "../validations/user.js";
 import {
+  clearCookies,
   generateRefreshToken,
   generateTokenAndSetCookie,
 } from "../utils/token.js";
@@ -157,14 +158,7 @@ const AuthController = {
 
       user.refreshToken = null;
       await user.save();
-      res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-      });
-      res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-      });
+      clearCookies(res);
       req.session.destroy();
       return res.status(StatusCodes.OK).json({ message: "Logout successful" });
     } catch (error) {

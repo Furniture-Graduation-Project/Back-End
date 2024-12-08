@@ -18,10 +18,9 @@ const protectRouteClient = async (req, res, next) => {
       }
       throw error;
     }
-
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
-      return res.status(404).json({ error: "Người dùng không tìm thấy" });
+      return res.status(401).json({ error: "Người dùng không tìm thấy" });
     }
     if (user.active === false) {
       return res

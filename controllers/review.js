@@ -22,7 +22,7 @@ const ReviewController = {
     if (!productId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Không tìm thấy productID" });
+        .json({ message: "Không tìm thấy đánh giá" });
     }
 
     try {
@@ -33,12 +33,19 @@ const ReviewController = {
 
       if (reviews.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: "Không tìm thấy bình luận cho sản phẩm này",
+          message: "Không tìm có đánh giá cho sản phẩm này",
         });
       }
+
+      const totalData = await Review.countDocuments({
+        productId: productId,
+      });
+      const totalPage = limit ? Math.ceil(totalData / limit) : 1;
       return res.status(StatusCodes.OK).json({
-        message: "Lấy bình luận theo productID thành công",
+        message: "Lấy tất cả đánh giá cho sản phẩm này thành công",
         data: reviews,
+        totalPage,
+        totalData,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
