@@ -26,7 +26,11 @@ const ReviewController = {
     }
 
     try {
-      const reviews = await Review.find({ productId: productId });
+      const reviews = await Review.find({ productId: productId }).populate(
+        "userId",
+        "name avatar"
+      );
+
       if (reviews.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: "Không tìm thấy bình luận cho sản phẩm này",
