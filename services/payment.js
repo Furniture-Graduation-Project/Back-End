@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 const callApi = async () => {
@@ -12,13 +12,13 @@ const callApi = async () => {
       return data.data;
     } else {
       console.error(
-        'Định dạng dữ liệu không hợp lệ: mong đợi một đối tượng chứa mảng dữ liệu, nhưng nhận được:',
-        data,
+        "Định dạng dữ liệu không hợp lệ: mong đợi một đối tượng chứa mảng dữ liệu, nhưng nhận được:",
+        data
       );
       return null;
     }
   } catch (error) {
-    console.error('Đã xảy ra lỗi trong callApi:', error);
+    console.error("Đã xảy ra lỗi trong callApi:", error);
     return null;
   }
 };
@@ -31,7 +31,7 @@ const checkDescription = (payments, infoPayment) => {
     const isAmountMatching =
       Number(infoPayment.amount) === Number(payment.value);
     const isDescriptionMatching = payment.description.includes(
-      infoPayment.description,
+      infoPayment.description
     );
     const isStartTimeValid = datePayment >= startTime;
     const isEndTimeValid = datePayment <= endTime;
@@ -59,7 +59,7 @@ const paymentApiCall = async (infoPayment) => {
         break;
       }
     } else {
-      console.error('Định dạng dữ liệu không hợp lệ:', typeof data);
+      console.error("Định dạng dữ liệu không hợp lệ:", typeof data);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));

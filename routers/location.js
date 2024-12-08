@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  changeDefaultLocation,
   create,
   getByUserId,
   getOne,
@@ -16,5 +17,6 @@ router.get("/:userId", getByUserId);
 router.get("/:userId/location", getOne);
 router.delete("/:userId/location", remove);
 router.put("/:userId/location", update);
+router.put("/:userId/location/default", changeDefaultLocation);
 
 export default router;

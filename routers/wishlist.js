@@ -4,9 +4,9 @@ const routerWishlist = new Router();
 
 routerWishlist.get("/", WishlistController.getAll);
 routerWishlist.get("/limited", WishlistController.getLimited);
-routerWishlist.get("/:id", WishlistController.getDetail);
-routerWishlist.post("/", WishlistController.create);
+routerWishlist.get("/:userId", WishlistController.getByUserId);
+routerWishlist.post("/:userId", WishlistController.create);
 routerWishlist.put("/:id", WishlistController.edit);
-routerWishlist.delete("/:id", WishlistController.delete);
+routerWishlist.delete("/:userId/remove", WishlistController.delete);
 
 export default routerWishlist;
