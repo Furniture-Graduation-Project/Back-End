@@ -33,7 +33,8 @@ const ReviewController = {
       const reviews = await Review.find({ productId: productId })
         .populate('userId', 'name avatar')
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .sort({ createdAt: -1 });
 
       if (reviews.length === 0) {
         return res.status(StatusCodes.OK).json({
