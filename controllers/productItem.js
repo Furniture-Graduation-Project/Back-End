@@ -17,7 +17,7 @@ const ProductItemController = {
           image,
           SKU,
         },
-        { abortEarly: false, stripUnknown: true }
+        { abortEarly: false, stripUnknown: true },
       );
 
       if (error) {
@@ -83,14 +83,14 @@ const ProductItemController = {
   getByProductId: async (req, res) => {
     try {
       const { id } = req.params;
+      let query = req.query.status == 'active' ? { status: 'active' } : {};
+      query.productId = id;
       if (!id) {
         return res
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: 'Không tìm thấy sản phẩm biến thể' });
       }
-      const productItem = await ProductItemModel.find({
-        productId: id,
-      });
+      const productItem = await ProductItemModel.find(query);
 
       if (!productItem) {
         return res
@@ -134,7 +134,7 @@ const ProductItemController = {
       const updatedProductItem = await ProductItemModel.findByIdAndUpdate(
         id,
         { $set: updatedData },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
 
       return res.status(StatusCodes.OK).json(updatedProductItem);

@@ -5,6 +5,11 @@ import { orderItemSchema } from './orderItem.js';
 
 const orderSchema = new mongoose.Schema(
   {
+    code: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -40,8 +45,6 @@ const orderSchema = new mongoose.Schema(
         'delivered',
         'received',
         'cancelled',
-        'returned',
-        'refunded',
       ],
       default: 'pending',
     },
@@ -58,13 +61,44 @@ const orderSchema = new mongoose.Schema(
             'delivered',
             'received',
             'cancelled',
-            'returned',
-            'refunded',
           ],
         },
         date: { type: Date, default: Date.now },
       },
     ],
+    returnInfo: {
+      status: {
+        type: String,
+        enum: ['pending', 'processing', 'returned', 'refunded', 'finished'],
+        default: 'pending',
+      },
+      reason: { type: String },
+      confirmation: { type: String },
+      items: [
+        {
+          productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+          },
+          productOptionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ProductItem',
+          },
+          quantity: { type: Number, required: true },
+          unitPrice: {
+            type: Number,
+            required: true,
+          },
+          status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending',
+          },
+        },
+      ],
+      dateRequested: { type: Date, default: Date.now },
+      dateResolved: { type: Date },
+    },
     deleted: {
       type: Boolean,
       default: false,

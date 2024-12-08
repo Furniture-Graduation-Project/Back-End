@@ -7,6 +7,7 @@ import {
   signinEmployeeSchema,
 } from "../validations/employee.js";
 import {
+  clearCookies,
   generateRefreshToken,
   generateTokenAndSetCookie,
 } from "../utils/token.js";
@@ -204,7 +205,7 @@ const EmployeeController = {
       }
 
       const employee = await Employee.findOne({
-        Employeename: value.Employeename,
+        username: value.username,
       });
       if (!employee) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -225,6 +226,7 @@ const EmployeeController = {
       employee.save();
       return res.status(StatusCodes.OK).json({
         message: "Đăng nhập thành công",
+        data: employee,
         token,
       });
     } catch (error) {
@@ -367,14 +369,7 @@ const EmployeeController = {
       }
       employee.refreshToken = null;
       await employee.save();
-      res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-      });
-      res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-      });
+      clearCookies(res);
       return res
         .status(StatusCodes.OK)
         .json({ message: "Đăng xuất thành công" });

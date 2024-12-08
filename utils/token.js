@@ -31,3 +31,16 @@ export const generateRefreshToken = (userId, res) => {
 
   return refreshToken;
 };
+export const clearCookies = (res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    sameSite: process.env.SAME_SITE,
+    secure: process.env.NODE_ENV !== "development",
+  });
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    sameSite: process.env.SAME_SITE,
+    secure: process.env.NODE_ENV !== "development",
+  });
+};
