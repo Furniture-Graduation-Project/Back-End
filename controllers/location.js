@@ -31,6 +31,12 @@ export const create = async (req, res) => {
         .json({ message: "Người dùng không tồn tại !" });
     }
 
+    if (isDefault) {
+      user.locations.forEach((location) => {
+        location.default = false;
+      });
+    }
+
     user.locations.push({
       addressName,
       firstName,
