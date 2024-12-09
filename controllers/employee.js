@@ -5,6 +5,7 @@ import Employee from '../models/employee.js';
 import {
   employeeSchema,
   signinEmployeeSchema,
+  updateEmployeePassword,
 } from '../validations/employee.js';
 import {
   clearCookies,
