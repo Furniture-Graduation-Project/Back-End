@@ -172,9 +172,8 @@ export const updateOrderSchema = Joi.object({
         "finished"
       )
       .default("pending")
-      .required()
       .messages({
-        "any.required": "Trạng thái là bắt buộc",
+        "any.required": "Trạng thái trả hàng là bắt buộc",
         "any.only": "Trạng thái không hợp lệ",
       }),
     reason: Joi.string().optional().allow(null, ""),
