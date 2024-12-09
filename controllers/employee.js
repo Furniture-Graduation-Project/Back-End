@@ -1,16 +1,16 @@
-import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import Employee from "../models/employee.js";
+import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import Employee from '../models/employee.js';
 import {
   employeeSchema,
   signinEmployeeSchema,
-} from "../validations/employee.js";
+} from '../validations/employee.js';
 import {
   clearCookies,
   generateRefreshToken,
   generateTokenAndSetCookie,
-} from "../utils/token.js";
+} from '../utils/token.js';
 
 const EmployeeController = {
   searchByFullName: async (req, res) => {
@@ -19,27 +19,27 @@ const EmployeeController = {
 
       if (!fullName) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Vui lòng cung cấp fullName để tìm kiếm.",
+          message: 'Vui lòng cung cấp fullName để tìm kiếm.',
         });
       }
 
       const employees = await Employee.find({
-        fullName: { $regex: fullName, $options: "i" },
+        fullName: { $regex: fullName, $options: 'i' },
       });
 
       if (!employees || employees.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: "Không tìm thấy nhân viên nào với fullName này.",
+          message: 'Không tìm thấy nhân viên nào với fullName này.',
         });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: "Tìm kiếm thành công.",
+        message: 'Tìm kiếm thành công.',
         data: employees,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi tìm kiếm nhân viên.",
+        message: 'Có lỗi xảy ra khi tìm kiếm nhân viên.',
         error: error.message,
       });
     }
@@ -51,13 +51,13 @@ const EmployeeController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const employees = await Employee.find()
-        .skip(skip)
+      const employees = await Employee.find({ role: { $ne: 'admin' } })
+        .skip(skip) 
         .limit(limit)
-        .select("-password");
+        .select('-password');
       if (!employees || employees.length === 0) {
         return res.status(StatusCodes.OK).json({
-          message: "Không có nhân viên tồn tại.",
+          message: 'Không có nhân viên tồn tại.',
         });
       }
 
@@ -68,11 +68,11 @@ const EmployeeController = {
         data: employees,
         totalPage,
         totalData,
-        message: "Lấy danh sách nhân viên thành công.",
+        message: 'Lấy danh sách nhân viên thành công.',
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Có lỗi xảy ra khi lấy thông tin nhân viên.",
+        message: 'Có lỗi xảy ra khi lấy thông tin nhân viên.',
         error: error.message,
       });
     }
@@ -82,12 +82,12 @@ const EmployeeController = {
     try {
       const employees = await Employee.find();
       return res.status(StatusCodes.OK).json({
-        message: "Lấy tất cả nhân viên thành công",
+        message: 'Lấy tất cả nhân viên thành công',
         data: employees,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -96,23 +96,23 @@ const EmployeeController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy nhân viên",
+        message: 'Không tìm thấy nhân viên',
       });
     }
     try {
-      const employee = await Employee.findById(id).select("-password");
+      const employee = await Employee.findById(id).select('-password');
       if (!employee) {
         return res.status(StatusCodes.OK).json({
-          message: "Nhân viên không tìm thấy",
+          message: 'Nhân viên không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Lấy chi tiết nhân viên thành công",
+        message: 'Lấy chi tiết nhân viên thành công',
         data: employee,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -137,7 +137,7 @@ const EmployeeController = {
       if (existingEmployee) {
         return res.status(StatusCodes.CONFLICT).json({
           message:
-            "Tên đăng nhập đã tồn tại, vui lòng chọn tên đăng nhập khác.",
+            'Tên đăng nhập đã tồn tại, vui lòng chọn tên đăng nhập khác.',
         });
       }
 
@@ -150,12 +150,12 @@ const EmployeeController = {
       });
 
       return res.status(StatusCodes.CREATED).json({
-        message: "Tạo nhân viên thành công",
+        message: 'Tạo nhân viên thành công',
         data: employee,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -165,25 +165,25 @@ const EmployeeController = {
       if (!refreshToken)
         return res
           .status(StatusCodes.FORBIDDEN)
-          .json({ message: "Không có refresh token" });
+          .json({ message: 'Không có refresh token' });
       const employee = await Employee.findOne({ refreshToken });
       if (!employee)
         return res
           .status(StatusCodes.FORBIDDEN)
-          .json({ message: "Không tìm thấy nhân viên với token này" });
+          .json({ message: 'Không tìm thấy nhân viên với token này' });
       jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err) => {
         if (err)
           return res.status(
             StatusCodes.FORBIDDEN,
-            json({ message: "Không thể truy cập token này" })
+            json({ message: 'Không thể truy cập token này' }),
           );
         const newAccessToken = generateTokenAndSetCookie(
           String(employee._id),
-          res
+          res,
         );
         return res.status(StatusCodes.OK).json({
           token: newAccessToken,
-          message: "Làm mới token thành công !",
+          message: 'Làm mới token thành công !',
         });
       });
     } catch (error) {
@@ -209,14 +209,14 @@ const EmployeeController = {
       });
       if (!employee) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Tên đăng nhập không tồn tại!",
+          message: 'Tên đăng nhập không tồn tại!',
         });
       }
 
       const isMatch = await bcrypt.compare(value.password, employee.password);
       if (!isMatch) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Sai mật khẩu!",
+          message: 'Sai mật khẩu!',
         });
       }
 
@@ -225,13 +225,13 @@ const EmployeeController = {
       employee.refreshToken = refreshToken;
       employee.save();
       return res.status(StatusCodes.OK).json({
-        message: "Đăng nhập thành công",
+        message: 'Đăng nhập thành công',
         data: employee,
         token,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -240,7 +240,7 @@ const EmployeeController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy nhân viên",
+        message: 'Không tìm thấy nhân viên',
       });
     }
     try {
@@ -262,17 +262,17 @@ const EmployeeController = {
 
       if (!employee) {
         return res.status(StatusCodes.OK).json({
-          message: "Nhân viên không tìm thấy",
+          message: 'Nhân viên không tìm thấy',
         });
       }
 
       return res.status(StatusCodes.OK).json({
-        message: "Cập nhật nhân viên thành công",
+        message: 'Cập nhật nhân viên thành công',
         data: employee,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -281,7 +281,7 @@ const EmployeeController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy nhân viên",
+        message: 'Không tìm thấy nhân viên',
       });
     }
     try {
@@ -300,17 +300,17 @@ const EmployeeController = {
       const employee = await Employee.findById(id);
       if (!employee) {
         return res.status(StatusCodes.NOT_FOUND).json({
-          message: "Nhân viên không tìm thấy",
+          message: 'Nhân viên không tìm thấy',
         });
       }
 
       const isMatch = await bcrypt.compare(
         value.oldPassword,
-        employee.password
+        employee.password,
       );
       if (!isMatch) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          message: "Mật khẩu cũ không đúng",
+          message: 'Mật khẩu cũ không đúng',
         });
       }
 
@@ -319,12 +319,12 @@ const EmployeeController = {
       await employee.save();
 
       return res.status(StatusCodes.OK).json({
-        message: "Cập nhật mật khẩu thành công",
+        message: 'Cập nhật mật khẩu thành công',
         data: employee,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -333,23 +333,23 @@ const EmployeeController = {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy nhân viên",
+        message: 'Không tìm thấy nhân viên',
       });
     }
     try {
       const employee = await Employee.findByIdAndDelete(id);
       if (!employee) {
         return res.status(StatusCodes.OK).json({
-          message: "Nhân viên không tìm thấy",
+          message: 'Nhân viên không tìm thấy',
         });
       }
       return res.status(StatusCodes.OK).json({
-        message: "Xóa nhân viên thành công",
+        message: 'Xóa nhân viên thành công',
         data: employee,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message: "Lỗi: " + error.message,
+        message: 'Lỗi: ' + error.message,
       });
     }
   },
@@ -359,20 +359,20 @@ const EmployeeController = {
       if (!refreshToken) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Token làm mới không hợp lệ" });
+          .json({ message: 'Token làm mới không hợp lệ' });
       }
       const employee = await Employee.findOne({ refreshToken });
       if (!employee) {
         return res
           .status(StatusCodes.FORBIDDEN)
-          .json({ message: "Không tìm thấy nhân viên" });
+          .json({ message: 'Không tìm thấy nhân viên' });
       }
       employee.refreshToken = null;
       await employee.save();
       clearCookies(res);
       return res
         .status(StatusCodes.OK)
-        .json({ message: "Đăng xuất thành công" });
+        .json({ message: 'Đăng xuất thành công' });
     } catch (error) {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)

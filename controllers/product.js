@@ -91,18 +91,32 @@ export const ProductController = {
         .limit(limit);
       const productIds = products.map((product) => product._id);
 
-      const productDetails = await ProductItemModel.aggregate([
-        { $match: { productId: { $in: productIds } } },
-        {
-          $group: {
-            _id: "$productId",
-            prices: { $push: "$price" },
-            stock: { $sum: "$stock" },
-            outStock: { $sum: "$outStock" },
+      let productDetails;
+      if (status) {
+        productDetails = await ProductItemModel.aggregate([
+          { $match: { productId: { $in: productIds } } },
+          {
+            $group: {
+              _id: "$productId",
+              prices: { $push: "$price" },
+              stock: { $sum: "$stock" },
+              outStock: { $sum: "$outStock" },
+            },
           },
-        },
-      ]);
-
+        ]);
+      } else {
+        productDetails = await ProductItemModel.aggregate([
+          { $match: { productId: { $in: productIds }, status: "active" } },
+          {
+            $group: {
+              _id: "$productId",
+              prices: { $push: "$price" },
+              stock: { $sum: "$stock" },
+              outStock: { $sum: "$outStock" },
+            },
+          },
+        ]);
+      }
       const detailsMap = new Map(
         productDetails.map((item) => [
           item._id.toString(),
