@@ -8,6 +8,12 @@ import CartModel from '../models/cart.js';
 import generateQrCode from '../services/qrcode.js';
 import { checkPaidSchema } from '../validations/payment.js';
 import paymentApiCall from '../services/payment.js';
+import { populate } from 'dotenv';
+import generateOrderCode from '../utils/orderCode.js';
+import {
+  sendDeliveredNotificationEmail,
+  sendShipmentNotificationEmail,
+} from '../services/emailOrder.js';
 
 const OrderController = {
   getLimited: async (req, res) => {
@@ -20,13 +26,17 @@ const OrderController = {
       let orders;
       if (user) {
         orders = await OrderModel.find({ userId: user._id, deleted: false })
+          .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
           .populate({
             path: 'items',
             populate: { path: 'productId' },
           });
-        totalData = await OrderModel.countDocuments({ deleted: false });
+        totalData = await OrderModel.countDocuments({
+          userId: user._id,
+          deleted: false,
+        });
       } else {
         orders = await OrderModel.find()
           .skip(skip)
@@ -93,6 +103,14 @@ const OrderController = {
         .populate({
           path: 'items',
           populate: { path: 'productOptionId' },
+        })
+        .populate({
+          path: 'returnInfo',
+          populate: { path: 'items', populate: { path: 'productId' } },
+        })
+        .populate({
+          path: 'returnInfo',
+          populate: { path: 'items', populate: { path: 'productOptionId' } },
         });
       if (!order) {
         return res.status(StatusCodes.OK).json({
@@ -192,7 +210,8 @@ const OrderController = {
           );
         }),
       );
-      const order = await OrderModel.create(value);
+      const code = generateOrderCode();
+      const order = await OrderModel.create({ ...value, code });
       io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
         message: 'Tạo đơn hàng thành công.',
@@ -223,13 +242,50 @@ const OrderController = {
           message: errors,
         });
       }
-      const updatedOrder = await OrderModel.findByIdAndUpdate(id, value, {
-        new: true,
-      });
+      const updatedOrder = await OrderModel.findById(id)
+        .populate({
+          path: 'userId',
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        })
+        .populate({
+          path: 'items',
+          populate: { path: 'productOptionId' },
+        });
+      if (
+        value.status === 'cancelled' &&
+        !['pending', 'unpaid', 'confirmed'].includes(updatedOrder.status)
+      ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Trạng thái đơn hàng không hợp lệ',
+        });
+      }
+      updatedOrder.set(value);
+      await updatedOrder.save();
       if (!updatedOrder) {
         return res.status(StatusCodes.OK).json({
           message: 'Đơn hàng không tồn tại',
         });
+      }
+      if (updatedOrder.status === 'cancelled') {
+        await Promise.all(
+          updatedOrder.items.map(async (item) => {
+            const productItem = await ProductItemModel.findById(
+              item.productOptionId,
+            );
+            productItem.outStock -= item.quantity;
+            await productItem.save();
+          }),
+        );
+      }
+      if (updatedOrder.status === 'delivered' && updatedOrder.payment.paymentStatus === 'unpaid') {
+        io.emit(String(updatedOrder.userId._id), updatedOrder);
+        sendShipmentNotificationEmail(updatedOrder);
+      }
+      if (updatedOrder.status === 'received') {
+        sendDeliveredNotificationEmail(updatedOrder);
       }
       return res.status(StatusCodes.OK).json({
         message: 'Cập nhật đơn hàng thành công',

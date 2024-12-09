@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import WishlistModel from "../models/wishlist.js";
 import { wishlistSchema } from "../validations/wishlist.js";
+import UserModel from "../models/user.js";
 
 const WishlistController = {
   getLimited: async (req, res) => {
@@ -46,6 +47,29 @@ const WishlistController = {
       });
     }
   },
+  getByUserId: async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+      const user = await UserModel.findById(userId).populate(
+        "wishlist.productId"
+      );
+      if (!user) {
+        return res.status(StatusCodes.OK).json({
+          message: "Không tìm thấy người dùng",
+        });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        message: "Lấy danh sách yêu thích thành công",
+        data: user.wishlist,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: error.message,
+      });
+    }
+  },
 
   getDetail: async (req, res) => {
     const id = req.params.id;
@@ -73,21 +97,48 @@ const WishlistController = {
   },
 
   create: async (req, res) => {
+    const userId = req.params.userId;
     try {
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Không tìm thấy người dùng",
+        });
+      }
+
       const { value, error } = wishlistSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
       });
+
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: errors,
         });
       }
-      const wishlist = await WishlistModel.create(value);
+
+      if (
+        user.wishlist.some(
+          (item) => item.productId.toString() === value.productId
+        )
+      ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Sản phẩm đã tồn tại trong danh sách yêu thích",
+        });
+      } else {
+        user.wishlist.push(value);
+      }
+
+      await user.save();
+
+      const populatedUser = await UserModel.findById(userId).populate(
+        "wishlist.productId"
+      );
+
       return res.status(StatusCodes.CREATED).json({
-        message: "Tạo danh sách yêu thích thành công",
-        data: wishlist,
+        message: "Thêm sản phẩm vào danh sách yêu thích thành công",
+        data: populatedUser.wishlist,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -134,22 +185,28 @@ const WishlistController = {
   },
 
   delete: async (req, res) => {
-    const { id } = req.params;
-    if (!id) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Không tìm thấy danh sách yêu thích",
-      });
-    }
+    const userId = req.params.userId;
+    const { productId } = req.query;
     try {
-      const wishlist = await WishlistModel.findByIdAndDelete(id);
-      if (!wishlist) {
-        return res.status(StatusCodes.OK).json({
-          message: "Không tìm thấy danh sách yêu thích",
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Không tìm thấy người dùng",
         });
       }
+
+      const newWishlist = user.wishlist.filter(
+        (item) => item.productId.toString() !== productId
+      );
+
+      user.wishlist = newWishlist;
+
+      await user.save();
+
       return res.status(StatusCodes.OK).json({
-        message: "Xóa danh sách yêu thích thành công",
-        data: wishlist,
+        message: "Xóa sản phẩm khỏi danh sách yêu thích thành công",
+        data: user.wishlist,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
