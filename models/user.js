@@ -22,8 +22,8 @@ const userSchema = new mongoose.Schema(
     },
     wishlist: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        addedAt: { type: Date, default: Date.now },
       },
     ],
     locations: [
@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
         district: { type: String },
         ward: { type: String },
         street: { type: String },
+        default: { type: Boolean, default: false },
       },
     ],
     active: { type: Boolean, default: true },
