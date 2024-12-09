@@ -10,4 +10,5 @@ export const locationSchema = Joi.object({
   district: Joi.string().required(),
   ward: Joi.string().required(),
   street: Joi.string().required(),
+  default: Joi.boolean(),
 });

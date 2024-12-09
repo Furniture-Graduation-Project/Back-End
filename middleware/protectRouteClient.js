@@ -24,7 +24,7 @@ const protectRouteClient = async (req, res, next) => {
     }
     if (user.active === false) {
       return res
-        .status(401)
+        .status(403)
         .json({ error: "Tài khoản người người dùng đã bị khóa" });
     }
     req.user = user;

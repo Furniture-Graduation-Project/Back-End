@@ -73,13 +73,15 @@ const AuthController = {
 
   update: async (req, res) => {
     try {
+      const {id} = req.params
       const { password, ...updateFields } = req.body;
 
       if (password) {
         const hashPass = await bcryptjs.hash(password, 10);
         updateFields.password = hashPass;
       }
-
+      console.log(req.body);
+      
       const data = await User.findByIdAndUpdate(req.params.id, updateFields, {
         new: true,
         runValidators: true,
