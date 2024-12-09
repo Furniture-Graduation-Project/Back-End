@@ -39,6 +39,7 @@ const OrderController = {
         });
       } else {
         orders = await OrderModel.find()
+        .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
           .populate({
