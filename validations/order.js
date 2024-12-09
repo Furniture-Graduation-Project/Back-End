@@ -162,18 +162,61 @@ export const updateOrderSchema = Joi.object({
       "array.min": "Phải có ít nhất một trạng thái trong lịch sử trạng thái",
     }),
   returnInfo: Joi.object({
-    reason: Joi.string().optional(),
-    items: Joi.array().items(returnItemSchema).required().messages({
-      "array.min": "Phải có ít nhất một sản phẩm trong yêu cầu hoàn trả",
-      "any.required": "Danh sách sản phẩm trong yêu cầu hoàn trả là bắt buộc",
+    status: Joi.string()
+      .valid(
+        "pending",
+        "processing",
+        "resolved",
+        "returned",
+        "refunded",
+        "finished"
+      )
+      .default("pending")
+      .required()
+      .messages({
+        "any.required": "Trạng thái là bắt buộc",
+        "any.only": "Trạng thái không hợp lệ",
+      }),
+    reason: Joi.string().optional().allow(null, ""),
+    response: Joi.string().optional().allow(null, "").messages({
+      "string.base": "Phản hồi từ admin phải là chuỗi",
     }),
+    items: Joi.array()
+      .items(
+        Joi.object({
+          productId: Joi.string().required().messages({
+            "any.required": "ID sản phẩm là bắt buộc",
+          }),
+          productOptionId: Joi.string().optional().allow(null, ""),
+          quantity: Joi.number().required().messages({
+            "any.required": "Số lượng là bắt buộc",
+            "number.base": "Số lượng phải là số",
+          }),
+          unitPrice: Joi.number().required().messages({
+            "any.required": "Giá sản phẩm là bắt buộc",
+            "number.base": "Giá sản phẩm phải là số",
+          }),
+          status: Joi.string()
+            .valid("pending", "approved", "rejected")
+            .default("pending")
+            .messages({
+              "any.only": "Trạng thái sản phẩm không hợp lệ",
+            }),
+        })
+      )
+      .min(1)
+      .required()
+      .messages({
+        "array.min": "Phải có ít nhất một sản phẩm trong yêu cầu hoàn trả",
+        "any.required": "Danh sách sản phẩm là bắt buộc",
+      }),
     dateRequested: Joi.date()
       .default(() => new Date())
       .messages({
-        "date.base": "Ngày yêu cầu hoàn trả phải là một giá trị hợp lệ",
+        "date.base": "Ngày yêu cầu hoàn trả phải là giá trị hợp lệ",
       }),
     dateResolved: Joi.date().optional().messages({
-      "date.base": "Ngày giải quyết hoàn trả phải là một giá trị hợp lệ",
+      "date.base": "Ngày giải quyết hoàn trả phải là giá trị hợp lệ",
     }),
   }),
   deleted: Joi.boolean().optional(),
