@@ -53,7 +53,7 @@ const EmployeeController = {
       const skip = (page - 1) * limit;
 
       const employees = await Employee.find({ role: { $ne: 'admin' } })
-        .skip(skip) 
+        .skip(skip)
         .limit(limit)
         .select('-password');
       if (!employees || employees.length === 0) {
@@ -133,7 +133,7 @@ const EmployeeController = {
       }
 
       const existingEmployee = await Employee.findOne({
-        employeename: value.employeename,
+        username: value.username,
       });
       if (existingEmployee) {
         return res.status(StatusCodes.CONFLICT).json({
