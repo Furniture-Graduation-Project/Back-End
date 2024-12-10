@@ -14,11 +14,15 @@ export const employeeSchema = Joi.object({
   fullName: Joi.string().messages({
     "string.empty": "Họ tên không được để trống",
   }),
-  phoneNumber: Joi.string().min(10).max(15).messages({
-    "string.empty": "Số điện thoại không được để trống",
-    "string.min": "Số điện thoại lớn hơn 10 ký tự",
-    "string.max": "Số điện thoại nhỏ hơn 15 ký tự",
-  }),
+  phoneNumber: Joi.string()
+    .length(10)
+    .pattern(/^[0-9]+$/, "Số điện thoại")
+    .messages({
+      "string.empty": "Số điện thoại không được để trống",
+      "string.length": "Số điện thoại phải đúng 10 ký tự",
+      "string.pattern.base": "Số điện thoại chỉ được chứa các chữ số",
+    })
+    .optional(),
   address: Joi.string().messages({
     "string.empty": "Địa chỉ không được để trống",
   }),
