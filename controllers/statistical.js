@@ -19,6 +19,7 @@ export const StatisticalController = {
       // 2. Truy vấn các đơn hàng trong khoảng thời gian đó
       const orders = await Orders.find({
         createdAt: { $gte: sixMonthsAgo, $lte: now },
+        status: "received"
       });
 
       if (!orders.length) {
@@ -60,6 +61,71 @@ export const StatisticalController = {
         return {
           month,
           ...categories,
+        };
+      });
+      return res.status(StatusCodes.OK).json({
+        message: 'Thống kê thành công',
+        data: chartData,
+      });
+    } catch (error) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: 'Lỗi: ' + error.message,
+      });
+    }
+  },
+
+  getStatisticalFrom6MonthsAgoPieChart: async (req, res) => {
+    try {
+      const now = new Date();
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+      const vietnameseMonths = [
+        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+      ];
+
+      // 2. Truy vấn các đơn hàng trong khoảng thời gian đó
+      const orders = await Orders.find({
+        createdAt: { $gte: sixMonthsAgo, $lte: now },
+        status: "received"
+      });
+
+      if (!orders.length) {
+        return res.status(StatusCodes.OK).json({
+          message: 'Không có đơn hàng nào trong vòng 6 tháng gần nhất',
+          data: [],
+        });
+      }
+
+      // 3. Thống kê theo sản phẩm
+      const productStats = {};
+
+      for (const order of orders) {
+        const monthIndex = order.createdAt.getMonth(); 
+        const month = vietnameseMonths[monthIndex];  
+
+        for (const item of order.items) {
+          const product = await Products.findById(item.productId);
+          if (product) {
+              if (!productStats[month]) {
+                productStats[month] = {};
+              }
+
+              if (!productStats[month][product.name]) {
+                productStats[month][product.name] = 0;
+              }
+
+              productStats[month][product.name] += 1;
+            }
+        }
+      }
+
+      const chartData = Object.keys(productStats).map((month) => {
+        const products = productStats[month];
+        return {
+          month,
+          ...products,
         };
       });
       return res.status(StatusCodes.OK).json({
