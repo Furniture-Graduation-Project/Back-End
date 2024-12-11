@@ -282,8 +282,7 @@ const OrderController = {
         );
       }
       if (
-        updatedOrder.status === "delivered" &&
-        updatedOrder.payment.paymentStatus === "unpaid"
+        updatedOrder.status === "delivered"
       ) {
         io.emit(String(updatedOrder.userId._id), updatedOrder);
         sendShipmentNotificationEmail(updatedOrder);
@@ -420,8 +419,6 @@ const OrderController = {
         stripUnknown: true,
       });
       const date = new Date();
-      console.log(date);
-
       if (error) {
         const errors = error.details.map((err) => err.message);
         return res.status(StatusCodes.BAD_REQUEST).json({

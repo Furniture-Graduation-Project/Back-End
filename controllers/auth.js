@@ -56,6 +56,12 @@ const AuthController = {
       const refreshToken = generateRefreshToken(user._id, res);
 
       user.refreshToken = refreshToken;
+      if (user.active === false) {
+        const key = String(user._id + 'lock');
+        io.emit(key, {
+          message: 'Tài khoản đã bị khóa !',
+        });
+      }
       await user.save();
       return res.status(StatusCodes.ACCEPTED).json({ accessToken });
     } catch (error) {
@@ -80,10 +86,6 @@ const AuthController = {
         new: true,
         runValidators: true,
       });
-      console.log(req.params.id);
-      console.log(data)
-      
-
       if (!data) {
         return res
           .status(StatusCodes.OK)
