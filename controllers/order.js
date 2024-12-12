@@ -22,10 +22,27 @@ const OrderController = {
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
+      let query = {};
+
+      if (req.query.code) query.code = req.query.code;
+      if (req.query.status) query.status = req.query.status;
+      if (req.query.payment) query["payment.paymentStatus"] = req.query.payment;
+      if (req.query.return) {
+        query["returnInfo.status"] = req.query.return;
+      }
+      if (req.query.filter && req.query.filter != "all") {
+        if (req.query.filter == "normal") {
+          query["returnInfo.items.length"] = { $eq: 0 };
+        } else {
+          query["returnInfo.items"] = { $exists: true, $not: { $size: 0 } };
+        }
+      }
       let totalData;
       let orders;
       if (user) {
-        orders = await OrderModel.find({ userId: user._id, deleted: false })
+        query.userId = user._id;
+        query.deleted = false;
+        orders = await OrderModel.find(query)
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
@@ -33,20 +50,17 @@ const OrderController = {
             path: "items",
             populate: { path: "productId" },
           });
-        totalData = await OrderModel.countDocuments({
-          userId: user._id,
-          deleted: false,
-        });
+        totalData = await OrderModel.countDocuments(query);
       } else {
-        orders = await OrderModel.find()
-        .sort({ createdAt: -1 })
+        orders = await OrderModel.find(query)
+          .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
           .populate({
             path: "items",
             populate: { path: "productId" },
           });
-        totalData = await OrderModel.countDocuments();
+        totalData = await OrderModel.countDocuments(query);
       }
 
       if (!orders || orders.length === 0) {
@@ -281,9 +295,7 @@ const OrderController = {
           })
         );
       }
-      if (
-        updatedOrder.status === "delivered"
-      ) {
+      if (updatedOrder.status === "delivered") {
         io.emit(String(updatedOrder.userId._id), updatedOrder);
         sendShipmentNotificationEmail(updatedOrder);
       }
