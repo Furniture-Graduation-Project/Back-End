@@ -19,6 +19,10 @@ const ReviewSchema = new mongoose.Schema(
     reviewText: {
       type: String,
     },
+    status: {
+      type: Boolean,
+      default: true,
+    },
     reviewDate: {
       type: Date,
     },

@@ -22,4 +22,7 @@ export const reviewSchema = Joi.object({
   reviewDate: Joi.date().optional().messages({
     "date.base": "Ngày đánh giá phải là ngày hợp lệ",
   }),
+  status: Joi.boolean().optional().messages({
+    "boolean.base": "Trạng thái sao phải là kiểu Boolean.",
+  }),
 });
