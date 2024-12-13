@@ -316,12 +316,15 @@ export const ProductController = {
             status: 'available',
           });
 
-          const productItem = await ProductItemModel.findById(
-            item.productOptionId,
-          );
+          const productItem = await ProductItemModel.findOne({
+            _id: item.productOptionId,
+          });
           return {
             productId: product ? product._id : '',
-            productOptionId: productItem ? productItem._id : '',
+            productOptionId:
+              productItem && productItem.status == 'active'
+                ? productItem._id
+                : '',
             quantity: productItem
               ? productItem.stock - productItem.outStock
               : 0,
