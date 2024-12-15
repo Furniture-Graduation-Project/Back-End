@@ -28,13 +28,16 @@ export const sendDeliveredNotificationEmail = async (updatedOrder) => {
           .map((variant) => `${variant.variant}: ${variant.value}`)
           .join(', ');
 
-      return `<li style="font-size: 16px; line-height: 1.6;">${index + 1}. ${
-        item.productId.name
-      } - ${item.quantity} ${
-        variants ? `(Tùy chọn: ${variants})` : ''
-      } x ${item.unitPrice.toLocaleString()} VNĐ = ${(
-        item.quantity * item.unitPrice
-      ).toLocaleString()} VNĐ</li>`;
+      return `<li style="font-size: 16px; line-height: 1.6; margin-bottom: 10px; display: flex; align-items: center;">
+      <img src="${item.productOptionId.image}" alt="${item.productId.name}" 
+           style="width: 100px; height: 100px; object-fit: cover; margin-right: 10px; border-radius: 4px;" />
+      <span style="flex-grow: 1;">
+        ${index + 1}. ${item.productId.name} - ${item.quantity} 
+        ${variants ? `(Tùy chọn: ${variants})` : ''}
+        x ${item.unitPrice.toLocaleString()} VNĐ = 
+        ${(item.quantity * item.unitPrice).toLocaleString()} VNĐ
+      </span>
+    </li>`;
     })
     .join('');
 

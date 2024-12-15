@@ -30,25 +30,25 @@ export const sendEmail = async (email, subject, text, html) => {
         ${emailStyles}
        </style>
         </head>
-        <body>
-         <div class="email-container">
+      <body>
+      <div class="email-container">
         <div class="email-header">
-            <img src="https://lh3.googleusercontent.com/a/ACg8ocIUa8AFKljq-hW6psUFyLarC4lxhDmJmXKFW0yNabmAhvQW5O0=s96-c"
+            <img src="https://res.cloudinary.com/dfykg7wtt/image/upload/v1734279997/test/ykvtz6z4zmrs0dcuxv6p.png"
                 alt="Company Logo">
-            <h1>Nội Thất River</h1>
+            <h1>Nội Thất River <span>🎄</span></h1>
         </div>
         <div class="email-body">
             ${html}
         </div>
         <div class="email-footer">
-            Trân trọng,<br />
+            <p>Trân trọng,</p>
             <h2>Nội Thất River</h2>
             <p>Hotline: ${process.env.ACCOUNT_NO}</p>
             <p>Website: <a href="${process.env.CLIENT_URL}" class="link">${process.env.CLIENT_URL}</a></p>
         </div>
-         </div>
-        </body>
-        </html>
+    </div>
+    </body>
+    </html>
       `,
     };
     const info = await transporter.sendMail(mailOptions);
