@@ -84,7 +84,8 @@ export const ProductController = {
         .populate("category", "categoryName")
         .populate("material", "materialName")
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .sort({ createdAt: -1 });
       const productIds = products.map((product) => product._id);
 
       let productDetails;
@@ -316,11 +317,11 @@ export const ProductController = {
             _id: item.productOptionId,
           });
           return {
-            productId: product ? product._id : '',
+            productId: product ? product._id : "",
             productOptionId:
-              productItem && productItem.status == 'active'
+              productItem && productItem.status == "active"
                 ? productItem._id
-                : '',
+                : "",
             quantity: productItem
               ? productItem.stock - productItem.outStock
               : 0,
