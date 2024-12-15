@@ -4,21 +4,21 @@ import fs from 'fs';
 
 dotenv.config();
 
-const { EMAIL_USERNAME, EMAIL_PASSWORD } = process.env;
+const { EMAIL_TEST, PASS_TEST } = process.env;
 
-export const sendEmail = async (email, subject, text) => {
+export const sendEmail = async (email, subject, text, html) => {
   try {
     const emailStyles = fs.readFileSync('assets/email.css', 'utf8');
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: EMAIL_USERNAME,
-        pass: EMAIL_PASSWORD,
+        user: EMAIL_TEST,
+        pass: PASS_TEST,
       },
     });
 
     const mailOptions = {
-      from: EMAIL_USERNAME,
+      from: EMAIL_TEST,
       to: email,
       subject: subject,
       text: text,

@@ -8,7 +8,6 @@ import CartModel from '../models/cart.js';
 import generateQrCode from '../services/qrcode.js';
 import { checkPaidSchema } from '../validations/payment.js';
 import paymentApiCall from '../services/payment.js';
-import { populate } from 'dotenv';
 import generateOrderCode from '../utils/orderCode.js';
 import {
   sendDeliveredNotificationEmail,
@@ -19,36 +18,32 @@ import mongoose from 'mongoose';
 const OrderController = {
   getLimited: async (req, res) => {
     try {
-      const user = req.user;
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
-      let totalData;
-      let orders;
-      if (user) {
-        orders = await OrderModel.find({ userId: user._id, deleted: false })
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .populate({
-            path: 'items',
-            populate: { path: 'productId' },
-          });
-        totalData = await OrderModel.countDocuments({
-          userId: user._id,
-          deleted: false,
-        });
-      } else {
-        orders = await OrderModel.find()
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .populate({
-            path: 'items',
-            populate: { path: 'productId' },
-          });
-        totalData = await OrderModel.countDocuments();
+      let query = {};
+      if (req.query.code) query.code = req.query.code;
+      if (req.query.status) query.status = req.query.status;
+      if (req.query.payment) query['payment.paymentStatus'] = req.query.payment;
+      if (req.query.return) {
+        query['returnInfo.status'] = req.query.return;
       }
+      if (req.query.filter && req.query.filter != 'all') {
+        if (req.query.filter == 'normal') {
+          query['returnInfo.items.length'] = { $eq: 0 };
+        } else {
+          query['returnInfo.items'] = { $exists: true, $not: { $size: 0 } };
+        }
+      }
+      const orders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        });
+      const totalData = await OrderModel.countDocuments(query);
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
@@ -131,13 +126,28 @@ const OrderController = {
   },
 
   getByIdUser: async (req, res) => {
-    const { id } = req.params;
     try {
-      const orders = await OrderModel.find({ userId: id }).populate({
-        path: 'items',
-        populate: { path: 'productId' },
-      });
-
+      const user = req.user;
+      if (!user) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Không tìm thấy người dùng',
+        });
+      }
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+      let query = {};
+      query.userId = String(user._id);
+      query.deleted = false;
+      const orders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        });
+      const totalData = await OrderModel.countDocuments(query);
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: 'Người dùng chưa có đơn hàng nào',
@@ -147,6 +157,8 @@ const OrderController = {
       return res.status(StatusCodes.OK).json({
         message: 'Lấy đơn hàng của người dùng thành công',
         data: orders,
+        totalPage: Math.ceil(totalData / limit),
+        totalData: totalData,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -613,7 +625,7 @@ const OrderController = {
           $match: {
             ...filterToday,
             'payment.paymentStatus': 'paid',
-            status: 'delivered',
+            status: 'received',
           },
         },
         {
