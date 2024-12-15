@@ -4,7 +4,7 @@ dotenv.config();
 
 export const sendShipmentNotificationEmail = async (updatedOrder) => {
   const subject = `Thông báo: Đơn hàng #${updatedOrder.code} đang được giao hàng`;
-  const text = `
+  const html = `
    
           <h2 style="color: #333;">Kính gửi quý khách ${updatedOrder.orderName},</h2>
           <p style="font-size: 16px;">Chúng tôi rất vui thông báo rằng đơn hàng của quý khách đã được vận chuyển và đang trên đường đến địa chỉ:</p>
@@ -16,7 +16,7 @@ export const sendShipmentNotificationEmail = async (updatedOrder) => {
        
   `;
 
-  return sendEmail(updatedOrder.userId.email, subject, text);
+  return sendEmail(updatedOrder.userId.email, subject, '', html);
 };
 
 export const sendDeliveredNotificationEmail = async (updatedOrder) => {
@@ -40,7 +40,7 @@ export const sendDeliveredNotificationEmail = async (updatedOrder) => {
 
   const subject = `Thông báo: Đơn hàng #${updatedOrder.code} đã giao thành công`;
 
-  const text = `
+  const html = `
 
           <h2 style="color: #333;">Kính gửi quý khách ${
             updatedOrder.orderName
@@ -64,5 +64,5 @@ export const sendDeliveredNotificationEmail = async (updatedOrder) => {
   
   `;
 
-  return sendEmail(updatedOrder.userId.email, subject, text);
+  return sendEmail(updatedOrder.userId.email, subject, '', html);
 };

@@ -4,7 +4,7 @@ import fs from 'fs';
 
 dotenv.config();
 
-const { EMAIL_TEST, PASS_TEST } = process.env;
+const { EMAIL_USERNAME, EMAIL_PASSWORD } = process.env;
 
 export const sendEmail = async (email, subject, text, html) => {
   try {
@@ -12,13 +12,13 @@ export const sendEmail = async (email, subject, text, html) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: EMAIL_TEST,
-        pass: PASS_TEST,
+        user: EMAIL_USERNAME,
+        pass: EMAIL_PASSWORD,
       },
     });
 
     const mailOptions = {
-      from: EMAIL_TEST,
+      from: EMAIL_USERNAME,
       to: email,
       subject: subject,
       text: text,
@@ -38,7 +38,7 @@ export const sendEmail = async (email, subject, text, html) => {
             <h1>Nội Thất River</h1>
         </div>
         <div class="email-body">
-            ${text}
+            ${html}
         </div>
         <div class="email-footer">
             Trân trọng,<br />
