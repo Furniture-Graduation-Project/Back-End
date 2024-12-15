@@ -18,6 +18,7 @@ import routerBlog from './blog.js';
 import routerMaterial from './material.js';
 import routerUser from './user.js';
 import routerContact from './contact.js';
+import routerStat from './statistical.js';
 
 const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve('swagger.json'), 'utf8'),
@@ -42,4 +43,5 @@ export function Route(app) {
   app.use('/', authRoutes);
   app.use('/users', routerUser);
   app.use('/contact', routerContact);
+  app.use('/statistical', routerStat);
 }
