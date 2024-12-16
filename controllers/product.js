@@ -69,6 +69,7 @@ export const ProductController = {
       const materialId = req.query.materialId;
       const status = req.query.status;
       const name = req.query.name;
+      const sortBy = req.query.sortBy;
       const query = {
         ...(status === "all"
           ? {}
@@ -79,12 +80,32 @@ export const ProductController = {
         ...(materialId ? { material: materialId } : {}),
         ...(name ? { name: { $regex: name, $options: "i" } } : {}),
       };
+      let sortOptions = {};
+      switch (sortBy) {
+        case "a-z":
+          sortOptions = { name: 1 };
+          break;
+        case "z-a":
+          sortOptions = { name: -1 };
+          break;
+        case "newest":
+          sortOptions = { createdAt: -1 };
+          break;
+        case "oldest":
+          sortOptions = { createdAt: 1 };
+          break;
+        default:
+          sortOptions = {};
+          break;
+      }
 
       const products = await ProductModel.find(query)
         .populate("category", "categoryName")
         .populate("material", "materialName")
+        .sort(sortOptions)
         .skip(skip)
         .limit(limit);
+
       const productIds = products.map((product) => product._id);
 
       let productDetails;
@@ -313,12 +334,15 @@ export const ProductController = {
             status: "available",
           });
 
-          const productItem = await ProductItemModel.findById(
-            item.productOptionId
-          );
+          const productItem = await ProductItemModel.findOne({
+            _id: item.productOptionId,
+          });
           return {
             productId: product ? product._id : "",
-            productOptionId: productItem ? productItem._id : "",
+            productOptionId:
+              productItem && productItem.status == "active"
+                ? productItem._id
+                : "",
             quantity: productItem
               ? productItem.stock - productItem.outStock
               : 0,
