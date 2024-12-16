@@ -333,7 +333,6 @@ export const ProductController = {
             _id: item.productId,
             status: "available",
           });
-
           const productItem = await ProductItemModel.findOne({
             _id: item.productOptionId,
           });

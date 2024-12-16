@@ -8,22 +8,20 @@ import CartModel from '../models/cart.js';
 import generateQrCode from '../services/qrcode.js';
 import { checkPaidSchema } from '../validations/payment.js';
 import paymentApiCall from '../services/payment.js';
-import { populate } from 'dotenv';
 import generateOrderCode from '../utils/orderCode.js';
 import {
   sendDeliveredNotificationEmail,
   sendShipmentNotificationEmail,
 } from '../services/emailOrder.js';
+import mongoose from 'mongoose';
 
 const OrderController = {
   getLimited: async (req, res) => {
     try {
-      const user = req.user;
       const page = parseInt(req.query.page, 10) + 1 || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
       let query = {};
-
       if (req.query.code) query.code = req.query.code;
       if (req.query.status) query.status = req.query.status;
       if (req.query.payment) query['payment.paymentStatus'] = req.query.payment;
@@ -37,31 +35,15 @@ const OrderController = {
           query['returnInfo.items'] = { $exists: true, $not: { $size: 0 } };
         }
       }
-      let totalData;
-      let orders;
-      if (user) {
-        query.userId = user._id;
-        query.deleted = false;
-        orders = await OrderModel.find(query)
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .populate({
-            path: 'items',
-            populate: { path: 'productId' },
-          });
-        totalData = await OrderModel.countDocuments(query);
-      } else {
-        orders = await OrderModel.find(query)
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .populate({
-            path: 'items',
-            populate: { path: 'productId' },
-          });
-        totalData = await OrderModel.countDocuments(query);
-      }
+      const orders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        });
+      const totalData = await OrderModel.countDocuments(query);
 
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
@@ -144,13 +126,28 @@ const OrderController = {
   },
 
   getByIdUser: async (req, res) => {
-    const { id } = req.params;
     try {
-      const orders = await OrderModel.find({ userId: id }).populate({
-        path: 'items',
-        populate: { path: 'productId' },
-      });
-
+      const user = req.user;
+      if (!user) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Không tìm thấy người dùng',
+        });
+      }
+      const page = parseInt(req.query.page, 10) + 1 || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+      let query = {};
+      query.userId = String(user._id);
+      query.deleted = false;
+      const orders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'items',
+          populate: { path: 'productId' },
+        });
+      const totalData = await OrderModel.countDocuments(query);
       if (!orders || orders.length === 0) {
         return res.status(StatusCodes.OK).json({
           message: 'Người dùng chưa có đơn hàng nào',
@@ -160,6 +157,8 @@ const OrderController = {
       return res.status(StatusCodes.OK).json({
         message: 'Lấy đơn hàng của người dùng thành công',
         data: orders,
+        totalPage: Math.ceil(totalData / limit),
+        totalData: totalData,
       });
     } catch (error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -169,6 +168,8 @@ const OrderController = {
   },
 
   create: async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const { value, error } = createOrderSchema.validate(req.body, {
         abortEarly: false,
@@ -197,15 +198,29 @@ const OrderController = {
           message: 'Sản phẩm trong đơn hàng đã có sự thay đổi.',
         });
       }
+      const code = generateOrderCode();
+
       await Promise.all(
         value.items.map(async (item) => {
-          const productItem = await ProductItemModel.findById(
-            item.productOptionId,
+          const result = await ProductItemModel.findOneAndUpdate(
+            {
+              _id: item.productOptionId,
+              stock: { $gte: item.quantity },
+            },
+            {
+              $inc: { outStock: item.quantity },
+            },
+            { new: true, session },
           );
-          productItem.outStock += item.quantity;
-          await productItem.save();
+
+          if (!result) {
+            throw new Error(
+              `Sản phẩm ${item.productOptionId} không đủ số lượng.`,
+            );
+          }
         }),
       );
+      const order = await OrderModel.create([{ ...value, code }], { session });
       await Promise.all(
         value.items.map(async (item) => {
           await CartModel.findOneAndUpdate(
@@ -222,20 +237,25 @@ const OrderController = {
                 },
               },
             },
+            { session },
           );
         }),
       );
-      const code = generateOrderCode();
-      const order = await OrderModel.create({ ...value, code });
+      await session.commitTransaction();
       io.emit('Order', order);
       return res.status(StatusCodes.CREATED).json({
         message: 'Tạo đơn hàng thành công.',
-        data: order,
+        data: order[0],
       });
     } catch (error) {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: error.message,
       });
+    } finally {
+      session.endSession();
     }
   },
 
@@ -295,14 +315,23 @@ const OrderController = {
           }),
         );
       }
-      if (updatedOrder.status === 'delivered') {
+      if (
+        updatedOrder.status === 'delivered' &&
+        updatedOrder.payment.paymentStatus === 'paid' &&
+        updatedOrder.payment.paymentMethod !== 'credit_card'
+      ) {
         io.emit(String(updatedOrder.userId._id), updatedOrder);
         sendShipmentNotificationEmail(updatedOrder);
       }
       if (
-        updatedOrder.status === 'received' &&
-        updatedOrder.returnInfo.items.length == 0
+        updatedOrder.status === 'delivered' &&
+        updatedOrder.payment.paymentStatus === 'unpaid' &&
+        updatedOrder.payment.paymentMethod !== 'cash_on_delivery'
       ) {
+        io.emit(String(updatedOrder.userId._id), updatedOrder);
+        sendShipmentNotificationEmail(updatedOrder);
+      }
+      if (updatedOrder.status === 'received') {
         sendDeliveredNotificationEmail(updatedOrder);
       }
       return res.status(StatusCodes.OK).json({
