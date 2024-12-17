@@ -15,7 +15,6 @@ dist-ssr
 jwt.http
 .env
 docker-compose.yml
-credentials.json
 
 
 
@@ -29,4 +28,4 @@ credentials.json
 *.njsproj
 *.sln
 *.sw?
-
+credentials.json
