@@ -2,6 +2,9 @@ import { Router } from "express";
 import passport from "passport";
 const router = Router();
 import AuthController from "../controllers/auth.js";
+import dotenv from "dotenv";
+dotenv.config();
+
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
@@ -9,7 +12,10 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/failure" }),
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.CLIENT_URL}/failed`,
+    failureMessage: "Failed",
+  }),
   AuthController.signinGoogle
 );
 
@@ -20,7 +26,9 @@ router.get(
 
 router.get(
   "/facebook/callback",
-  passport.authenticate("facebook", { failureRedirect: "/auth/failure" }),
+  passport.authenticate("facebook", {
+    failureRedirect: `${process.env.CLIENT_URL}/signin`,
+  }),
   AuthController.signinFacebook
 );
 
