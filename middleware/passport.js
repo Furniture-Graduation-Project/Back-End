@@ -15,9 +15,20 @@ passport.use(
     },
     async (request, accessToken, refreshToken, profile, done) => {
       try {
+        const existingUserWithEmail = await User.findOne({
+          email: profile._json.email,
+          "account.google.id": { $ne: profile.id },
+        });
+        if (existingUserWithEmail) {
+          return done(null, false, {
+            message: "Email đã được sử dụng bởi tài khoản khác.",
+          });
+        }
+
         let user = await User.findOne({
           "account.google.id": profile.id,
         });
+
         if (!user) {
           user = new User({
             name: profile.displayName,

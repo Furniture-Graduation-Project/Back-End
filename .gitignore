@@ -16,6 +16,8 @@ jwt.http
 .env
 docker-compose.yml
 
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -356,7 +356,7 @@ const OrderController = {
       });
     }
   },
-  fnishRequest: async (req, res) => {
+  finishRequest: async (req, res) => {
     const { id } = req.params;
     if (!id) {
       return res.status(StatusCodes.BAD_REQUEST).json({

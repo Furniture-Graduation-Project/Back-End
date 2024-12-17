@@ -25,7 +25,43 @@ export const ProductController = {
       });
     }
   },
+  getIdWithPrice: async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Không tìm thấy sản phẩm" });
+      }
+      const product = await ProductModel.findById(id)
+        .populate("category")
+        .populate("material");
+      if (!product) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Sản phẩm không tồn tại." });
+      }
 
+      const prices = await ProductItemModel.find({
+        productId: product._id,
+      }).select("price");
+
+      const productsWithPrices = prices.map((item) => item.price);
+
+      res.status(StatusCodes.OK).json({
+        data: {
+          ...product.toObject(),
+          prices: productsWithPrices,
+        },
+        message: "Lấy sản phẩm thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        error: error.message,
+      });
+    }
+  },
   getProductNew: async (req, res) => {
     try {
       const products = await ProductModel.find({ status: "available" })
@@ -104,8 +140,8 @@ export const ProductController = {
         .populate("material", "materialName")
         .sort(sortOptions)
         .skip(skip)
-        .limit(limit);
-
+        .limit(limit)
+        .sort({ createdAt: -1 });
       const productIds = products.map((product) => product._id);
 
       let productDetails;
