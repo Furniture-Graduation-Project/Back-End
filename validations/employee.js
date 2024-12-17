@@ -8,7 +8,7 @@ export const employeeSchema = Joi.object({
   password: Joi.string().optional().messages({
     "string.empty": "Mật khẩu không được để trống",
   }),
-  avatar: Joi.string().messages({
+  avatar: Joi.string().optional().messages({
     "string.empty": "Ảnh dại diện không được để trống",
   }),
   fullName: Joi.string().messages({

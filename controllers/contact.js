@@ -10,7 +10,7 @@ const ContactController = {
           message: 'Không tìm thấy dữ liệu đầu vào',
         });
       }
-      const contact = sendEmail(email, subject, text);
+      const contact = sendEmail(email, subject, '', text);
       if (!contact) {
         return res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Gủi yêu cầu liên hệ thất bại',
