@@ -12,7 +12,7 @@ orderRouter.get("/:id", OrderController.getByIdOrder);
 orderRouter.post("/", OrderController.create);
 orderRouter.post("/check", OrderController.checkProductOrder);
 orderRouter.post("/create-qr", OrderController.createQrCode);
-orderRouter.put("/return/:id", OrderController.fnishRequest);
+orderRouter.put("/return/:id", OrderController.finishRequest);
 orderRouter.put("/:id", OrderController.update);
 orderRouter.put("/payment/:id", OrderController.payment);
 orderRouter.delete("/:id", OrderController.delete);
