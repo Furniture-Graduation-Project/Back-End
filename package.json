@@ -11,6 +11,7 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "fs": "^0.0.1-security",
+    "googleapis": "^144.0.0",
     "http-status-codes": "^2.3.0",
     "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",

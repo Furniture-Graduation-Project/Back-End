@@ -15,6 +15,9 @@ dist-ssr
 jwt.http
 .env
 docker-compose.yml
+credentials.json
+
+
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +29,4 @@ docker-compose.yml
 *.njsproj
 *.sln
 *.sw?
+

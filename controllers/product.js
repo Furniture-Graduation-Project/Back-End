@@ -25,7 +25,43 @@ export const ProductController = {
       });
     }
   },
+  getIdWithPrice: async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Không tìm thấy sản phẩm" });
+      }
+      const product = await ProductModel.findById(id)
+        .populate("category")
+        .populate("material");
+      if (!product) {
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Sản phẩm không tồn tại." });
+      }
 
+      const prices = await ProductItemModel.find({
+        productId: product._id,
+      }).select("price");
+
+      const productsWithPrices = prices.map((item) => item.price);
+
+      res.status(StatusCodes.OK).json({
+        data: {
+          ...product.toObject(),
+          prices: productsWithPrices,
+        },
+        message: "Lấy sản phẩm thành công.",
+      });
+    } catch (error) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Có lỗi xảy ra khi lấy thông tin sản phẩm.",
+        error: error.message,
+      });
+    }
+  },
   getProductNew: async (req, res) => {
     try {
       const products = await ProductModel.find({ status: "available" })
@@ -69,6 +105,7 @@ export const ProductController = {
       const materialId = req.query.materialId;
       const status = req.query.status;
       const name = req.query.name;
+      const sortBy = req.query.sortBy;
       const query = {
         ...(status === "all"
           ? {}
@@ -79,12 +116,32 @@ export const ProductController = {
         ...(materialId ? { material: materialId } : {}),
         ...(name ? { name: { $regex: name, $options: "i" } } : {}),
       };
+      let sortOptions = {};
+      switch (sortBy) {
+        case "a-z":
+          sortOptions = { name: 1 };
+          break;
+        case "z-a":
+          sortOptions = { name: -1 };
+          break;
+        case "newest":
+          sortOptions = { createdAt: -1 };
+          break;
+        case "oldest":
+          sortOptions = { createdAt: 1 };
+          break;
+        default:
+          sortOptions = {};
+          break;
+      }
 
       const products = await ProductModel.find(query)
         .populate("category", "categoryName")
         .populate("material", "materialName")
+        .sort(sortOptions)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .sort({ createdAt: -1 });
       const productIds = products.map((product) => product._id);
 
       let productDetails;
@@ -316,11 +373,11 @@ export const ProductController = {
             _id: item.productOptionId,
           });
           return {
-            productId: product ? product._id : '',
+            productId: product ? product._id : "",
             productOptionId:
-              productItem && productItem.status == 'active'
+              productItem && productItem.status == "active"
                 ? productItem._id
-                : '',
+                : "",
             quantity: productItem
               ? productItem.stock - productItem.outStock
               : 0,
