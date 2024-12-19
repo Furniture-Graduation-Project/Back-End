@@ -12,7 +12,10 @@ const CategoryController = {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const categories = await Category.find().skip(skip).limit(limit);
+      const categories = await Category.find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
 
       if (!categories || categories.length === 0) {
         return res
