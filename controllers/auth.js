@@ -9,6 +9,7 @@ import {
 } from "../utils/token.js";
 import jwt from "jsonwebtoken";
 import { io } from "../services/socket.js";
+import { sendEmail } from "../utils/email.js";
 
 const AuthController = {
   signup: async (req, res) => {
@@ -92,10 +93,28 @@ const AuthController = {
           .status(StatusCodes.OK)
           .json({ message: "Người dùng không tồn tại !" });
       }
+
+      const email = updateFields.email;
+      const subject = updateFields.subject;
+      const text = updateFields.text;
+
       if (data.active === false) {
         const key = String(data._id + "lock");
         io.emit(key, {
           message: "Tài khoản đã bị khóa !",
+        });
+      }
+
+      if (email) {
+        const contact = sendEmail(email, subject, "", text);
+        if (!contact) {
+          return res.status(StatusCodes.BAD_REQUEST).json({
+            message: "Gủi yêu cầu liên hệ thất bại",
+          });
+        }
+        return res.status(StatusCodes.OK).json({
+          message: "Gủi yêu cầu liên hệ thành công",
+          data: contact,
         });
       }
       return res.status(StatusCodes.OK).json({ data });
