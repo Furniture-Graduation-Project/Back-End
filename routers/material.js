@@ -16,5 +16,10 @@ router.put(
   MaterialController.updateMaterialById
 );
 router.get("/search", MaterialController.searchByName);
-router.delete("/:id", MaterialController.deleteMaterialById);
+router.delete(
+  "/:id",
+  protectRoute,
+  protectProduct,
+  MaterialController.deleteMaterialById
+);
 export default router;
