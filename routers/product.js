@@ -24,7 +24,7 @@ router.put(
 router.delete(
   "/:id",
   protectRoute,
-  protectAdmin,
+  protectProduct,
   ProductController.deleteProduct
 );
 router.get("/:id/with-price", ProductController.getIdWithPrice);
