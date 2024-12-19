@@ -20,7 +20,7 @@ router.get("/search", CategoryController.searchByName);
 router.delete(
   "/:id",
   protectRoute,
-  protectAdmin,
+  protectProduct,
   CategoryController.deleteCategoryById
 );
 export default router;
