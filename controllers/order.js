@@ -329,6 +329,11 @@ const OrderController = {
             "Trạng thái thanh toán đơn hàng này không thể thay đổi khi chưa giao hàng",
         });
       }
+      if (updatedOrder.updatedAt !== value.updatedAt) {
+        return res.status(StatusCodes.CONFLICT).json({
+          message: "Đơn hàng đã được cập nhật bởi người khác.",
+        });
+      }
       updatedOrder.set(value);
       await updatedOrder.save();
       if (!updatedOrder) {
