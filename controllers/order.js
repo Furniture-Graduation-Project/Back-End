@@ -365,7 +365,11 @@ const OrderController = {
       }
       if (
         updatedOrder.status === "received" &&
-        !updatedOrder.statusHistory.some((item) => item.status === "received")
+        !updatedOrder.statusHistory.some(
+          (item) =>
+            item.status === "received" &&
+            updatedOrder.returnInfo?.items?.length == 0
+        )
       ) {
         sendDeliveredNotificationEmail(updatedOrder);
       }
