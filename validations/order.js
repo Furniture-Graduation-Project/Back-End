@@ -219,4 +219,7 @@ export const updateOrderSchema = Joi.object({
     }),
   }),
   deleted: Joi.boolean().optional(),
+  updatedAt: Joi.date().optional().messages({
+    "date.base": "Ngày cập nhật phải là giá trị hợp lệ",
+  }),
 });

@@ -69,3 +69,29 @@ export const sendDeliveredNotificationEmail = async (updatedOrder) => {
 
   return sendEmail(updatedOrder.userId.email, subject, '', html);
 };
+export const sendRefundRequestEmail = async (canceledOrder) => {
+
+  const subject = `Yêu cầu thông tin hoàn tiền: Đơn hàng #${canceledOrder.code}`;
+
+  const html = `
+          <h2 style="color: #333;">Kính gửi quý khách ${
+            canceledOrder.orderName
+          },</h2>
+          <p style="font-size: 16px;">Chúng tôi xin thông báo rằng đơn hàng của quý khách với mã <strong>#${
+            canceledOrder.code
+          }</strong> sẽ được hoàn tiền.</p>
+          <p style="font-size: 16px;">Để tiến hành hoàn tiền, quý khách vui lòng cung cấp thông tin phương thức hoàn tiền theo một trong các cách sau:</p>
+          <ul style="font-size: 16px; line-height: 1.8;">
+            <li>Chuyển khoản ngân hàng: Cung cấp <strong>số tài khoản, tên ngân hàng, và tên chủ tài khoản</strong>.</li>
+            <li>Hoàn tiền qua ví điện tử: Cung cấp <strong>số điện thoại hoặc email</strong> liên kết với ví.</li>
+          </ul>
+           <h2 style="color: #333;">Số tiền sẽ hoàn trả : ${canceledOrder.totalPrice.toLocaleString()} VND,</h2>
+          <p style="font-size: 16px;">Quý khách có thể phản hồi trực tiếp email này hoặc liên hệ qua số hotline: <strong>${
+            process.env.ACCOUNT_NO
+          }</strong>.</p>
+          <p style="font-size: 16px;">Chúng tôi sẽ xử lý hoàn tiền trong vòng 3-5 ngày làm việc sau khi nhận được thông tin từ quý khách.</p>
+          <p style="font-size: 16px;">Xin cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ của chúng tôi.</p>
+  `;
+
+  return sendEmail(canceledOrder.userId.email, subject, '', html);
+};
